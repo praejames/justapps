@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Small talk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-color: #0071e3;
+            --accent-rgb: 0, 113, 227;
+            --wp-opacity: 0.4;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* SYSTEM LAYERS */
+        #wp-engine-layer {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: -3;
+            opacity: var(--wp-opacity);
+            transition: opacity 0.2s ease;
+        }
+        #wp-tint-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -4;
+            transition: background 0.3s ease;
+        }
+        #interactive-fx-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ==========================================
+           SHAPESHIFTING ARCHITECTURAL STYLES
+           ========================================== */
+
+        /* STYLE 1: LIQUID GLASS */
+        body.style-glass.mode-dark { background: #0a0a0c; color: #f5f5f7; --panel-bg: rgba(25, 25, 28, 0.45); --panel-border: rgba(255, 255, 255, 0.08); --input-bg: rgba(0, 0, 0, 0.3); }
+        body.style-glass.mode-light { background: #f5f5f7; color: #1d1d1f; --panel-bg: rgba(255, 255, 255, 0.4); --panel-border: rgba(0, 0, 0, 0.06); --input-bg: rgba(255, 255, 255, 0.6); }
+        body.style-glass .themed-panel { background: var(--panel-bg); backdrop-filter: blur(25px) saturate(190%); -webkit-backdrop-filter: blur(25px) saturate(190%); border: 1px solid var(--panel-border); border-radius: 1.25rem; }
+        body.style-glass .themed-input { background: var(--input-bg); border: 1px solid var(--panel-border); border-radius: 0.75rem; }
+        body.style-glass .start-barrier { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(40px) saturate(150%); border-radius: 2rem; padding: 3rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        body.style-glass .btn-start-spec { background: var(--accent-color); color: white; font-weight: 700; border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.4); }
+
+        /* STYLE 2: MODERN */
+        body.style-modern.mode-dark { background: #121212; color: #e0e0e0; --panel-bg: #1e1e1e; --input-bg: #2d2d2d; --border: #333333; }
+        body.style-modern.mode-light { background: #ffffff; color: #111111; --panel-bg: #f8f9fa; --input-bg: #ffffff; --border: #e0e0e0; }
+        body.style-modern .themed-panel { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 0.5rem; }
+        body.style-modern .themed-input { background: var(--input-bg); border: 1px solid var(--border); border-radius: 0.375rem; }
+        body.style-modern .start-barrier { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 8px; backdrop-filter: blur(20px); box-shadow: 0 15px 35px rgba(0,0,0,0.25); padding: 2.5rem; }
+        body.style-modern .btn-start-spec { background: var(--panel-bg); border: 1px solid var(--border); color: inherit; border-radius: 6px; position: relative; }
+        body.style-modern .btn-start-spec::after { content: ''; position: absolute; inset: -2px; border-radius: 8px; background: var(--accent-color); z-index: -1; opacity: 0.7; filter: blur(6px); }
+
+        /* STYLE 3: EXPRESSIVE */
+        body.style-expressive.mode-dark { background: #141218; color: #e6e1e5; --panel-bg: #211f26; --input-bg: #2b2930; }
+        body.style-expressive.mode-light { background: #fef7ff; color: #1d1b20; --panel-bg: #f3edf7; --input-bg: #e7e0ec; }
+        body.style-expressive .themed-panel { background: var(--panel-bg); border-radius: 2rem; border: none; }
+        body.style-expressive .themed-input { background: var(--input-bg); border-radius: 1rem; border: 2px solid transparent; }
+        body.style-expressive .start-barrier { background: transparent; padding: 3rem; }
+        body.style-expressive .btn-start-spec { background: var(--accent-color); color: white; border-radius: 50px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-radius 0.3s ease; }
+        body.style-expressive .btn-start-spec:hover { border-radius: 20px; transform: scale(1.05); }
+        body.style-expressive .btn-start-spec:active { transform: scale(0.9) rotate(-2deg); }
+
+        /* STYLE 4: CLASSIC */
+        body.style-classic { font-family: 'Courier Prime', monospace !important; }
+        body.style-classic.mode-dark { background: #000000; color: #00ff00; --panel-bg: #000000; --border: #00ff00; }
+        body.style-classic.mode-light { background: #ffffff; color: #000000; --panel-bg: #ffffff; --border: #000000; }
+        body.style-classic .themed-panel { background: var(--panel-bg); border: 3px double var(--border); box-shadow: 4px 4px 0px var(--border); }
+        body.style-classic .themed-input { background: var(--panel-bg); border: 1px dashed var(--border); }
+        body.style-classic .start-barrier { background: var(--panel-bg); border: 6px outset #888; padding: 2.5rem; border-radius: 12px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5); }
+        body.style-classic.mode-dark .start-barrier { border-color: #00ff00; }
+        body.style-classic .btn-start-spec {
+            background: #e5e5e5 !important; color: #111111 !important;
+            border-left: 3px solid #fff; border-top: 3px solid #fff;
+            border-right: 4px solid #666; border-bottom: 5px solid #444;
+            border-radius: 4px; box-shadow: 0 5px 0 #111; transition: all 0.05s ease;
+        }
+        body.style-classic .btn-start-spec:active {
+            border-left: 4px solid #444; border-top: 4px solid #444;
+            border-right: 1px solid #fff; border-bottom: 1px solid #fff;
+            transform: translateY(5px); box-shadow: 0 0px 0 #111;
+        }
+        body.style-classic.mode-dark .btn-start-spec { background: #111 !important; color: #00ff00 !important; border-color: #00ff00; box-shadow: 0 5px 0 #00ff00; }
+
+        /* SHUFFLE ANIMATION MATRICES */
+        @keyframes glowRun { 0%, 100% { filter: drop-shadow(0 0 4px var(--accent-color)); opacity: 0.9; } 50% { filter: drop-shadow(0 0 20px var(--accent-color)); opacity: 1; } }
+        .anim-glow { animation: glowRun 0.8s infinite ease-in-out; }
+        @keyframes bounceRun { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+        .anim-bounce { animation: bounceRun 0.4s ease infinite; }
+        @keyframes dropRun { 0% { transform: translateY(-50px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        .anim-drop { animation: dropRun 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards; }
+        @keyframes charactersRun { 0% { letter-spacing: -0.15em; filter: blur(4px); opacity: 0; } 100% { letter-spacing: 0em; filter: blur(0); opacity: 1; } }
+        .anim-characters { animation: charactersRun 0.35s ease-out forwards; }
+        .anim-killed { animation: none !important; transform: none !important; filter: none !important; }
+
+        .question-glow-drop { animation: questionGlow 1s ease-out forwards; }
+        @keyframes questionGlow {
+            0% { text-shadow: 0 0 0px rgba(var(--accent-rgb), 0); }
+            50% { text-shadow: 0 0 25px rgba(var(--accent-rgb), 1); }
+            100% { text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5); }
+        }
+
+        #fx-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
+        .btn-global-accent { background-color: var(--accent-color); color: #ffffff; }
+        .text-global-accent { color: var(--accent-color); }
+    </style>
+</head>
+<body class="style-glass mode-dark p-4 sm:p-12 flex flex-col justify-between items-center">
+    <div id="wp-tint-overlay"></div>
+    <div id="wp-engine-layer"></div>
+    <canvas id="interactive-fx-canvas"></canvas>
+    <canvas id="fx-canvas"></canvas>
+
+    <div class="w-full max-w-4xl mx-auto flex flex-col justify-between min-h-[85vh] z-10">
+        
+        <!-- HEADER SYSTEM NAVBAR -->
+        <header class="w-full themed-panel p-4 flex flex-wrap justify-between items-center gap-4 mb-8">
+            <div class="flex flex-col">
+                <span id="banner-title" class="text-xs font-bold tracking-wider uppercase text-global-accent">Activity</span>
+                <span id="banner-date" class="text-[11px] opacity-60">Date Label</span>
+            </div>
+            <div class="text-xs font-mono tracking-widest opacity-80 bg-black/10 px-3 py-1.5 rounded-lg" id="live-system-clock">00:00:00 AM</div>
+            <div class="flex items-center gap-2">
+                <button onclick="changeViewPanel('history')" class="text-xs font-medium themed-input px-3 py-1.5 hover:opacity-80 transition">History</button>
+                <button onclick="changeViewPanel('settings')" class="text-xs font-medium themed-input px-3 py-1.5 hover:opacity-80 transition">Settings</button>
+                <button onclick="navigateToHomeMain()" class="text-xs font-medium themed-input px-3 py-1.5 hover:opacity-80 transition">Home</button>
+            </div>
+        </header>
+
+        <!-- MAIN WINDOW PORTAL -->
+        <main id="view-game" class="flex-1 flex flex-col justify-center my-auto space-y-12 w-full">
+            <div id="step-student" class="text-center max-w-xl mx-auto w-full relative">
+                
+                <!-- THE HIGHER CONTRAST PROTECTIVE THEME BARRIER -->
+                <div id="start-card-barrier" class="start-barrier space-y-6 relative z-10">
+                    <h2 id="student-status-heading" class="text-xs font-bold tracking-widest uppercase opacity-60">Ready</h2>
+                    <div id="student-display" class="text-3xl sm:text-6xl font-bold tracking-tight">Welcome</div>
+                    
+                    <div id="action-trigger-box" class="pt-2 max-w-xs mx-auto">
+                        <button id="main-start-btn" onclick="triggerParticipantSelectionEngine()" class="w-full btn-start-spec font-semibold text-sm py-4 px-8 uppercase tracking-wider">
+                            Start
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORIES SELECTION PLATFORM -->
+            <div id="step-categories" class="hidden space-y-6 max-w-2xl mx-auto w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <h2 class="text-xs font-medium tracking-widest uppercase opacity-40">Category</h2>
+                    <button onclick="executeRandomCategoryPick()" class="text-xs font-medium text-global-accent themed-input px-3 py-1 hover:opacity-80 transition">Randomize Choice</button>
+                </div>
+                <div id="category-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full"></div>
+            </div>
+
+            <!-- ACTIVE QUESTION SCREEN VIEW -->
+            <div id="step-question" class="hidden themed-panel p-10 sm:p-16 text-center space-y-8 max-w-3xl mx-auto">
+                <h2 id="chosen-category-label" class="text-xs font-semibold tracking-widest uppercase text-global-accent"></h2>
+                <p id="question-display-node" class="text-xl sm:text-2xl font-light leading-relaxed max-w-2xl mx-auto min-h-[4rem]"></p>
+                <div id="question-complete-box" class="pt-2 max-w-xs mx-auto hidden">
+                    <button onclick="finalizeTurnInteractionCycle()" class="w-full themed-input text-xs font-medium tracking-wider uppercase py-3.5 px-6 hover:opacity-80 transition">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- RUNTIME ENGAGEMENT HISTORY RECORDS -->
+        <main id="view-history" class="hidden w-full themed-panel p-6 space-y-4 my-auto">
+            <div class="flex justify-between items-center border-b border-black/5 pb-3">
+                <h3 class="text-xs font-bold tracking-wider uppercase opacity-60">History</h3>
+                <div class="flex gap-2">
+                    <button onclick="triggerHistoryDataFileExport()" class="text-xs font-medium text-global-accent hover:underline">Export (.txt)</button>
+                    <button onclick="wipeEvaluationHistoryTracks()" class="text-xs font-medium text-rose-500 hover:underline">Clear All</button>
+                </div>
+            </div>
+            <div id="history-container" class="space-y-2 max-h-[50vh] overflow-y-auto text-xs font-mono"></div>
+        </main>
+
+        <!-- CONFIGURATION CONTROL CENTER -->
+        <main id="view-settings" class="hidden w-full space-y-6 my-auto overflow-y-auto max-h-[75vh] pr-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="themed-panel p-6 space-y-4">
+                    <h3 class="text-xs font-bold tracking-wider uppercase opacity-50">Header & Wallpaper</h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] opacity-60 block mb-1">Activity Name</label>
+                                <input type="text" id="input-banner-title" oninput="applyConfigBannerTextChanges()" class="w-full themed-input p-2 text-xs focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[11px] opacity-60 block mb-1">Subtitle / Date</label>
+                                <input type="text" id="input-banner-date" oninput="applyConfigBannerTextChanges()" class="w-full themed-input p-2 text-xs focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] opacity-60 block mb-1">Import Wallpaper File</label>
+                            <input type="file" id="file-wallpaper-import" accept="image/*" onchange="processWallpaperImageUpload(this)" class="w-full themed-input p-1.5 text-xs focus:outline-none text-[11px]">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] opacity-60 mb-1">
+                                <span>Wallpaper Opacity</span>
+                                <span id="label-opacity-val">40%</span>
+                            </div>
+                            <input type="range" id="input-wp-opacity" min="0" max="1" step="0.05" oninput="adjustWallpaperOpacityState(this.value)" class="w-full accent-blue-600">
+                        </div>
+                        <button id="btn-clear-wallpaper" onclick="clearCustomWallpaperAsset()" class="hidden text-[10px] text-rose-500 hover:underline">Remove custom wallpaper</button>
+                    </div>
+                </div>
+
+                <div class="themed-panel p-6 space-y-4">
+                    <h3 class="text-xs font-bold tracking-wider uppercase opacity-50">Logic & Animations</h3>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                            <input type="checkbox" id="toggle-exhaust-names" onchange="cacheSettingsEngineFormValues()"> No Repeat Names
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                            <input type="checkbox" id="toggle-exhaust-questions" onchange="cacheSettingsEngineFormValues()"> No Repeat Questions
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-0.5">Name Shuffle (Sec)</label>
+                            <input type="number" id="input-time-names" min="1" max="10" step="0.5" class="w-full themed-input p-1.5 text-xs focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-0.5">Name Style</label>
+                            <select id="select-name-anim" class="w-full themed-input p-1.5 text-xs focus:outline-none">
+                                <option value="fireworks">Fireworks Burst</option>
+                                <option value="bounce">Bounce</option>
+                                <option value="drop">Drop</option>
+                                <option value="characters">Characters Morph</option>
+                                <option value="glow">Glow Pulse</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-0.5">Question Build (Sec)</label>
+                            <input type="number" id="input-time-questions" min="1" max="15" step="0.5" class="w-full themed-input p-1.5 text-xs focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-0.5">Question Style</label>
+                            <select id="select-question-anim" class="w-full themed-input p-1.5 text-xs focus:outline-none">
+                                <option value="scramble">Word Scramble Reveal</option>
+                                <option value="instant">Instant Drop Glow</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="themed-panel p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <h3 class="text-xs font-bold tracking-wider uppercase opacity-50 mb-2">Design Matrix Vibe</h3>
+                    <select id="select-theme-skin" onchange="applyVisualThemeSkinConfigurationChange()" class="w-full themed-input p-2 text-xs focus:outline-none">
+                        <option value="style-glass">Liquid Glass</option>
+                        <option value="style-modern">Modern</option>
+                        <option value="style-expressive">Expressive</option>
+                        <option value="style-classic">Classic (Retro Mac)</option>
+                    </select>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold tracking-wider uppercase opacity-50 mb-2">Contrast Profile</h3>
+                    <select id="select-theme-mode" onchange="applyVisualThemeSkinConfigurationChange()" class="w-full themed-input p-2 text-xs focus:outline-none">
+                        <option value="mode-dark">Dark Mode</option>
+                        <option value="mode-light">Light Mode</option>
+                    </select>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold tracking-wider uppercase opacity-50 mb-1.5">Accent Modification Color</h3>
+                    <div class="flex flex-wrap gap-1.5 pt-1">
+                        <button onclick="commitColorAccentSelection('#0071e3','0,113,227')" class="w-4 h-4 rounded-full bg-[#0071e3]"></button>
+                        <button onclick="commitColorAccentSelection('#ff3b30','255,59,48')" class="w-4 h-4 rounded-full bg-[#ff3b30]"></button>
+                        <button onclick="commitColorAccentSelection('#34c759','52,199,89')" class="w-4 h-4 rounded-full bg-[#34c759]"></button>
+                        <button onclick="commitColorAccentSelection('#ffcc00','255,204,0')" class="w-4 h-4 rounded-full bg-[#ffcc00]"></button>
+                        <button onclick="commitColorAccentSelection('#ff2d55','255,45,85')" class="w-4 h-4 rounded-full bg-[#ff2d55]"></button>
+                        <button onclick="commitColorAccentSelection('#ff9500','255,149,0')" class="w-4 h-4 rounded-full bg-[#ff9500]"></button>
+                        <button onclick="commitColorAccentSelection('#5856d6','88,86,214')" class="w-4 h-4 rounded-full bg-[#5856d6]"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                <div class="themed-panel p-6 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold tracking-wider uppercase opacity-50">Participants</h3>
+                        <label class="text-[11px] text-global-accent font-medium cursor-pointer hover:underline">Import .txt
+                            <input type="file" id="file-import-students" accept=".txt" class="hidden" onchange="runImportFileProcess('students')">
+                        </label>
+                    </div>
+                    <textarea id="raw-students-input" rows="6" class="w-full themed-input p-2 text-xs focus:outline-none" placeholder="Names..."></textarea>
+                    <button onclick="downloadFormatTemplateFile('students')" class="w-full bg-black/5 text-[10px] font-semibold py-1.5 rounded uppercase tracking-wide opacity-70">Template</button>
+                </div>
+
+                <div class="themed-panel p-6 space-y-3 md:col-span-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold tracking-wider uppercase opacity-50">Category & Questions</h3>
+                        <div class="flex gap-3 text-[11px] font-medium">
+                            <label class="text-global-accent cursor-pointer hover:underline">Import Matrix (.txt)
+                                <input type="file" id="file-import-categories" accept=".txt" class="hidden" onchange="runImportFileProcess('categories')">
+                            </label>
+                            <button onclick="createNewCategoryDataStructureNode()" class="text-global-accent hover:underline">Add Category</button>
+                        </div>
+                    </div>
+                    <div id="dynamic-categories-editor-box" class="space-y-3 max-h-[30vh] overflow-y-auto pr-1"></div>
+                    <button onclick="downloadFormatTemplateFile('categories')" class="w-full bg-black/5 text-[10px] font-semibold py-1.5 rounded uppercase tracking-wide opacity-70">Template</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                <button onclick="serializeAndCommitSettingsDatabaseState()" class="sm:col-span-2 btn-global-accent font-medium text-sm py-3.5 rounded-xl shadow">Save Layout State</button>
+                <button onclick="forceResetToFactorySystemDefaults()" class="border border-rose-500/30 text-rose-500 text-xs py-3.5 rounded-xl font-medium hover:bg-rose-500/5 transition">Restore Default</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const factorySystemDefaults = {
+            bannerTitle: "Science Quickstarter",
+            bannerDate: "May 2026",
+            customWallpaper: "",
+            wpOpacity: 0.4,
+            themeSkin: "style-glass",
+            themeMode: "mode-dark",
+            students: ["Ethan Baker", "Sophia Chen", "Liam Tanaka", "Olivia Rodriguez", "Noah Dubois", "Ava Novak"],
+            categories: [
+                { name: "Biology", questions: ["How do epigenetic methylation sweeps modify transgenerational phenotype expressions?", "What pathway mechanics allow retroviruses to embed information matrices inside host domains?"] },
+                { name: "Physics", questions: ["How does time dilation affect interstellar travelers near a black horizon?", "Why does quantum entanglement defy local realism constraints over macroscopic distances?"] }
+            ],
+            accent: "#0071e3",
+            accentRgb: "0, 113, 227",
+            nameAnim: "fireworks",
+            questionAnim: "scramble",
+            timeNames: 2.5,
+            timeQuestions: 4,
+            history: [],
+            exhaustedStudents: [],
+            exhaustedQuestions: []
+        };
+
+        let appData = {};
+        let targetSelectedStudentToken = "";
+        let canvasActiveLoopRunning = false;
+        let fxAnimationFramePointer = null;
+
+        // Vector tracking parameters
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let shapeX = window.innerWidth / 2;
+        let shapeY = window.innerHeight / 2;
+        let magnetIntensity = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            magnetIntensity = Math.min(magnetIntensity + 0.1, 1);
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+                magnetIntensity = Math.min(magnetIntensity + 0.1, 1);
+            }
+        });
+
+        function isMainStartPageActive() {
+            return !document.getElementById('view-game').classList.contains('hidden') && !document.getElementById('step-student').classList.contains('hidden');
+        }
+
+        function runCoreApplicationBootstrapSequence() {
+            const payload = localStorage.getItem('interactive_icebreaker_v7');
+            appData = payload ? JSON.parse(payload) : JSON.parse(JSON.stringify(factorySystemDefaults));
+
+            startLiveSystemClockEngine();
+            applySkinThemeConfigurations();
+            syncSettingsDOMFieldRepresentations();
+            finalizeTurnInteractionCycle();
+            startInteractiveBackdropEngineLoop();
+        }
+
+        function startLiveSystemClockEngine() {
+            setInterval(() => {
+                const node = document.getElementById('live-system-clock');
+                if (node) node.innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        function applySkinThemeConfigurations() {
+            const skins = ["style-glass", "style-modern", "style-expressive", "style-classic"];
+            const modes = ["mode-dark", "mode-light"];
+            skins.forEach(s => document.body.classList.remove(s));
+            modes.forEach(m => document.body.classList.remove(m));
+
+            const currentSkin = appData.themeSkin || "style-glass";
+            const currentMode = appData.themeMode || "mode-dark";
+            
+            document.body.classList.add(currentSkin, currentMode);
+            
+            document.documentElement.style.setProperty('--accent-color', appData.accent);
+            document.documentElement.style.setProperty('--accent-rgb', appData.accentRgb);
+            document.documentElement.style.setProperty('--wp-opacity', appData.wpOpacity);
+
+            document.getElementById('banner-title').innerText = appData.bannerTitle;
+            document.getElementById('banner-date').innerText = appData.bannerDate;
+
+            const tintOverlay = document.getElementById('wp-tint-overlay');
+            if (currentMode === "mode-dark") {
+                tintOverlay.style.background = currentSkin === "style-classic" ? "#000000" : "#0d0d11";
+            } else {
+                tintOverlay.style.background = currentSkin === "style-classic" ? "#ffffff" : "#f4f5f7";
+            }
+
+            const wpLayer = document.getElementById('wp-engine-layer');
+            if (appData.customWallpaper) {
+                wpLayer.style.backgroundImage = `url('${appData.customWallpaper}')`;
+                document.getElementById('btn-clear-wallpaper').classList.remove('hidden');
+            } else {
+                wpLayer.style.backgroundImage = "none";
+                document.getElementById('btn-clear-wallpaper').classList.add('hidden');
+            }
+        }
+
+        function syncSettingsDOMFieldRepresentations() {
+            document.getElementById('input-banner-title').value = appData.bannerTitle;
+            document.getElementById('input-banner-date').value = appData.bannerDate;
+            document.getElementById('toggle-exhaust-names').checked = localStorage.getItem('exh_names_v6') === 'true';
+            document.getElementById('toggle-exhaust-questions').checked = localStorage.getItem('exh_questions_v6') === 'true';
+            document.getElementById('input-time-names').value = appData.timeNames || 2.5;
+            document.getElementById('input-time-questions').value = appData.timeQuestions || 4;
+            document.getElementById('select-theme-skin').value = appData.themeSkin || 'style-glass';
+            document.getElementById('select-theme-mode').value = appData.themeMode || 'mode-dark';
+            document.getElementById('select-name-anim').value = appData.nameAnim || 'fireworks';
+            document.getElementById('select-question-anim').value = appData.questionAnim || 'scramble';
+            document.getElementById('raw-students-input').value = appData.students.join('\n');
+            document.getElementById('input-wp-opacity').value = appData.wpOpacity;
+            document.getElementById('label-opacity-val').innerText = `${Math.round(appData.wpOpacity * 100)}%`;
+            
+            buildDynamicCategoriesEditorFormLayoutHTML();
+        }
+
+        function adjustWallpaperOpacityState(val) {
+            appData.wpOpacity = parseFloat(val);
+            document.documentElement.style.setProperty('--wp-opacity', appData.wpOpacity);
+            document.getElementById('label-opacity-val').innerText = `${Math.round(appData.wpOpacity * 100)}%`;
+        }
+
+        function applyConfigBannerTextChanges() {
+            appData.bannerTitle = document.getElementById('input-banner-title').value || "Activity";
+            appData.bannerDate = document.getElementById('input-banner-date').value || "";
+            document.getElementById('banner-title').innerText = appData.bannerTitle;
+            document.getElementById('banner-date').innerText = appData.bannerDate;
+        }
+
+        function cacheSettingsEngineFormValues() {
+            localStorage.setItem('exh_names_v6', document.getElementById('toggle-exhaust-names').checked);
+            localStorage.setItem('exh_questions_v6', document.getElementById('toggle-exhaust-questions').checked);
+        }
+
+        function changeViewPanel(id) {
+            ['view-game', 'view-history', 'view-settings'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(`view-${id}`).classList.remove('hidden');
+            if (id === 'history') renderHistoricalTrackingListRowsHTML();
+        }
+
+        function navigateToHomeMain() { changeViewPanel('game'); finalizeTurnInteractionCycle(); }
+
+        function finalizeTurnInteractionCycle() {
+            targetSelectedStudentToken = "";
+            const display = document.getElementById('student-display');
+            display.className = "text-3xl sm:text-6xl font-bold tracking-tight anim-killed";
+            display.innerText = "Welcome";
+            display.style.color = "";
+            
+            document.getElementById('student-status-heading').innerText = "Ready";
+            document.getElementById('step-student').classList.remove('hidden');
+            document.getElementById('step-categories').classList.add('hidden');
+            document.getElementById('step-question').classList.add('hidden');
+            document.getElementById('action-trigger-box').classList.remove('hidden');
+            stopFireworksCanvasEngineLoop();
+        }
+
+        // --- INTERACTIVE BACKGROUND THEME GRAPHICS SIMULATORS ---
+        function startInteractiveBackdropEngineLoop() {
+            const bgCanvas = document.getElementById('interactive-fx-canvas');
+            const bgCtx = bgCanvas.getContext('2d');
+
+            function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+            window.addEventListener('resize', resizeBg);
+            resizeBg();
+
+            function render() {
+                requestAnimationFrame(render);
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+                if (!isMainStartPageActive()) return;
+
+                const skin = appData.themeSkin || 'style-glass';
+                const isDark = appData.themeMode === 'mode-dark';
+                const containerNode = document.getElementById('start-card-barrier');
+                if(!containerNode) return;
+                
+                const bounds = containerNode.getBoundingClientRect();
+                const centerX = bounds.left + bounds.width / 2;
+                const centerY = bounds.top + bounds.height / 2;
+
+                // 1. LIQUID GLASS: Lens fluid follow tracking & refraction
+                if (skin === 'style-glass') {
+                    shapeX += (mouseX - shapeX) * 0.1;
+                    shapeY += (mouseY - shapeY) * 0.1;
+
+                    bgCtx.save();
+                    // Refraction simulator base ring
+                    let refractGrad = bgCtx.createRadialGradient(shapeX, shapeY, 0, shapeX, shapeY, 220);
+                    refractGrad.addColorStop(0, isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.65)');
+                    refractGrad.addColorStop(0.6, isDark ? 'rgba(50,50,65,0.3)' : 'rgba(215,225,240,0.4)');
+                    refractGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                    
+                    bgCtx.fillStyle = refractGrad;
+                    bgCtx.beginPath();
+                    bgCtx.arc(shapeX, shapeY, 220, 0, Math.PI * 2);
+                    bgCtx.fill();
+                    bgCtx.restore();
+                }
+
+                // 2. MODERN: Polished squared window blurred mask with glow highlights
+                else if (skin === 'style-modern') {
+                    bgCtx.save();
+                    bgCtx.fillStyle = isDark ? 'rgba(30,30,35,0.55)' : 'rgba(245,247,250,0.65)';
+                    bgCtx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+                    bgCtx.lineWidth = 1.5;
+                    bgCtx.beginPath();
+                    bgCtx.roundRect(bounds.left, bounds.top, bounds.width, bounds.height, 8);
+                    bgCtx.fill();
+                    bgCtx.stroke();
+                    bgCtx.restore();
+                }
+
+                // 3. EXPRESSIVE: Organic shape avoiding cursor mechanics
+                else if (skin === 'style-expressive') {
+                    const dx = mouseX - shapeX;
+                    const dy = mouseY - shapeY;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist < 280) {
+                        const angle = Math.atan2(dy, dx);
+                        const pushForce = (280 - dist) * 0.2;
+                        shapeX -= Math.cos(angle) * pushForce;
+                        shapeY -= Math.sin(angle) * pushForce;
+                    }
+
+                    // Return to standard coordinates interpolation
+                    shapeX += (centerX - shapeX) * 0.06;
+                    shapeY += (centerY - shapeY) * 0.06;
+
+                    bgCtx.save();
+                    bgCtx.fillStyle = `rgba(${appData.accentRgb}, 0.35)`;
+                    bgCtx.beginPath();
+                    // Morph parameters based on mouse velocity delta
+                    const widthPulse = 180 + Math.sin(Date.now() * 0.003) * 15;
+                    const heightPulse = 140 + Math.cos(Date.now() * 0.002) * 10;
+                    bgCtx.ellipse(shapeX, shapeY, widthPulse, heightPulse, Math.sin(Date.now() * 0.001) * 0.15, 0, Math.PI * 2);
+                    bgCtx.fill();
+                    bgCtx.restore();
+                    
+                    // Re-align HTML layout box visually over moving organic element
+                    containerNode.style.transform = `translate(${(shapeX - centerX)*0.25}px, ${(shapeY - centerY)*0.25}px)`;
+                }
+
+                // 4. CLASSIC: Retro CRT physical monitor look with active magnetic warp fields
+                else if (skin === 'style-classic') {
+                    containerNode.style.transform = 'none';
+                    bgCtx.save();
+                    
+                    const distToCenter = Math.hypot(mouseX - centerX, mouseY - centerY);
+                    
+                    if (distToCenter < 300 && magnetIntensity > 0) {
+                        // Render magnetic structural lines of distortion field lines
+                        bgCtx.strokeStyle = isDark ? `rgba(0, 255, 0, ${0.15 * magnetIntensity})` : `rgba(0, 0, 0, ${0.1 * magnetIntensity})`;
+                        bgCtx.lineWidth = 2;
+                        bgCtx.beginPath();
+                        bgCtx.arc(mouseX, mouseY, 40 + Math.sin(Date.now()*0.02)*10, 0, Math.PI*2);
+                        bgCtx.stroke();
+                        
+                        // Chromatic shifting simulation overlay color blocks
+                        bgCtx.fillStyle = isDark ? 'rgba(0, 255, 0, 0.04)' : 'rgba(255, 0, 0, 0.03)';
+                        bgCtx.fillRect(bounds.left - 10, bounds.top + Math.sin(Date.now()*0.05)*20, bounds.width + 20, 15);
+                    }
+                    
+                    magnetIntensity = Math.max(magnetIntensity - 0.02, 0);
+
+                    // Scanline generator overlay system maps
+                    bgCtx.fillStyle = isDark ? 'rgba(0,255,0,0.03)' : 'rgba(0,0,0,0.02)';
+                    for (let y = 0; y < bgCanvas.height; y += 4) {
+                        bgCtx.fillRect(0, y, bgCanvas.width, 1.5);
+                    }
+                    bgCtx.restore();
+                }
+                
+                if (skin !== 'style-expressive') {
+                    containerNode.style.transform = 'none';
+                }
+            }
+            render();
+        }
+
+        function triggerParticipantSelectionEngine() {
+            if (!appData.students || !appData.students.length) return alert("Roster empty.");
+            
+            let pool = [...appData.students];
+            const ruleNames = localStorage.getItem('exh_names_v6') === 'true';
+
+            if (ruleNames) {
+                pool = pool.filter(n => !appData.exhaustedStudents.includes(n));
+                if (!pool.length) {
+                    appData.exhaustedStudents = [];
+                    pool = [...appData.students];
+                }
+            }
+
+            document.getElementById('action-trigger-box').classList.add('hidden');
+            document.getElementById('student-status-heading').innerText = "Selecting Participant...";
+
+            const duration = (appData.timeNames || 2.5) * 1000;
+            const stepRate = 60;
+            let elapsed = 0;
+
+            const shuffleLoop = setInterval(() => {
+                const idx = Math.floor(Math.random() * pool.length);
+                document.getElementById('student-display').innerText = pool[idx];
+                elapsed += stepRate;
+
+                if (elapsed >= duration) {
+                    clearInterval(shuffleLoop);
+                    targetSelectedStudentToken = pool[Math.floor(Math.random() * pool.length)];
+
+                    if (ruleNames) {
+                        appData.exhaustedStudents.push(targetSelectedStudentToken);
+                        serializeAndPersistMemoryPayload();
+                    }
+                    processParticipantClimaxDisplayAnimation();
+                }
+            }, stepRate);
+        }
+
+        function processParticipantClimaxDisplayAnimation() {
+            const display = document.getElementById('student-display');
+            display.innerText = targetSelectedStudentToken;
+            
+            if (appData.themeSkin !== 'style-classic') {
+                display.style.color = "var(--accent-color)";
+            }
+
+            display.className = "text-3xl sm:text-6xl font-bold tracking-tight"; 
+            const anim = appData.nameAnim || 'fireworks';
+
+            if (anim === 'glow') display.classList.add('anim-glow');
+            else if (anim === 'bounce') display.classList.add('anim-bounce');
+            else if (anim === 'drop') display.classList.add('anim-drop');
+            else if (anim === 'characters') display.classList.add('anim-characters');
+            else if (anim === 'fireworks') {
+                display.classList.add('anim-drop');
+                startFireworksCanvasEngineLoop();
+            }
+
+            setTimeout(() => {
+                populateActiveCategorySelectionInterfaceGrid();
+            }, 1200);
+        }
+
+        function populateActiveCategorySelectionInterfaceGrid() {
+            document.getElementById('student-display').className = "text-3xl sm:text-6xl font-bold tracking-tight anim-killed";
+            stopFireworksCanvasEngineLoop();
+
+            const grid = document.getElementById('category-buttons');
+            grid.innerHTML = "";
+            
+            if (!appData.categories || !appData.categories.length) return alert("Categories configuration missing.");
+
+            appData.categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = "themed-input font-semibold py-4 px-6 text-center text-sm tracking-wide hover:opacity-80 transition";
+                btn.innerText = cat.name;
+                btn.onclick = () => launchTargetedQuestionPipeline(cat);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('step-categories').classList.remove('hidden');
+        }
+
+        function executeRandomCategoryPick() {
+            if (!appData.categories || !appData.categories.length) return;
+            launchTargetedQuestionPipeline(appData.categories[Math.floor(Math.random() * appData.categories.length)]);
+        }
+
+        function launchTargetedQuestionPipeline(cat) {
+            let pool = [...cat.questions];
+            const ruleQuestions = localStorage.getItem('exh_questions_v6') === 'true';
+
+            if (ruleQuestions) {
+                pool = pool.filter(q => !appData.exhaustedQuestions.includes(q));
+                if (!pool.length) {
+                    appData.exhaustedQuestions = appData.exhaustedQuestions.filter(q => !cat.questions.includes(q));
+                    pool = [...cat.questions];
+                }
+            }
+
+            if (!pool.length) return alert("No questions available in category.");
+
+            const selectedQuestion = pool[Math.floor(Math.random() * pool.length)];
+            if (ruleQuestions) appData.exhaustedQuestions.push(selectedQuestion);
+
+            appData.history.unshift({
+                name: targetSelectedStudentToken,
+                category: cat.name,
+                question: selectedQuestion,
+                timestamp: new Date().toLocaleString()
+            });
+            serializeAndPersistMemoryPayload();
+
+            document.getElementById('step-student').classList.add('hidden');
+            document.getElementById('step-categories').classList.add('hidden');
+            document.getElementById('step-question').classList.remove('hidden');
+            
+            document.getElementById('chosen-category-label').innerText = `${cat.name} // ${targetSelectedStudentToken}`;
+            
+            const displayNode = document.getElementById('question-display-node');
+            displayNode.className = "text-xl sm:text-2xl font-light leading-relaxed max-w-2xl mx-auto min-h-[4rem]";
+            document.getElementById('question-complete-box').classList.add('hidden');
+
+            if (appData.questionAnim === 'instant') {
+                displayNode.innerText = selectedQuestion;
+                displayNode.classList.add('question-glow-drop');
+                document.getElementById('question-complete-box').classList.remove('hidden');
+                return;
+            }
+
+            const finalWords = selectedQuestion.split(" ");
+            const duration = (appData.timeQuestions || 4) * 1000;
+            const steps = 20;
+            const intervalDelay = duration / steps;
+            let currentStep = 0;
+            const dictionary = ["entropy", "quantum", "matrix", "catalyst", "phenotype", "kinetic", "valence", "synthesis", "vector"];
+
+            const scrambleLoop = setInterval(() => {
+                let frame = [];
+                const progress = currentStep / steps;
+
+                finalWords.forEach((word, index) => {
+                    if (progress > (index / finalWords.length) || currentStep === steps) {
+                        frame.push(word);
+                    } else {
+                        frame.push(dictionary[Math.floor(Math.random() * dictionary.length)]);
+                    }
+                });
+
+                displayNode.innerText = frame.join(" ");
+                currentStep++;
+
+                if (currentStep > steps) {
+                    clearInterval(scrambleLoop);
+                    displayNode.innerText = selectedQuestion;
+                    displayNode.classList.add('question-glow-drop');
+                    document.getElementById('question-complete-box').classList.remove('hidden');
+                }
+            }, intervalDelay);
+        }
+
+        function processWallpaperImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appData.customWallpaper = e.target.result;
+                    applySkinThemeConfigurations();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearCustomWallpaperAsset() {
+            appData.customWallpaper = "";
+            document.getElementById('file-wallpaper-import').value = "";
+            applySkinThemeConfigurations();
+        }
+
+        function renderHistoricalTrackingListRowsHTML() {
+            const container = document.getElementById('history-container');
+            container.innerHTML = "";
+
+            if (!appData.history || !appData.history.length) {
+                container.innerHTML = "<div class='text-center py-4 opacity-40'>Log empty.</div>";
+                return;
+            }
+
+            appData.history.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "p-3 border-b border-black/5 flex flex-col gap-1";
+                row.innerHTML = `
+                    <div class="flex justify-between text-[11px] text-global-accent font-bold">
+                        <span>Participant: ${item.name} | Category: ${item.category}</span>
+                        <span class="opacity-50">${item.timestamp}</span>
+                    </div>
+                    <div class="text-xs font-light mt-0.5">"${item.question}"</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function wipeEvaluationHistoryTracks() {
+            if (confirm("Wipe logs?")) {
+                appData.history = [];
+                serializeAndPersistMemoryPayload();
+                renderHistoricalTrackingListRowsHTML();
+            }
+        }
+
+        function triggerHistoryDataFileExport() {
+            if (!appData.history || !appData.history.length) return alert("Log empty.");
+            let buf = "";
+            appData.history.forEach(item => {
+                buf += `Timestamp Code : ${item.timestamp}\nParticipant    : ${item.name}\nCategory       : ${item.category}\nQuestion       : "${item.question}"\n\n`;
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([buf], { type: 'text/plain;charset=utf-8' }));
+            a.download = `History_Trace_Log.txt`;
+            a.click();
+        }
+
+        function downloadFormatTemplateFile(type) {
+            let stream = type === 'students' 
+                ? "Name A\nName B\nName C" 
+                : "Biology\nQuestion Sample Alpha?\nQuestion Sample Beta?\n\nPhysics\nQuestion Sample Gamma?";
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([stream], { type: 'text/plain' }));
+            a.download = `${type}_template.txt`;
+            a.click();
+        }
+
+        function runImportFileProcess(id) {
+            const input = document.getElementById(`file-import-${id}`);
+            if (!input.files || !input.files[0]) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                if (id === 'students') {
+                    appData.students = text.split('\n').map(n => n.trim()).filter(n => n !== "");
+                    document.getElementById('raw-students-input').value = appData.students.join('\n');
+                } else {
+                    const blocks = text.split('\n\n').map(b => b.trim()).filter(b => b !== "");
+                    appData.categories = blocks.map(b => {
+                        const lines = b.split('\n').map(l => l.trim()).filter(l => l !== "");
+                        return { name: lines[0], questions: lines.slice(1) };
+                    });
+                    buildDynamicCategoriesEditorFormLayoutHTML();
+                }
+                alert("Import Complete.");
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function buildDynamicCategoriesEditorFormLayoutHTML() {
+            const container = document.getElementById('dynamic-categories-editor-box');
+            container.innerHTML = "";
+            appData.categories.forEach((cat, idx) => {
+                const div = document.createElement('div');
+                div.className = "themed-input p-3 space-y-1.5";
+                div.innerHTML = `
+                    <div class="flex gap-2">
+                        <input type="text" value="${cat.name}" onchange="appData.categories[${idx}].name = this.value" class="bg-black/5 rounded p-1 text-xs font-semibold flex-1 focus:outline-none">
+                        <button onclick="appData.categories.splice(${idx}, 1); buildDynamicCategoriesEditorFormLayoutHTML();" class="text-rose-500 text-xs px-1">Delete</button>
+                    </div>
+                    <textarea onchange="appData.categories[${idx}].questions = this.value.split('\\n').filter(q => q.trim() !== '')" rows="2" class="w-full bg-black/5 rounded p-2 text-xs focus:outline-none" placeholder="Questions...">${cat.questions.join('\n')}</textarea>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function createNewCategoryDataStructureNode() {
+            appData.categories.push({ name: "Category Name", questions: [] });
+            buildDynamicCategoriesEditorFormLayoutHTML();
+        }
+
+        function applyVisualThemeSkinConfigurationChange() {
+            appData.themeSkin = document.getElementById('select-theme-skin').value;
+            appData.themeMode = document.getElementById('select-theme-mode').value;
+            applySkinThemeConfigurations();
+        }
+
+        function serializeAndCommitSettingsDatabaseState() {
+            appData.bannerTitle = document.getElementById('input-banner-title').value || "Activity";
+            appData.bannerDate = document.getElementById('input-banner-date').value || "";
+            appData.themeSkin = document.getElementById('select-theme-skin').value;
+            appData.themeMode = document.getElementById('select-theme-mode').value;
+            appData.nameAnim = document.getElementById('select-name-anim').value;
+            appData.questionAnim = document.getElementById('select-question-anim').value;
+            appData.timeNames = parseFloat(document.getElementById('input-time-names').value) || 2.5;
+            appData.timeQuestions = parseFloat(document.getElementById('input-time-questions').value) || 4;
+            appData.students = document.getElementById('raw-students-input').value.split('\n').map(n => n.trim()).filter(n => n !== "");
+
+            cacheSettingsEngineFormValues();
+            serializeAndPersistMemoryPayload();
+            applySkinThemeConfigurations();
+            navigateToHomeMain();
+        }
+
+        function forceResetToFactorySystemDefaults() {
+            if (confirm("Reset application?")) {
+                appData = JSON.parse(JSON.stringify(factorySystemDefaults));
+                localStorage.removeItem('interactive_icebreaker_v7');
+                applySkinThemeConfigurations();
+                syncSettingsDOMFieldRepresentations();
+                navigateToHomeMain();
+            }
+        }
+
+        function serializeAndPersistMemoryPayload() {
+            localStorage.setItem('interactive_icebreaker_v7', JSON.stringify(appData));
+        }
+
+        function commitColorAccentSelection(hex, rgb) {
+            appData.accent = hex;
+            appData.accentRgb = rgb;
+            applySkinThemeConfigurations();
+        }
+
+        // --- HIGH FIDELITY FIREWORKS ENGINE ---
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.radius = Math.random() * 2 + 1;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 1.5;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.016 + 0.014;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.vy += 0.05; this.alpha -= this.decay; }
+            draw() {
+                ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function loop() {
+            if (!canvasActiveLoopRunning) return;
+            fxAnimationFramePointer = requestAnimationFrame(loop);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Math.random() < 0.06) {
+                const ex = Math.random() * canvas.width;
+                const ey = Math.random() * (canvas.height * 0.4) + (canvas.height * 0.1);
+                const color = appData.themeSkin === 'style-classic' ? 'var(--accent-color)' : `hsl(${Math.floor(Math.random() * 360)}, 100%, 60%)`;
+                for (let i = 0; i < 35; i++) particles.push(new Particle(ex, ey, color));
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].alpha <= 0) particles.splice(i, 1);
+                else particles[i].draw();
+            }
+        }
+
+        function startFireworksCanvasEngineLoop() {
+            if (canvasActiveLoopRunning) return;
+            canvasActiveLoopRunning = true; particles = []; loop();
+        }
+
+        function stopFireworksCanvasEngineLoop() {
+            canvasActiveLoopRunning = false; cancelAnimationFrame(fxAnimationFramePointer);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        runCoreApplicationBootstrapSequence();
+    </script>
+</body>
+</html>
