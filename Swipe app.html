@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -60,11 +62,7 @@
             cursor: pointer;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; }
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -73,175 +71,29 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
-        .centered-panel {
-            max-width: 480px;
-            margin: 40px auto 0 auto;
-        }
+        .centered-panel { max-width: 480px; margin: 40px auto 0 auto; }
+        .role-selector { display: flex; gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 12px; }
+        .role-tab { flex: 1; padding: 12px; text-align: center; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .role-tab.active { background: var(--card-bg); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: var(--primary); }
+        .form-element { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: var(--text-muted); }
+        input, textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--card-bg); color: var(--text-color); font-size: 15px; outline: none; }
+        button { padding: 12px 24px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        button.action-btn { background: var(--primary); color: white; border: none; width: 100%; }
+        .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+        .grid-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+        .quad-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .banner-alert { background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger); color: var(--danger); padding: 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { font-weight: 700; color: var(--text-muted); }
 
-        .role-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            background: rgba(0,0,0,0.05);
-            padding: 6px;
-            border-radius: 12px;
-        }
-
-        .role-tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .role-tab.active {
-            background: var(--card-bg);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            color: var(--primary);
-        }
-
-        .form-element {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 15px;
-            outline: none;
-            transition: border 0.2s;
-        }
-
-        button {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        button.action-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 100%;
-        }
-
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .grid-fields {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .quad-fields {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .banner-alert {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-
-        th, td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-        }
-
-        .card-deck-viewport {
-            position: relative;
-            width: 100%;
-            max-width: 340px;
-            height: 380px;
-            margin: 32px auto;
-        }
-
-        .gesture-card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 20px;
-            padding: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            text-align: center;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            transform-origin: center bottom;
-            cursor: grab;
-            transition: transform 0.1s ease-out, opacity 0.2s;
-        }
-
-        .tag-overlay {
-            position: absolute;
-            top: 20px;
-            font-size: 12px;
-            font-weight: 900;
-            padding: 6px 12px;
-            border-radius: 6px;
-            opacity: 0;
-            text-transform: uppercase;
-        }
+        .card-deck-viewport { position: relative; width: 100%; max-width: 340px; height: 380px; margin: 32px auto; }
+        .gesture-card { position: absolute; width: 100%; height: 100%; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 24px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); transform-origin: center bottom; cursor: grab; transition: transform 0.1s ease-out, opacity 0.2s; }
+        .tag-overlay { position: absolute; top: 20px; font-size: 12px; font-weight: 900; padding: 6px 12px; border-radius: 6px; opacity: 0; text-transform: uppercase; }
         .tag-cap { right: 20px; border: 2px solid var(--success); color: var(--success); }
         .tag-trap { left: 20px; border: 2px solid var(--danger); color: var(--danger); }
-
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            margin: 32px auto;
-            animation: turn 0.8s linear infinite;
-        }
-
+        .spinner { width: 48px; height: 48px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; margin: 32px auto; animation: turn 0.8s linear infinite; }
         @keyframes turn { to { transform: rotate(360deg); } }
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -298,7 +150,7 @@
                     </div>
 
                     <div class="banner-alert">
-                        WARNING: Save your Session Key! This engine auto-expires within 24 hours of initialization tracking.
+                        Sessions auto-expire 24 hours post-creation. Re-entering code within window will restore state.
                     </div>
 
                     <div class="grid-fields" style="margin-bottom: 24px;">
@@ -309,33 +161,15 @@
 
                     <h3 style="margin-bottom: 16px;">Settings Control</h3>
                     <div class="quad-fields">
-                        <div>
-                            <label style="color:var(--success);">Right Swipe</label>
-                            <input type="text" id="lblRight" value="CAP">
-                        </div>
-                        <div>
-                            <label style="color:var(--danger);">Left Swipe</label>
-                            <input type="text" id="lblLeft" value="TRAP">
-                        </div>
-                        <div>
-                            <label style="color:var(--warning);">Up Swipe</label>
-                            <input type="text" id="lblUp" value="SKIP">
-                        </div>
-                        <div>
-                            <label style="color:var(--text-muted);">Down Swipe</label>
-                            <input type="text" id="lblDown" value="TRASH">
-                        </div>
+                        <div><label style="color:var(--success);">Right Swipe</label><input type="text" id="lblRight" value="CAP"></div>
+                        <div><label style="color:var(--danger);">Left Swipe</label><input type="text" id="lblLeft" value="TRAP"></div>
+                        <div><label style="color:var(--warning);">Up Swipe</label><input type="text" id="lblUp" value="SKIP"></div>
+                        <div><label style="color:var(--text-muted);">Down Swipe</label><input type="text" id="lblDown" value="TRASH"></div>
                     </div>
 
                     <div class="grid-fields">
-                        <div>
-                            <label>Time per question (seconds)</label>
-                            <input type="number" id="limitTime" value="15">
-                        </div>
-                        <div>
-                            <label>Points per question</label>
-                            <input type="number" id="valPoints" value="10">
-                        </div>
+                        <div><label>Time per question (seconds)</label><input type="number" id="limitTime" value="15"></div>
+                        <div><label>Points per question</label><input type="number" id="valPoints" value="10"></div>
                     </div>
 
                     <div class="form-element">
@@ -346,7 +180,7 @@ The atomic identity number of any given elemental structure is determined exclus
                     </div>
 
                     <div class="form-element">
-                        <label>Open-Ended Analytical Final Question Prompt Field</label>
+                        <label>Open-Ended Analytical Final Question</label>
                         <input type="text" id="lastPromptText" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
                     </div>
 
@@ -365,15 +199,10 @@ The atomic identity number of any given elemental structure is determined exclus
                             <span id="clientCount" style="font-weight:800; color:var(--success);">0 Live</span>
                         </div>
                         <table id="rosterTable">
-                            <thead>
-                                <tr><th>Pilot</th><th>Metrics</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="2" style="color:var(--text-muted); text-align:center;">Awaiting sync connections...</td></tr>
-                            </tbody>
+                            <thead><tr><th>Pilot</th><th>Metrics</th></tr></thead>
+                            <tbody><tr><td colspan="2" style="color:var(--text-muted); text-align:center;">Awaiting database synchronization...</td></tr></tbody>
                         </table>
                     </div>
-
                     <button class="action-btn" style="margin-top: 32px; background: var(--primary);" onclick="dispatchNextMatrixCard()">DISPATCH NEXT CARD</button>
                 </div>
             </div>
@@ -381,10 +210,10 @@ The atomic identity number of any given elemental structure is determined exclus
 
         <div id="participantDashboard" class="card centered-panel hidden text-center">
             <div id="stageWait">
-                <h3>Connected to Room Engine</h3>
+                <h3>Connected to Cloud Engine</h3>
                 <p id="channelEcho" style="font-weight: 700; color: var(--primary); margin-top: 8px;"></p>
                 <div class="spinner"></div>
-                <p style="color:var(--text-muted); font-size:14px;">Waiting for Facilitator to dispatch production cards...</p>
+                <p style="color:var(--text-muted); font-size:14px;">Awaiting card transmission payload from host...</p>
             </div>
 
             <div id="stageAction" class="hidden">
@@ -396,25 +225,36 @@ The atomic identity number of any given elemental structure is determined exclus
                 <div class="card-deck-viewport">
                     <div class="tag-overlay tag-cap" id="capIndicator">CAP</div>
                     <div class="tag-overlay tag-trap" id="trapIndicator">TRAP</div>
-                    <div class="gesture-card" id="swipeCardAnchor">
-                        Initializing Matrix Stream...
-                    </div>
+                    <div class="gesture-card" id="swipeCardAnchor">Syncing Active Card Frame...</div>
                 </div>
-                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">Flick Right (CAP) • Flick Left (TRAP)<br>Flick Up (SKIP) • Flick Down (TRASH)</p>
+                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">Swipe Right (CAP) • Swipe Left (TRAP)<br>Swipe Up (SKIP) • Swipe Down (TRASH)</p>
             </div>
         </div>
     </div>
 
     <script>
         let currentRole = 'participant';
-        let globalSocket = null;
         let globalRoomCode = "";
         let globalNickname = "";
         let runningScore = 0;
         let parsedDeckMatrix = [];
         let activeCardIndex = -1;
-        let connectionMap = {};
         let cardCountdownTimer;
+        let activeSessionRef = null;
+
+        // Injected User Config with Reconstructed Database Route URL Mapping
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7oPt9Wtxaz2-u7RNgCQIehBs026XWTvA",
+            authDomain: "swipe-app-176c2.firebaseapp.com",
+            databaseURL: "https://swipe-app-176c2-default-rtdb.firebaseio.com",
+            projectId: "swipe-app-176c2",
+            storageBucket: "swipe-app-176c2.firebasestorage.app",
+            messagingSenderId: "833930289142",
+            appId: "1:833930289142:web:e867cf6ffb49df5bd8f1d7"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
 
         function toggleThemeMode() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -429,64 +269,66 @@ The atomic identity number of any given elemental structure is determined exclus
             document.getElementById('formFac').classList.toggle('hidden', selectedRole !== 'facilitator');
         }
 
-        // Bulletproof open-source real-time signaling backbone configuration
-        function establishNetworkTunnel(roomCode, isFacilitator) {
-            globalRoomCode = roomCode;
-            const targetChannel = encodeURIComponent(`room_cap_trap_${roomCode}`);
-            
-            // Using direct, configurationless open scaling broker tunnel
-            globalSocket = new WebSocket(`wss://api.piesocket.com/v3/${targetChannel}?api_key=VCXCEuvhGcBDP7XhiJJ2thEB3XwP56wCHgj3XHPu&notify_self=0`);
-
-            globalSocket.onopen = () => {
-                if (!isFacilitator) {
-                    // Instantly announce arrival into room session
-                    globalSocket.send(JSON.stringify({ action: 'JOIN', user: globalNickname }));
-                }
-            };
-
-            globalSocket.onmessage = (event) => {
-                const payload = JSON.parse(event.data);
-                
-                if (isFacilitator) {
-                    if (payload.action === 'JOIN') {
-                        connectionMap[payload.user] = { points: 0 };
-                        refreshLeaderboardDOM();
-                    }
-                    if (payload.action === 'UPDATE_SCORE') {
-                        connectionMap[payload.user] = { points: payload.points };
-                        refreshLeaderboardDOM();
-                    }
-                } else {
-                    if (payload.action === 'TRANSMIT_CARD') {
-                        document.getElementById('stageWait').classList.add('hidden');
-                        document.getElementById('stageAction').classList.remove('hidden');
-                        bindIncomingCardMatrix(payload);
-                    }
-                }
-            };
-        }
-
         function initiateFacilitatorDashboard() {
             const secretKey = document.getElementById('facCode').value.trim();
-            if(!secretKey) return alert("Please establish verification key.");
+            if(!secretKey) return alert("Room verification code mandatory.");
+
+            globalRoomCode = secretKey;
+            activeSessionRef = database.ref('sessions/' + secretKey);
+
+            activeSessionRef.once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (Date.now() - data.createdAt > 86400000) {
+                        activeSessionRef.remove(); 
+                        createNewSessionNode();
+                    } else {
+                        document.getElementById('sessionTitle').value = data.title || "";
+                        alert("Prior active session state within 24hr parameter successfully recovered.");
+                    }
+                } else {
+                    createNewSessionNode();
+                }
+            });
 
             document.getElementById('sessionKeyDisplay').value = secretKey;
             document.getElementById('entranceStep').classList.add('hidden');
             document.getElementById('facilitatorDashboard').classList.remove('hidden');
 
-            establishNetworkTunnel(secretKey, true);
+            activeSessionRef.child('roster').on('value', (snapshot) => {
+                const roster = snapshot.val() || {};
+                refreshLeaderboardDOM(roster);
+            });
+        }
+
+        function createNewSessionNode() {
+            activeSessionRef.set({
+                createdAt: Date.now(),
+                title: document.getElementById('sessionTitle').value,
+                activeCard: null
+            });
         }
 
         function initiateParticipantSession() {
             globalNickname = document.getElementById('joinName').value.trim();
-            const accessKey = document.getElementById('joinCode').value.trim();
-            if(!globalNickname || !accessKey) return alert("Credentials mandatory.");
+            globalRoomCode = document.getElementById('joinCode').value.trim();
+            if(!globalNickname || !globalRoomCode) return alert("Credentials mandatory.");
 
             document.getElementById('entranceStep').classList.add('hidden');
             document.getElementById('participantDashboard').classList.remove('hidden');
-            document.getElementById('channelEcho').innerText = `ROOM KEY: ${accessKey}`;
+            document.getElementById('channelEcho').innerText = `ROOM KEY: ${globalRoomCode}`;
 
-            establishNetworkTunnel(accessKey, false);
+            activeSessionRef = database.ref('sessions/' + globalRoomCode);
+            activeSessionRef.child('roster/' + globalNickname).set({ points: 0 });
+
+            activeSessionRef.child('activeCard').on('value', (snapshot) => {
+                const cardData = snapshot.val();
+                if (cardData) {
+                    document.getElementById('stageWait').classList.add('hidden');
+                    document.getElementById('stageAction').classList.remove('hidden');
+                    bindIncomingCardMatrix(cardData);
+                }
+            });
         }
 
         function deployProductionLiveEngine() {
@@ -497,17 +339,18 @@ The atomic identity number of any given elemental structure is determined exclus
             });
             parsedDeckMatrix.push({ query: document.getElementById('lastPromptText').value, verification: 'OPEN' });
 
+            activeSessionRef.update({ title: document.getElementById('sessionTitle').value });
+
             const qrBox = document.getElementById('canvasQR');
             qrBox.innerHTML = "";
             new QRCode(qrBox, { text: window.location.href, width: 140, height: 140 });
-            alert("Live production engine listening successfully.");
+            alert("Database linked game board live.");
         }
 
         function dispatchNextMatrixCard() {
             activeCardIndex++;
             if(activeCardIndex < parsedDeckMatrix.length) {
-                const packet = {
-                    action: 'TRANSMIT_CARD',
+                activeSessionRef.child('activeCard').set({
                     prompt: parsedDeckMatrix[activeCardIndex].query,
                     truth: parsedDeckMatrix[activeCardIndex].verification,
                     countdown: parseInt(document.getElementById('limitTime').value) || 15,
@@ -515,26 +358,26 @@ The atomic identity number of any given elemental structure is determined exclus
                     lexicon: {
                         cap: document.getElementById('lblRight').value,
                         trap: document.getElementById('lblLeft').value
-                    }
-                };
-                globalSocket.send(JSON.stringify(packet));
+                    },
+                    timestamp: Date.now()
+                });
             } else {
                 alert("Matrix bank sequence completed.");
             }
         }
 
-        function refreshLeaderboardDOM() {
+        function refreshLeaderboardDOM(roster) {
             const tbody = document.getElementById('rosterTable').querySelector('tbody');
             tbody.innerHTML = "";
-            const dynamicKeys = Object.keys(connectionMap).sort((a,b) => connectionMap[b].points - connectionMap[a].points);
-            document.getElementById('clientCount').innerText = `${dynamicKeys.length} Live`;
+            const keys = Object.keys(roster).sort((a,b) => roster[b].points - roster[a].points);
+            document.getElementById('clientCount').innerText = `${keys.length} Live`;
 
-            if(dynamicKeys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Awaiting sync connections...</td></tr>`;
+            if(keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Awaiting synchronization...</td></tr>`;
                 return;
             }
-            dynamicKeys.forEach(k => {
-                tbody.innerHTML += `<tr><td><strong>${k}</strong></td><td>${connectionMap[k].points} pts</td></tr>`;
+            keys.forEach(k => {
+                tbody.innerHTML += `<tr><td><strong>${k}</strong></td><td>${roster[k].points} pts</td></tr>`;
             });
         }
 
@@ -592,9 +435,7 @@ The atomic identity number of any given elemental structure is determined exclus
                 else if (deltaX < -140) processMatrixResolution('false');
                 else if (deltaY < -140) processMatrixResolution('skip');
                 else if (deltaY > 140) processMatrixResolution('trash');
-                else {
-                    el.style.transform = "translate(0px, 0px) rotate(0deg)";
-                }
+                else { el.style.transform = "translate(0px, 0px) rotate(0deg)"; }
             };
         }
 
@@ -602,20 +443,16 @@ The atomic identity number of any given elemental structure is determined exclus
             clearInterval(cardCountdownTimer);
             const targetElement = document.getElementById('swipeCardAnchor');
             targetElement.style.opacity = "0";
-            targetElement.innerText = "Syncing scoring arrays...";
+            targetElement.innerText = "Transmitting response data...";
 
             if(focusedCardPayload && focusedCardPayload.truth !== 'OPEN') {
-                if(evalChoice === focusedCardPayload.truth) {
-                    runningScore += focusedCardPayload.pointsValue;
-                }
+                if(evalChoice === focusedCardPayload.truth) { runningScore += focusedCardPayload.pointsValue; }
             }
             document.getElementById('liveScoreCounter').innerText = `Score: ${runningScore} pts`;
 
-            globalSocket.send(JSON.stringify({
-                action: 'UPDATE_SCORE',
-                user: globalNickname,
-                points: runningScore
-            }));
+            if (activeSessionRef) {
+                activeSessionRef.child('roster/' + globalNickname).set({ points: runningScore });
+            }
         }
 
         function fetchTextTemplate() {
