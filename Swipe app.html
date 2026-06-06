@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -31,6 +32,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
         }
 
         body {
@@ -67,23 +69,10 @@
             font-weight: 600;
         }
 
-        button.primary-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-        }
+        button.primary-btn { background: var(--primary); color: white; border: none; }
+        button.success-btn { background: var(--success); color: white; border: none; }
 
-        button.success-btn {
-            background: var(--success);
-            color: white;
-            border: none;
-        }
-
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 850px; margin: 0 auto; }
         .text-center { text-align: center; }
 
         .card {
@@ -95,155 +84,100 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        h1 { margin-bottom: 10px; }
-        p.subtitle { color: var(--text-muted); margin-bottom: 25px; }
-
-        .role-bubbles {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
+        .role-bubbles { display: flex; gap: 15px; margin-bottom: 25px; }
         .bubble {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            background: var(--card-bg);
-            color: var(--text-color);
+            flex: 1; padding: 15px; border: 2px solid var(--border-color);
+            border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold;
+            background: var(--card-bg); color: var(--text-color);
         }
+        .bubble.active { border-color: var(--primary); background: rgba(13, 110, 253, 0.1); }
 
-        .bubble.active {
-            border-color: var(--primary);
-            background: rgba(13, 110, 253, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
         input, textarea, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 16px;
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; background: var(--card-bg); color: var(--text-color); font-size: 16px;
         }
 
         .warning-banner {
-            background: rgba(220, 53, 65, 0.1);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            font-weight: 500;
+            background: rgba(220, 53, 65, 0.1); border: 1px solid var(--danger);
+            color: var(--danger); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .hidden { display: none !important; }
+        .section-title { margin: 25px 0 15px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; font-size: 18px; font-weight: bold; }
 
-        .section-title {
-            margin: 25px 0 15px 0;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 5px;
-            font-size: 18px;
-            font-weight: bold;
-        }
+        .swipe-control-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .color-circle { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.1); }
 
-        .swipe-control-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
+        .live-panel-grid { display: grid; grid-template-columns: 200px 1fr; gap: 30px; margin-top: 20px; }
+        #qrcode img { margin: 0 auto; }
 
-        .color-circle {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .live-panel-grid {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        #qrcode img {
-            margin: 0 auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            text-align: left;
-            font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; font-size: 14px; }
         th { background: rgba(0,0,0,0.03); }
 
-        .game-card {
+        /* Mobile Gesture Deck & Swipe Animations */
+        .deck-container {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            height: 400px;
+            margin: 20px auto;
+            perspective: 1000px;
+        }
+
+        .swipe-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background: var(--card-bg);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 40px 20px;
-            margin: 20px 0;
+            border: 3px solid var(--primary);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             font-size: 22px;
             font-weight: bold;
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform-origin: 50% 99%;
+            transition: transform 0.1s ease-out, opacity 0.1s;
+            cursor: grab;
         }
+
+        .swipe-card:active { cursor: grabbing; }
+
+        /* Visual Direction Overlays */
+        .swipe-indicator {
+            position: absolute;
+            top: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 4px;
+            opacity: 0;
+            text-transform: uppercase;
+        }
+        .indicator-right { right: 10px; border: 2px solid var(--success); color: var(--success); }
+        .indicator-left { left: 10px; border: 2px solid var(--danger); color: var(--danger); }
     </style>
 </head>
 <body>
 
     <div class="header-controls">
-        <div class="app-brand" style="cursor: pointer;" onclick="resetToHome()">Justapps:Swipe app by Praejames</div>
+        <div class="app-brand" onclick="location.reload()">Justapps:Swipe app by Praejames</div>
         <button id="themeToggle" onclick="toggleTheme()">Toggle Mode</button>
     </div>
 
     <div class="container">
         <div id="authPage" class="card text-center">
-            <h1>Welcome to Cap or Trap</h1>
-            <p class="subtitle">Select your role to get started</p>
+            <h1>Cap or Trap</h1>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Live Swipe-Based Classroom Interactive Assessment</p>
 
             <div class="role-bubbles">
                 <div class="bubble active" id="btnParticipantRole" onclick="setRole('participant')">Participant</div>
@@ -252,56 +186,53 @@
 
             <div id="participantForm">
                 <div class="form-group">
-                    <label>Set your Nickname</label>
-                    <input type="text" id="partNickname" placeholder="e.g. Alex">
+                    <label>Your Nickname</label>
+                    <input type="text" id="partNickname" placeholder="e.g. Juan">
                 </div>
                 <div class="form-group">
-                    <label>Enter the Session code</label>
-                    <input type="text" id="partCode" placeholder="4-digit code">
+                    <label>Session Code</label>
+                    <input type="text" id="partCode" placeholder="4-digit key">
                 </div>
-                <button class="primary-btn" style="width:100%;" onclick="startParticipant()">Start</button>
+                <button class="primary-btn" style="width:100%; padding:12px;" onclick="startParticipant()">Join Live Session</button>
             </div>
 
             <div id="facilitatorForm" class="hidden">
                 <div class="role-bubbles">
                     <div class="bubble active" id="btnStartNew" onclick="setFacMode('new')">Start New</div>
-                    <div class="bubble" id="btnEnterExisting" onclick="setFacMode('existing')">Enter a Session code</div>
+                    <div class="bubble" id="btnEnterExisting" onclick="setFacMode('existing')">Enter Existing</div>
                 </div>
-
                 <div class="form-group">
-                    <label id="facCodeLabel">Session Code</label>
-                    <input type="text" id="facCode" placeholder="Enter or generate code">
+                    <label id="facCodeLabel">Create Room Session Key (4 digits)</label>
+                    <input type="text" id="facCode" value="1234" maxlength="6">
                 </div>
-
                 <div id="existingSessionConfirm" class="form-group hidden">
-                    <label>Session Title to Confirm</label>
-                    <input type="text" id="facConfirmTitle" placeholder="Enter exact title to verify and edit">
+                    <label>Confirm Session Name to Recover</label>
+                    <input type="text" id="facConfirmTitle" placeholder="Exact session match name">
                 </div>
-
-                <button class="primary-btn" style="width:100%;" onclick="startFacilitator()">Start</button>
+                <button class="primary-btn" style="width:100%; padding:12px;" onclick="startFacilitator()">Configure Session</button>
             </div>
         </div>
 
         <div id="facilitatorDashboard" class="card hidden">
             <div class="grid-2">
                 <div class="form-group">
-                    <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION NAME</label>
-                    <input type="text" id="dashSessionName" value="Cap or Trap Physics Review">
+                    <label>SESSION NAME</label>
+                    <input type="text" id="dashSessionName" value="Science Assessment Session">
                 </div>
                 <div class="form-group" style="text-align: right;">
-                    <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION KEY</label>
-                    <input type="text" id="dashSessionKey" value="1234" style="color: var(--primary); text-align: right;">
+                    <label>SESSION KEY</label>
+                    <input type="text" id="dashSessionKey" value="1234" readonly style="text-align: right; color: var(--primary); font-weight: bold;">
                 </div>
             </div>
 
             <div class="warning-banner">
-                WARNING: Save your Session Key! You will not be able to access this session again; it will be permanently deleted after the timer expires.
+                Sessions expire automatically after 24 hours of creation unless renewed by save deployment.
             </div>
 
             <div class="grid-3" style="margin-bottom: 25px;">
-                <button onclick="downloadTemplate()">Get Template (.txt)</button>
-                <button onclick="triggerImport()">Import Session (.txt)</button>
-                <button onclick="exportSession()">Export Session (.txt)</button>
+                <button onclick="downloadTemplate()">Get Template</button>
+                <button onclick="triggerImport()">Import (.txt)</button>
+                <button onclick="exportSession()">Export (.txt)</button>
             </div>
             <input type="file" id="fileImport" class="hidden" accept=".txt" onchange="handleImport(event)">
 
@@ -324,14 +255,14 @@
             </div>
             <div class="grid-2">
                 <div>
-                    <label>Up Swipe (Skip Label)</label>
+                    <label>Up Swipe (Skip)</label>
                     <div class="swipe-control-row">
                         <div class="color-circle" style="background-color: var(--warning);"></div>
                         <input type="text" id="cfgUp" value="SKIP">
                     </div>
                 </div>
                 <div>
-                    <label>Down Swipe (Trash Label)</label>
+                    <label>Down Swipe (Trash)</label>
                     <div class="swipe-control-row">
                         <div class="color-circle" style="background-color: var(--text-muted);"></div>
                         <input type="text" id="cfgDown" value="TRASH">
@@ -341,71 +272,410 @@
 
             <div class="grid-2">
                 <div class="form-group">
-                    <label>Time per question (seconds)</label>
-                    <input type="number" id="cfgTime" value="15">
+                    <label>Time limit per card (s)</label>
+                    <input type="number" id="cfgTime" value="20">
                 </div>
                 <div class="form-group">
-                    <label>Points per question</label>
+                    <label>Points Value</label>
                     <input type="number" id="cfgPoints" value="10">
                 </div>
             </div>
 
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Music</label>
-                    <select id="cfgMusic">
-                        <option>Muted</option>
-                        <option>Chiptune Track 1</option>
-                        <option>Synthwave Loop</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Theme</label>
-                    <select id="cfgTheme">
-                        <option>Vibrant Orchid</option>
-                        <option>Classic Slate</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Background Wallpaper</label>
-                    <input type="file" id="cfgWallpaperFile" accept="image/*" onchange="handleWallpaperUpload(event)" style="font-size: 12px; padding: 6px;">
-                </div>
+            <div class="form-group">
+                <label>Upload Background Wallpaper</label>
+                <input type="file" id="cfgWallpaperFile" accept="image/*" onchange="handleWallpaperUpload(event)">
             </div>
 
-            <div class="section-title">Questions</div>
+            <div class="section-title">Questions Engine</div>
             <div class="form-group">
-                <label>Review Questions (Format: Question/Answer - One per paragraph)</label>
-                <textarea id="cfgQuestions" rows="5">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No
-Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures./Yes</textarea>
+                <label>Review Cards (Format: Prompt/Answer [Yes or No] - One per line)</label>
+                <textarea id="cfgQuestions" rows="5">Mitochondria generation creates cellular ATP via anaerobic respirations./No
+Light velocity decreases when passing through high density glass metrics./Yes
+Sound waves propagate faster in water than through standard air vacuum vectors./Yes</textarea>
             </div>
 
             <div class="form-group">
-                <label>Last question</label>
-                <input type="text" id="cfgLastQuestion" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
+                <label>Last Question (Static Anchor - Never Jumbled)</label>
+                <input type="text" id="cfgLastQuestion" value="Write down your main takeaways or processing conceptual errors from this session.">
             </div>
 
-            <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-bottom: 25px;">
-                <input type="checkbox" id="cfgRandomize" style="width:auto;">
+            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="cfgRandomize" checked style="width:auto;">
                 <label for="cfgRandomize" style="margin-bottom:0;">Randomize Questions</label>
             </div>
 
-            <button class="success-btn" style="width: 100%; padding: 15px; font-size: 16px;" onclick="saveAndLaunchLiveSession()">SAVE & START LIVE SESSION</button>
+            <button class="success-btn" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 20px;" onclick="saveAndLaunchLiveSession()">SAVE & START LIVE SESSION</button>
         </div>
 
         <div id="liveSessionHub" class="card hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px;">
                 <div>
                     <h2 id="hubSessionName">Session</h2>
-                    <p style="color: var(--text-muted);">Code: <span id="hubSessionCode" style="font-weight: bold; color: var(--primary);"></span></p>
+                    <p style="color: var(--text-muted);">Access Room Code: <span id="hubSessionCode" style="font-weight: bold; color: var(--primary); font-size: 20px;"></span></p>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="liveCountLabel">3</div>
-                    <label style="font-size: 12px; color: var(--text-muted);">LIVE PARTICIPANTS</label>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--success);" id="liveCountLabel">0</div>
+                    <label style="font-size: 12px; color: var(--text-muted); font-weight: bold;">LIVE PARTICIPANTS</label>
                 </div>
             </div>
 
             <div class="live-panel-grid">
                 <div class="text-center" style="border-right: 1px solid var(--border-color); padding-right: 20px;">
-                    <label style="margin-bottom: 10px; display: block; font-size: 12px; color: var(--text-muted);">SCAN TO JOIN</label>
+                    <label style="margin-bottom: 10px; display: block; font-size: 11px; font-weight: bold; color: var(--text-muted);">DISPATCH ACCESS QR</label>
                     <div id="qrcode"></div>
-                    <p style="font-size: 11px; margin-top: 10px; word-break: break-all; color: var(--text-muted);">
+                    <p style="font-size: 11px; margin-top: 10px; word-break: break-all; color: var(--primary);">https://praejames.github.io/justapps/Swipe%20app.html</p>
+                    <button class="primary-btn" style="width:100%; margin-top:15px; font-size:13px;" onclick="broadcastNextCard()">DISPATCH NEXT CARD</button>
+                </div>
+
+                <div>
+                    <h3>Live Real-Time Standings</h3>
+                    <table id="hubLeaderboardTable">
+                        <thead>
+                            <tr><th>Rank</th><th>Participant Name</th><th>Score Metrics</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" class="text-center" style="color:var(--text-muted);">Waiting for active connection handshakes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="participantEngine" class="card hidden text-center">
+            <div id="participantWaiting">
+                <h2>Connected to Room Engine</h2>
+                <p id="roomDisplayLabel" style="color: var(--primary); font-weight: bold; margin: 10px 0;"></p>
+                <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
+                <div style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+
+            <div id="participantActiveGame" class="hidden">
+                <div style="display:flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 10px;">
+                    <div id="partScoreDisplay">Score: 0</div>
+                    <div id="partTimerDisplay" style="color: var(--danger);">Time: --</div>
+                </div>
+
+                <div class="deck-container">
+                    <div class="swipe-indicator indicator-right" id="indRight">CAP</div>
+                    <div class="swipe-indicator indicator-left" id="indLeft">TRAP</div>
+                    <div class="swipe-card" id="activeSwipeCard">
+                        Hold tight! Card stream syncing...
+                    </div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 13px;">Flick Right for TRUE (CAP) • Left for FALSE (TRAP)<br>Flick Up to SKIP • Down to TRASH</p>
+            </div>
+        </div>
+    </div>
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    <script>
+        let role = 'participant';
+        let fMode = 'new';
+        let client, roomTopic, nickname, myCurrentScore = 0;
+        let questionsList = [];
+        let currentCardIndex = -1;
+        let localRoster = {};
+        let cardTimerInterval;
+
+        // MQTT Public Broker Configuration over WebSockets
+        const BROKER = "wss://broker.hivemq.com:8000/mqtt";
+
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+        }
+
+        function handleWallpaperUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) { document.body.style.backgroundImage = `url('${evt.target.result}')`; };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setRole(r) {
+            role = r;
+            document.getElementById('btnParticipantRole').classList.toggle('active', r === 'participant');
+            document.getElementById('btnFacilitatorRole').classList.toggle('active', r === 'facilitator');
+            document.getElementById('participantForm').classList.toggle('hidden', r !== 'participant');
+            document.getElementById('facilitatorForm').classList.toggle('hidden', r !== 'facilitator');
+        }
+
+        function setFacMode(m) {
+            fMode = m;
+            document.getElementById('btnStartNew').classList.toggle('active', m === 'new');
+            document.getElementById('btnEnterExisting').classList.toggle('active', m === 'existing');
+            document.getElementById('existingSessionConfirm').classList.toggle('hidden', m !== 'existing');
+        }
+
+        // 24 HOUR EXPIRATION COMPLIANCE CHECKS
+        function runLifecycleChecks(key, targetName) {
+            const record = localStorage.getItem(`session_${key}`);
+            if(!record) return null;
+            const data = JSON.parse(record);
+            if(new Date().getTime() - data.created > 86400000) {
+                localStorage.removeItem(`session_${key}`);
+                return null;
+            }
+            return data;
+        }
+
+        function startFacilitator() {
+            const key = document.getElementById('facCode').value.trim();
+            if(!key) return alert("Please specify room key context.");
+            
+            if(fMode === 'existing') {
+                const recovered = runLifecycleChecks(key);
+                if(!recovered) {
+                    alert("Session has passed its 24-hour retention framework or doesn't exist.");
+                    return;
+                }
+                document.getElementById('dashSessionName').value = recovered.name;
+                document.getElementById('cfgQuestions').value = recovered.rawQuestions;
+            }
+            
+            document.getElementById('dashSessionKey').value = key;
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('facilitatorDashboard').classList.remove('hidden');
+        }
+
+        function startParticipant() {
+            nickname = document.getElementById('partNickname').value.trim();
+            const code = document.getElementById('partCode').value.trim();
+            if(!nickname || !code) return alert("Missing validation credentials.");
+
+            roomTopic = `justapps/swipe/room/${code}`;
+            setupNetworkConnection(false);
+
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('participantEngine').classList.remove('hidden');
+            document.getElementById('roomDisplayLabel').innerText = `Room Key Channel: ${code}`;
+        }
+
+        function setupNetworkConnection(isFacilitator) {
+            client = mqtt.connect(BROKER);
+            
+            client.on('connect', () => {
+                client.subscribe(roomTopic);
+                if(!isFacilitator) {
+                    // Signal to facilitator room presence
+                    client.publish(roomTopic, JSON.stringify({ type: 'JOIN', name: nickname }));
+                }
+            });
+
+            client.on('message', (topic, message) => {
+                const packet = JSON.parse(message.toString());
+                
+                if(isFacilitator) {
+                    if(packet.type === 'JOIN') {
+                        localRoster[packet.name] = { score: 0, status: 'Connected' };
+                        updateLeaderboardDisplay();
+                    }
+                    if(packet.type === 'SCORE_UPDATE') {
+                        if(localRoster[packet.name]) {
+                            localRoster[packet.name].score = packet.score;
+                            updateLeaderboardDisplay();
+                        }
+                    }
+                } else {
+                    // Participant Event Handling Framework
+                    if(packet.type === 'DISPATCH_CARD') {
+                        document.getElementById('participantWaiting').classList.add('hidden');
+                        document.getElementById('participantActiveGame').classList.remove('hidden');
+                        renderIncomingCard(packet);
+                    }
+                }
+            });
+        }
+
+        function saveAndLaunchLiveSession() {
+            const key = document.getElementById('dashSessionKey').value;
+            const name = document.getElementById('dashSessionName').value;
+            roomTopic = `justapps/swipe/room/${key}`;
+
+            // Save state internally for 24-hour lifecycle retrieval verification
+            localStorage.setItem(`session_${key}`, JSON.stringify({
+                name: name,
+                created: new Date().getTime(),
+                rawQuestions: document.getElementById('cfgQuestions').value
+            }));
+
+            // Prepare local parsed structural questions
+            processQuestionsArray();
+
+            setupNetworkConnection(true);
+
+            document.getElementById('hubSessionName').innerText = name;
+            document.getElementById('hubSessionCode').innerText = key;
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: "https://praejames.github.io/justapps/Swipe%20app.html", width: 130, height: 130 });
+
+            document.getElementById('facilitatorDashboard').classList.add('hidden');
+            document.getElementById('liveSessionHub').classList.remove('hidden');
+        }
+
+        function processQuestionsArray() {
+            const raw = document.getElementById('cfgQuestions').value.split('\n').filter(l => l.trim().includes('/'));
+            questionsList = raw.map(line => {
+                const parts = line.split('/');
+                return { q: parts[0].trim(), a: parts[1].trim() };
+            });
+
+            if(document.getElementById('cfgRandomize').checked) {
+                questionsList.sort(() => Math.random() - 0.5);
+            }
+            // Append the static anchored last question without disruption
+            questionsList.push({ q: document.getElementById('cfgLastQuestion').value, a: 'OPEN' });
+        }
+
+        function broadcastNextCard() {
+            currentCardIndex++;
+            if(currentCardIndex < questionsList.length) {
+                const packet = {
+                    type: 'DISPATCH_CARD',
+                    index: currentCardIndex,
+                    prompt: questionsList[currentCardIndex].q,
+                    ans: questionsList[currentCardIndex].a,
+                    time: parseInt(document.getElementById('cfgTime').value) || 20,
+                    pts: parseInt(document.getElementById('cfgPoints').value) || 10,
+                    labels: {
+                        right: document.getElementById('cfgRight').value,
+                        left: document.getElementById('cfgLeft').value,
+                        up: document.getElementById('cfgUp').value,
+                        down: document.getElementById('cfgDown').value
+                    }
+                };
+                client.publish(roomTopic, JSON.stringify(packet));
+            } else {
+                alert("Assessment cards finished.");
+            }
+        }
+
+        function updateLeaderboardDisplay() {
+            const tbody = document.getElementById('hubLeaderboardTable').querySelector('tbody');
+            tbody.innerHTML = "";
+            const keys = Object.keys(localRoster).sort((a,b) => localRoster[b].score - localRoster[a].score);
+            document.getElementById('liveCountLabel').innerText = keys.length;
+
+            if(keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center">No participants tracked yet.</td></tr>`;
+                return;
+            }
+            keys.forEach((k, idx) => {
+                tbody.innerHTML += `<tr><td>#${idx+1}</td><td>${k}</td><td>${localRoster[k].score} pts</td><td>${localRoster[k].status}</td></tr>`;
+            });
+        }
+
+        // PHYSICAL GESTURE HANDLING FOR MOBILE PARTICIPANTS
+        let activeCardData = null;
+        function renderIncomingCard(packet) {
+            activeCardData = packet;
+            const card = document.getElementById('activeSwipeCard');
+            card.style.transform = "none";
+            card.style.opacity = "1";
+            card.innerText = packet.prompt;
+
+            document.getElementById('indRight').innerText = packet.labels.right;
+            document.getElementById('indLeft').innerText = packet.labels.left;
+
+            let timeLeft = packet.time;
+            document.getElementById('partTimerDisplay').innerText = `Time: ${timeLeft}s`;
+            clearInterval(cardTimerInterval);
+            cardTimerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('partTimerDisplay').innerText = `Time: ${timeLeft}s`;
+                if(timeLeft <= 0) {
+                    clearInterval(cardTimerInterval);
+                    executeSwipeSelection('TIMEOUT');
+                }
+            }, 1000);
+
+            setupCardGestures(card);
+        }
+
+        function setupCardGestures(el) {
+            let startX = 0, startY = 0, moveX = 0, moveY = 0;
+            const indRight = document.getElementById('indRight');
+            const indLeft = document.getElementById('indLeft');
+
+            el.ontouchstart = (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            };
+
+            el.ontouchmove = (e) => {
+                moveX = e.touches[0].clientX - startX;
+                moveY = e.touches[0].clientY - startY;
+                
+                // Track real-time tilting visuals
+                el.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${moveX / 10}deg)`;
+                
+                // Opacity feedback indicators
+                if(moveX > 30) { indRight.style.opacity = Math.min(moveX/100, 1); indLeft.style.opacity = 0; }
+                else if(moveX < -30) { indLeft.style.opacity = Math.min(Math.abs(moveX)/100, 1); indRight.style.opacity = 0; }
+                else { indRight.style.opacity = 0; indLeft.style.opacity = 0; }
+            };
+
+            el.ontouchend = () => {
+                indRight.style.opacity = 0;
+                indLeft.style.opacity = 0;
+
+                if (moveX > 120) executeSwipeSelection('Yes'); 
+                else if (moveX < -120) executeSwipeSelection('No');
+                else if (moveY < -120) executeSwipeSelection('Skip');
+                else if (moveY > 120) executeSwipeSelection('Trash');
+                else {
+                    el.style.transform = "translate(0,0) rotate(0deg)";
+                }
+            };
+        }
+
+        function executeSwipeSelection(decision) {
+            clearInterval(cardTimerInterval);
+            const card = document.getElementById('activeSwipeCard');
+            card.style.opacity = "0";
+            card.innerText = "Synchronizing score with host...";
+
+            if(activeCardData && activeCardData.ans !== 'OPEN') {
+                if(decision === activeCardData.ans) {
+                    myCurrentScore += activeCardData.pts;
+                }
+            }
+            document.getElementById('partScoreDisplay').innerText = `Score: ${myCurrentScore}`;
+            
+            // Transmit results directly to facilitator live dashboard
+            client.publish(roomTopic, JSON.stringify({
+                type: 'SCORE_UPDATE',
+                name: nickname,
+                score: myCurrentScore
+            }));
+        }
+
+        function downloadTemplate() {
+            const template = "Prompt Text 1 Here/Yes\nPrompt Text 2 Here/No";
+            blobDownload(template, "swipe_template.txt");
+        }
+        function triggerImport() { document.getElementById('fileImport').click(); }
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const r = new FileReader();
+            r.onload = function(evt) { document.getElementById('cfgQuestions').value = evt.target.result; alert("Cards imported successfully."); };
+            r.readAsText(file);
+        }
+        function exportSession() {
+            const raw = document.getElementById('cfgQuestions').value;
+            blobDownload(raw, "exported_swipe_session.txt");
+        }
+        function blobDownload(t, f) {
+            const blob = new Blob([t], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.download = f; a.href = window.URL.createObjectURL(blob); a.click();
+        }
+    </script>
+</body>
+</html>
