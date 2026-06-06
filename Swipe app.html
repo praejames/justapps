@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap</title>
+    <!-- Embedded QR Generator to handle offline/local usage seamlessly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -45,9 +47,15 @@
 
         .header-controls {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+        }
+
+        .app-brand {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-muted);
         }
 
         button {
@@ -66,14 +74,18 @@
             border: none;
         }
 
+        button.success-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto;
         }
 
-        .text-center {
-            text-align: center;
-        }
+        .text-center { text-align: center; }
 
         .card {
             background: var(--card-bg);
@@ -160,37 +172,38 @@
         .hidden { display: none !important; }
 
         .section-title {
-            margin: 25px 0 10px 0;
+            margin: 25px 0 15px 0;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 5px;
             font-size: 18px;
+            font-weight: bold;
         }
 
-        /* Color-coded settings swipes */
-        .swipe-cap { border-left: 5px solid var(--success); }
-        .swipe-trap { border-left: 5px solid var(--danger); }
-        .swipe-skip { border-left: 5px solid var(--warning); }
-        .swipe-trash { border-left: 5px solid var(--text-muted); }
-
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+        /* Cleaned Up Settings Controls with Alignment Circles */
+        .swipe-control-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
-        .modal-content {
-            background: var(--card-bg);
-            color: var(--text-color);
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
+        .color-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .live-panel-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        #qrcode img {
+            margin: 0 auto;
         }
 
         table {
@@ -201,24 +214,25 @@
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 8px;
+            padding: 10px;
             text-align: left;
             font-size: 14px;
         }
-        th { background: rgba(0,0,0,0.05); }
+        th { background: rgba(0,0,0,0.03); }
     </style>
 </head>
 <body>
 
     <div class="header-controls">
+        <div class="app-brand">Justapps:Swipe app by Praejames</div>
         <button id="themeToggle" onclick="toggleTheme()">Toggle Mode</button>
     </div>
 
     <div class="container">
         <!-- ROLE SELECTION AND LOGIN PAGE -->
         <div id="authPage" class="card text-center">
-            <h1 id="mainTitle">Welcome to Cap or Trap</h1>
-            <p class="subtitle" id="mainSubtitle">Select your role to get started</p>
+            <h1>Welcome to Cap or Trap</h1>
+            <p class="subtitle">Select your role to get started</p>
 
             <div class="role-bubbles">
                 <div class="bubble active" id="btnParticipantRole" onclick="setRole('participant')">Participant</div>
@@ -259,16 +273,16 @@
             </div>
         </div>
 
-        <!-- FACILITATOR DASHBOARD -->
+        <!-- FACILITATOR DASHBOARD (EDIT MODE) -->
         <div id="facilitatorDashboard" class="card hidden">
             <div class="grid-2">
-                <div>
-                    <label style="font-size: 12px; color: var(--text-muted);">SESSION NAME</label>
-                    <h2 id="dashSessionName" style="margin-bottom:10px;">Default Session</h2>
+                <div class="form-group">
+                    <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION NAME</label>
+                    <input type="text" id="dashSessionName" value="Cap or Trap Physics Review" style="font-size: 20px; font-weight: bold;">
                 </div>
-                <div style="text-align: right;">
-                    <label style="font-size: 12px; color: var(--text-muted);">SESSION KEY</label>
-                    <h2 id="dashSessionKey" style="color: var(--primary);">UNSET</h2>
+                <div class="form-group" style="text-align: right;">
+                    <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION KEY</label>
+                    <input type="text" id="dashSessionKey" value="1234" style="font-size: 20px; font-weight: bold; text-align: right; color: var(--primary);">
                 </div>
             </div>
 
@@ -276,7 +290,7 @@
                 WARNING: Save your Session Key! You will not be able to access this session again; it will be permanently deleted after the timer expires.
             </div>
 
-            <div class="grid-3">
+            <div class="grid-3" style="margin-bottom: 25px;">
                 <button onclick="downloadTemplate()">Get Template (.txt)</button>
                 <button onclick="triggerImport()">Import Session (.txt)</button>
                 <button onclick="exportSession()">Export Session (.txt)</button>
@@ -285,23 +299,35 @@
 
             <div class="section-title">Settings Control</div>
             <div class="grid-2">
-                <div class="form-group swipe-cap">
+                <div>
                     <label>Right Swipe (True Label)</label>
-                    <input type="text" id="cfgRight" value="CAP">
+                    <div class="swipe-control-row">
+                        <div class="color-circle" style="background-color: var(--success);"></div>
+                        <input type="text" id="cfgRight" value="CAP">
+                    </div>
                 </div>
-                <div class="form-group swipe-trap">
+                <div>
                     <label>Left Swipe (False Label)</label>
-                    <input type="text" id="cfgLeft" value="TRAP">
+                    <div class="swipe-control-row">
+                        <div class="color-circle" style="background-color: var(--danger);"></div>
+                        <input type="text" id="cfgLeft" value="TRAP">
+                    </div>
                 </div>
             </div>
             <div class="grid-2">
-                <div class="form-group swipe-skip">
+                <div>
                     <label>Up Swipe (Skip Label)</label>
-                    <input type="text" id="cfgUp" value="SKIP">
+                    <div class="swipe-control-row">
+                        <div class="color-circle" style="background-color: var(--warning);"></div>
+                        <input type="text" id="cfgUp" value="SKIP">
+                    </div>
                 </div>
-                <div class="form-group swipe-trash">
+                <div>
                     <label>Down Swipe (Trash Label)</label>
-                    <input type="text" id="cfgDown" value="TRASH">
+                    <div class="swipe-control-row">
+                        <div class="color-circle" style="background-color: var(--text-muted);"></div>
+                        <input type="text" id="cfgDown" value="TRASH">
+                    </div>
                 </div>
             </div>
 
@@ -333,15 +359,15 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Wallpaper URL</label>
-                    <input type="text" id="cfgWallpaper" placeholder="Paste image link" onchange="updateWallpaper(this.value)">
+                    <label>Background Wallpaper</label>
+                    <input type="file" id="cfgWallpaperFile" accept="image/*" onchange="handleWallpaperUpload(event)" style="font-size: 12px; padding: 6px;">
                 </div>
             </div>
 
-            <div class="section-title">Review Questions</div>
+            <div class="section-title">Questions</div>
             <div class="form-group">
-                <label>Questions Matrix (Format: Question/Answer - One per paragraph)</label>
-                <textarea id="cfgQuestions" rows="6">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No
+                <label>Review Questions (Format: Question/Answer - One per paragraph)</label>
+                <textarea id="cfgQuestions" rows="5">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No
 Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures./Yes</textarea>
             </div>
 
@@ -350,20 +376,54 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
                 <input type="text" id="cfgLastQuestion" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
             </div>
 
-            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+            <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-bottom: 25px;">
                 <input type="checkbox" id="cfgRandomize" style="width:auto;">
-                <label for="cfgRandomize" style="margin-bottom:0;">Randomize to Participants</label>
+                <label for="cfgRandomize" style="margin-bottom:0;">Randomize Questions</label>
             </div>
 
-            <div class="grid-3" style="margin-top:20px;">
-                <button onclick="triggerQuestionImport()">Import Questions (.txt)</button>
-                <button class="primary-btn" onclick="openLeaderboard()">Live Leaderboard</button>
-                <button onclick="downloadCurrentData()" style="background: var(--success); color: white; border: none;">Download Data</button>
-            </div>
-            <input type="file" id="questionImport" class="hidden" accept=".txt" onchange="handleQuestionImport(event)">
+            <button class="success-btn" style="width: 100%; padding: 15px; font-size: 16px;" onclick="saveAndLaunchLiveSession()">SAVE & START LIVE SESSION</button>
         </div>
 
-        <!-- PARTICIPANT WAITING ENGINE PLACEHOLDER -->
+        <!-- LIVE SESSION HUB PANEL -->
+        <div id="liveSessionHub" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+                <div>
+                    <h2 id="hubSessionName">Session</h2>
+                    <p style="color: var(--text-muted);">Code: <span id="hubSessionCode" style="font-weight: bold; color: var(--primary);"></span></p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="liveCountLabel">0</div>
+                    <label style="font-size: 12px; color: var(--text-muted);">LIVE PARTICIPANTS</label>
+                </div>
+            </div>
+
+            <div class="live-panel-grid">
+                <div class="text-center" style="border-right: 1px solid var(--border-color); padding-right: 20px;">
+                    <label style="margin-bottom: 10px; display: block; font-size: 12px; color: var(--text-muted);">SCAN TO JOIN</label>
+                    <div id="qrcode"></div>
+                    <p style="font-size: 11px; margin-top: 10px; word-break: break-all; color: var(--text-muted);">https://praejames.github.io/justapps/Swipe%20app.html</p>
+                </div>
+
+                <div>
+                    <h3>Live Leaderboard Ranking</h3>
+                    <table id="hubLeaderboardTable">
+                        <thead>
+                            <tr><th>Rank</th><th>Participant</th><th>Score</th><th>Last Connection Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated on session save -->
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button onclick="exportSession()" style="flex: 1;">Download Session Log Data</button>
+                        <button onclick="backToEdit()" style="border-color: var(--danger); color: var(--danger);">Edit Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARTICIPANT ENGINE PLACEHOLDER -->
         <div id="participantEngine" class="card hidden text-center">
             <h2>Connected to Session Engine</h2>
             <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
@@ -371,45 +431,22 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
         </div>
     </div>
 
-    <!-- LIVE LEADERBOARD MODAL -->
-    <div id="leaderboardModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Live Session Status & Leaderboard</h3>
-            <div class="section-title">Top 10 Rankings</div>
-            <table id="leaderboardTable">
-                <thead><tr><th>Rank</th><th>Nickname</th><th>Points</th></tr></thead>
-                <tbody><!-- Dynamic --></tbody>
-            </table>
-
-            <div class="section-title">Item Analysis (Question Performance)</div>
-            <table id="itemAnalysisTable">
-                <thead>
-                    <tr><th>Question</th><th>Correct</th><th>Incorrect</th><th>Skipped</th><th>Trashed</th></tr>
-                </thead>
-                <tbody><!-- Dynamic --></tbody>
-            </table>
-            <button onclick="closeLeaderboard()" style="margin-top:20px; width:100%;">Close Live Monitor</button>
-        </div>
-    </div>
-
     <script>
-        // Mock State Database for runtime logic consistency
         let currentRole = 'participant';
         let facMode = 'new';
+        
+        // Fully formed baseline state matching the data requirement structure
         let sessionData = {
             sessionName: "Cap or Trap Physics Review",
-            sessionCode: "4921",
+            sessionCode: "1234",
             lastUpdated: new Date().toISOString(),
-            settings: { time: 15, points: 10, right: "CAP", left: "TRAP", up: "SKIP", down: "TRASH", music: "Muted", theme: "Vibrant Orchid", wallpaper: "" },
-            questions: [
-                { q: "Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria.", a: "No" },
-                { q: "Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures.", a: "Yes" }
-            ],
-            lastQuestion: "Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.",
+            settings: { time: 15, points: 10, right: "CAP", left: "TRAP", up: "SKIP", down: "TRASH", music: "Muted", theme: "Vibrant Orchid" },
+            questions: [],
+            lastQuestion: "",
             participants: [
                 { name: "jam", score: 32, timestamp: "2026-06-06T10:14:00Z", items: ["Correct", "Correct"], lastAnswer: "Misread prompt 1" },
                 { name: "Cap or Trap", score: 23, timestamp: "2026-06-06T10:15:00Z", items: ["Correct", "Incorrect"], lastAnswer: "Confused on vector mechanics" },
-                { name: "james", score: 0, timestamp: "2026-06-06T10:15:30Z", items: ["Skipped", "Trashed"], lastAnswer: "Ran out of time entirely" }
+                { name: "james", score: 0, timestamp: "2026-06-06T10:15:30Z", items: ["Skipped", "Trashed"], lastAnswer: "No input received" }
             ]
         };
 
@@ -419,8 +456,15 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             document.documentElement.setAttribute('data-theme', target);
         }
 
-        function updateWallpaper(url) {
-            document.body.style.backgroundImage = url ? `url('${url}')` : 'none';
+        function handleWallpaperUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url('${e.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function setRole(role) {
@@ -448,23 +492,58 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
         }
 
         function startFacilitator() {
-            const code = document.getElementById('facCode').value || "7712";
+            const code = document.getElementById('facCode').value || "1234";
             if(facMode === 'existing') {
                 const confirmTitle = document.getElementById('facConfirmTitle').value;
-                if(!confirmTitle) return alert("Please supply the original Session Title to verify configurations.");
-                sessionData.sessionName = confirmTitle;
+                if(!confirmTitle) return alert("Please enter the Session Title to confirm editing options.");
+                document.getElementById('dashSessionName').value = confirmTitle;
             }
-            sessionData.sessionCode = code;
-            
-            document.getElementById('dashSessionName').innerText = sessionData.sessionName;
-            document.getElementById('dashSessionKey').innerText = sessionData.sessionCode;
+            document.getElementById('dashSessionKey').value = code;
             document.getElementById('authPage').classList.add('hidden');
             document.getElementById('facilitatorDashboard').classList.remove('hidden');
         }
 
+        function saveAndLaunchLiveSession() {
+            // Update base localized tracking states
+            sessionData.sessionName = document.getElementById('dashSessionName').value;
+            sessionData.sessionCode = document.getElementById('dashSessionKey').value;
+            sessionData.lastUpdated = new Date().toISOString();
+            
+            // Generate Hub Visuals
+            document.getElementById('hubSessionName').innerText = sessionData.sessionName;
+            document.getElementById('hubSessionCode').innerText = sessionData.sessionCode;
+            document.getElementById('liveCountLabel').innerText = sessionData.participants.length;
+
+            // Render Native QR Code to target URL matching specifications cleanly
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: "https://praejames.github.io/justapps/Swipe%20app.html",
+                width: 140,
+                height: 140
+            });
+
+            // Populate Table
+            const tbody = document.getElementById('hubLeaderboardTable').querySelector('tbody');
+            tbody.innerHTML = "";
+            const sorted = [...sessionData.participants].sort((a,b) => b.score - a.score);
+            sorted.forEach((p, index) => {
+                tbody.innerHTML += `<tr><td>#${index + 1}</td><td>${p.name}</td><td>${p.score} pts</td><td>Active/Joined</td></tr>`;
+            });
+
+            // Toggle Visual States cleanly
+            document.getElementById('facilitatorDashboard').classList.add('hidden');
+            document.getElementById('liveSessionHub').classList.remove('hidden');
+        }
+
+        function backToEdit() {
+            document.getElementById('liveSessionHub').classList.add('hidden');
+            document.getElementById('facilitatorDashboard').classList.remove('hidden');
+        }
+
         function downloadTemplate() {
-            const template = "Session Name: Sample Review Session\nCode: 0000\n---\nQuestion prompt goes here/Yes\nAnother true or false query goes here/No";
-            blobDownload(template, "cap_or_trap_template.txt");
+            const template = "Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No\nLight vectors propagate with higher scalar velocities inside complete vacuums than glass structures./Yes";
+            blobDownload(template, "questions_template.txt");
         }
 
         function triggerImport() { document.getElementById('fileImport').click(); }
@@ -473,69 +552,30 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
-                alert("Session parsed successfully via text stream pipeline data maps.");
-                document.getElementById('dashSessionName').innerText = "Imported Track Stack";
-            };
-            reader.readAsText(file);
-        }
-
-        function triggerQuestionImport() { document.getElementById('questionImport').click(); }
-        function handleQuestionImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                document.getElementById('cfgQuestions').value = evt.target.result;
+                alert("Session metrics imported successfully.");
             };
             reader.readAsText(file);
         }
 
         function exportSession() {
-            const dataString = generateSessionLogString();
-            blobDownload(dataString, `Session_Export_${sessionData.sessionCode}.txt`);
-        }
-
-        function downloadCurrentData() {
-            exportSession();
-        }
-
-        function generateSessionLogString() {
-            let log = `SESSION NAME: ${document.getElementById('dashSessionName').innerText}\n`;
-            log += `SESSION CODE: ${sessionData.sessionCode}\n`;
+            let log = `SESSION NAME: ${document.getElementById('dashSessionName').value}\n`;
+            log += `SESSION CODE: ${document.getElementById('dashSessionKey').value}\n`;
             log += `LAST UPDATED: ${new Date().toISOString()}\n\n`;
             log += `--- SETTINGS MATRIX ---\n`;
-            log += `Time Per Card: ${document.getElementById('cfgTime').value}s | Points: ${document.getElementById('cfgPoints').value}\n`;
-            log += `Labels: R:${document.getElementById('cfgRight').value} L:${document.getElementById('cfgLeft').value} U:${document.getElementById('cfgUp').value} D:${document.getElementById('cfgDown').value}\n\n`;
-            
+            log += `Time/Question: ${document.getElementById('cfgTime').value}s | Points/Question: ${document.getElementById('cfgPoints').value}\n\n`;
             log += `--- QUESTIONS LIST ---\n${document.getElementById('cfgQuestions').value}\n\n`;
             log += `Last Question: ${document.getElementById('cfgLastQuestion').value}\n\n`;
+            log += `--- PARTICIPANT LEADERBOARD LOGS ---\n`;
             
-            log += `--- LIVE PARTICIPANT LOGS ---\n`;
             sessionData.participants.forEach(p => {
-                log += `Participant: ${p.name} | Total Score: ${p.score} pts | Joined: ${p.timestamp}\n`;
-                log += `Responses: ${p.items.join(', ')}\n`;
-                log += `Last Question Response: "${p.lastAnswer}"\n\n`;
-            });
-            return log;
-        }
-
-        function openLeaderboard() {
-            document.getElementById('leaderboardModal').classList.remove('hidden');
-            const lBody = document.getElementById('leaderboardTable').querySelector('tbody');
-            lBody.innerHTML = "";
-            const sortedPart = [...sessionData.participants].sort((a,b) => b.score - a.score);
-            sortedPart.forEach((p, idx) => {
-                lBody.innerHTML += `<tr><td>#${idx+1}</td><td>${p.name}</td><td>${p.score} pts</td></tr>`;
+                log += `Participant: ${p.name} | Total Score: ${p.score} pts | TimeStamp: ${p.timestamp}\n`;
+                log += `Item Summary Matrix responses: ${p.items.join(', ')}\n`;
+                log += `Open ended final prompt block answer: "${p.lastAnswer}"\n\n`;
             });
 
-            const iBody = document.getElementById('itemAnalysisTable').querySelector('tbody');
-            iBody.innerHTML = `
-                <tr><td>Photosynthesis.../No</td><td>2</td><td>0</td><td>1</td><td>0</td></tr>
-                <tr><td>Light vectors.../Yes</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
-            `;
+            blobDownload(log, `Session_Data_Log_${sessionData.sessionCode}.txt`);
         }
 
-        function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); }
         function blobDownload(text, filename) {
             const blob = new Blob([text], { type: 'text/plain' });
             const anchor = document.createElement('a');
