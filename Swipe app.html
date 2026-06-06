@@ -4,34 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap</title>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
-            --bg-color: #f8f9fa;
+            --bg-color: #f3f4f6;
             --card-bg: #ffffff;
-            --text-color: #212529;
-            --text-muted: #6c757d;
-            --border-color: #dee2e6;
-            --primary: #0d6efd;
-            --danger: #dc3545;
-            --warning: #ffc107;
-            --success: #198754;
+            --text-color: #1f2937;
+            --text-muted: #4b5563;
+            --border-color: #e5e7eb;
+            --primary: #4f46e5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
         }
 
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
             --text-color: #f8f9fa;
-            --text-muted: #a1a1a1;
-            --border-color: #333333;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             user-select: none;
         }
 
@@ -39,642 +38,602 @@
             background-color: var(--bg-color);
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
             transition: background 0.3s, color 0.3s;
         }
 
-        .header-controls {
+        .header-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            max-width: 1200px;
+            margin: 0 auto 24px auto;
         }
 
-        .app-brand {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--text-muted);
-        }
-
-        button {
+        .brand-logo {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
             cursor: pointer;
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-weight: 600;
         }
 
-        button.primary-btn { background: var(--primary); color: white; border: none; }
-        button.success-btn { background: var(--success); color: white; border: none; }
-
-        .container { max-width: 850px; margin: 0 auto; }
-        .text-center { text-align: center; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .centered-panel {
+            max-width: 480px;
+            margin: 40px auto 0 auto;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: rgba(0,0,0,0.05);
+            padding: 6px;
             border-radius: 12px;
-            padding: 30px;
-            margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .role-bubbles { display: flex; gap: 15px; margin-bottom: 25px; }
-        .bubble {
-            flex: 1; padding: 15px; border: 2px solid var(--border-color);
-            border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold;
-            background: var(--card-bg); color: var(--text-color);
+        .role-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .bubble.active { border-color: var(--primary); background: rgba(13, 110, 253, 0.1); }
 
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        .role-tab.active {
+            background: var(--card-bg);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            color: var(--primary);
+        }
+
+        .form-element {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
         input, textarea, select {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            border-radius: 6px; background: var(--card-bg); color: var(--text-color); font-size: 16px;
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
         }
 
-        .warning-banner {
-            background: rgba(220, 53, 65, 0.1); border: 1px solid var(--danger);
-            color: var(--danger); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;
+        button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .hidden { display: none !important; }
-        .section-title { margin: 25px 0 15px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; font-size: 18px; font-weight: bold; }
+        button.action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+        }
 
-        .swipe-control-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .color-circle { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.1); }
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
 
-        .live-panel-grid { display: grid; grid-template-columns: 200px 1fr; gap: 30px; margin-top: 20px; }
-        #qrcode img { margin: 0 auto; }
+        .grid-fields {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; font-size: 14px; }
-        th { background: rgba(0,0,0,0.03); }
+        .quad-fields {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
 
-        /* Mobile Gesture Deck & Swipe Animations */
-        .deck-container {
+        .banner-alert {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .card-deck-viewport {
             position: relative;
             width: 100%;
-            max-width: 360px;
-            height: 400px;
-            margin: 20px auto;
-            perspective: 1000px;
+            max-width: 340px;
+            height: 380px;
+            margin: 32px auto;
         }
 
-        .swipe-card {
+        .gesture-card {
             position: absolute;
             width: 100%;
             height: 100%;
             background: var(--card-bg);
-            border: 3px solid var(--primary);
-            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
             padding: 24px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            font-size: 22px;
-            font-weight: bold;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
             text-align: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            transform-origin: 50% 99%;
-            transition: transform 0.1s ease-out, opacity 0.1s;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            transform-origin: center bottom;
             cursor: grab;
+            transition: transform 0.1s ease-out, opacity 0.2s;
         }
 
-        .swipe-card:active { cursor: grabbing; }
-
-        /* Visual Direction Overlays */
-        .swipe-indicator {
+        .tag-overlay {
             position: absolute;
-            top: 10px;
-            font-size: 14px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 4px;
+            top: 20px;
+            font-size: 12px;
+            font-weight: 900;
+            padding: 6px 12px;
+            border-radius: 6px;
             opacity: 0;
             text-transform: uppercase;
         }
-        .indicator-right { right: 10px; border: 2px solid var(--success); color: var(--success); }
-        .indicator-left { left: 10px; border: 2px solid var(--danger); color: var(--danger); }
+        .tag-cap { right: 20px; border: 2px solid var(--success); color: var(--success); }
+        .tag-trap { left: 20px; border: 2px solid var(--danger); color: var(--danger); }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 32px auto;
+            animation: turn 0.8s linear infinite;
+        }
+
+        @keyframes turn { to { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="header-controls">
-        <div class="app-brand" onclick="location.reload()">Justapps:Swipe app by Praejames</div>
-        <button id="themeToggle" onclick="toggleTheme()">Toggle Mode</button>
+    <div class="header-nav">
+        <div class="brand-logo" onclick="location.reload()">Cap or Trap</div>
+        <button onclick="toggleThemeMode()">Toggle Mode</button>
     </div>
 
     <div class="container">
-        <div id="authPage" class="card text-center">
-            <h1>Cap or Trap</h1>
-            <p style="color: var(--text-muted); margin-bottom: 25px;">Live Swipe-Based Classroom Interactive Assessment</p>
-
-            <div class="role-bubbles">
-                <div class="bubble active" id="btnParticipantRole" onclick="setRole('participant')">Participant</div>
-                <div class="bubble" id="btnFacilitatorRole" onclick="setRole('facilitator')">Facilitator</div>
+        <div id="entranceStep" class="card centered-panel">
+            <h2 class="text-center" style="margin-bottom: 24px;">Welcome Pilot</h2>
+            <div class="role-selector">
+                <div class="role-tab active" id="tabPart" onclick="switchRoleView('participant')">Participant</div>
+                <div class="role-tab" id="tabFac" onclick="switchRoleView('facilitator')">Facilitator</div>
             </div>
 
-            <div id="participantForm">
-                <div class="form-group">
-                    <label>Your Nickname</label>
-                    <input type="text" id="partNickname" placeholder="e.g. Juan">
+            <div id="formPart">
+                <div class="form-element">
+                    <label>Player Nickname</label>
+                    <input type="text" id="joinName" placeholder="Enter Call Sign">
                 </div>
-                <div class="form-group">
-                    <label>Session Code</label>
-                    <input type="text" id="partCode" placeholder="4-digit key">
+                <div class="form-element">
+                    <label>Access Token</label>
+                    <input type="text" id="joinCode" placeholder="4-Digit Secure Key">
                 </div>
-                <button class="primary-btn" style="width:100%; padding:12px;" onclick="startParticipant()">Join Live Session</button>
+                <button class="action-btn" onclick="initiateParticipantSession()">Connect to Engine</button>
             </div>
 
-            <div id="facilitatorForm" class="hidden">
-                <div class="role-bubbles">
-                    <div class="bubble active" id="btnStartNew" onclick="setFacMode('new')">Start New</div>
-                    <div class="bubble" id="btnEnterExisting" onclick="setFacMode('existing')">Enter Existing</div>
-                </div>
-                <div class="form-group">
-                    <label id="facCodeLabel">Create Room Session Key (4 digits)</label>
+            <div id="formFac" class="hidden">
+                <div class="form-element">
+                    <label>Establish Administration Key</label>
                     <input type="text" id="facCode" value="1234" maxlength="6">
                 </div>
-                <div id="existingSessionConfirm" class="form-group hidden">
-                    <label>Confirm Session Name to Recover</label>
-                    <input type="text" id="facConfirmTitle" placeholder="Exact session match name">
-                </div>
-                <button class="primary-btn" style="width:100%; padding:12px;" onclick="startFacilitator()">Configure Session</button>
+                <button class="action-btn" onclick="initiateFacilitatorDashboard()">Initialize Panel</button>
             </div>
         </div>
 
         <div id="facilitatorDashboard" class="card hidden">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>SESSION NAME</label>
-                    <input type="text" id="dashSessionName" value="Science Assessment Session">
-                </div>
-                <div class="form-group" style="text-align: right;">
-                    <label>SESSION KEY</label>
-                    <input type="text" id="dashSessionKey" value="1234" readonly style="text-align: right; color: var(--primary); font-weight: bold;">
-                </div>
-            </div>
-
-            <div class="warning-banner">
-                Sessions expire automatically after 24 hours of creation unless renewed by save deployment.
-            </div>
-
-            <div class="grid-3" style="margin-bottom: 25px;">
-                <button onclick="downloadTemplate()">Get Template</button>
-                <button onclick="triggerImport()">Import (.txt)</button>
-                <button onclick="exportSession()">Export (.txt)</button>
-            </div>
-            <input type="file" id="fileImport" class="hidden" accept=".txt" onchange="handleImport(event)">
-
-            <div class="section-title">Settings Control</div>
-            <div class="grid-2">
+            <div class="dashboard-layout">
                 <div>
-                    <label>Right Swipe (True Label)</label>
-                    <div class="swipe-control-row">
-                        <div class="color-circle" style="background-color: var(--success);"></div>
-                        <input type="text" id="cfgRight" value="CAP">
+                    <div class="grid-fields">
+                        <div class="form-element">
+                            <label>Review Session Title</label>
+                            <input type="text" id="sessionTitle" value="Cap or Trap Physics Review">
+                        </div>
+                        <div class="form-element">
+                            <label>Session Key</label>
+                            <input type="text" id="sessionKeyDisplay" readonly style="font-weight: 800; color: var(--primary);">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label>Left Swipe (False Label)</label>
-                    <div class="swipe-control-row">
-                        <div class="color-circle" style="background-color: var(--danger);"></div>
-                        <input type="text" id="cfgLeft" value="TRAP">
+
+                    <div class="banner-alert">
+                        WARNING: Save your Session Key! This engine auto-expires within 24 hours of initialization tracking.
                     </div>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div>
-                    <label>Up Swipe (Skip)</label>
-                    <div class="swipe-control-row">
-                        <div class="color-circle" style="background-color: var(--warning);"></div>
-                        <input type="text" id="cfgUp" value="SKIP">
+
+                    <div class="grid-fields" style="margin-bottom: 24px;">
+                        <button onclick="fetchTextTemplate()">Get Template (.txt)</button>
+                        <button onclick="triggerFileImport()">Import Session (.txt)</button>
+                        <input type="file" id="uploadGate" class="hidden" accept=".txt" onchange="parseDeckUpload(event)">
                     </div>
-                </div>
-                <div>
-                    <label>Down Swipe (Trash)</label>
-                    <div class="swipe-control-row">
-                        <div class="color-circle" style="background-color: var(--text-muted);"></div>
-                        <input type="text" id="cfgDown" value="TRASH">
+
+                    <h3 style="margin-bottom: 16px;">Settings Control</h3>
+                    <div class="quad-fields">
+                        <div>
+                            <label style="color:var(--success);">Right Swipe</label>
+                            <input type="text" id="lblRight" value="CAP">
+                        </div>
+                        <div>
+                            <label style="color:var(--danger);">Left Swipe</label>
+                            <input type="text" id="lblLeft" value="TRAP">
+                        </div>
+                        <div>
+                            <label style="color:var(--warning);">Up Swipe</label>
+                            <input type="text" id="lblUp" value="SKIP">
+                        </div>
+                        <div>
+                            <label style="color:var(--text-muted);">Down Swipe</label>
+                            <input type="text" id="lblDown" value="TRASH">
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Time limit per card (s)</label>
-                    <input type="number" id="cfgTime" value="20">
-                </div>
-                <div class="form-group">
-                    <label>Points Value</label>
-                    <input type="number" id="cfgPoints" value="10">
-                </div>
-            </div>
+                    <div class="grid-fields">
+                        <div>
+                            <label>Time per question (seconds)</label>
+                            <input type="number" id="limitTime" value="15">
+                        </div>
+                        <div>
+                            <label>Points per question</label>
+                            <input type="number" id="valPoints" value="10">
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label>Upload Background Wallpaper</label>
-                <input type="file" id="cfgWallpaperFile" accept="image/*" onchange="handleWallpaperUpload(event)">
-            </div>
+                    <div class="form-element">
+                        <label>Review Questions Matrix Bank</label>
+                        <textarea id="deckRawSource" rows="6">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria. | false
+Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures. | true
+The atomic identity number of any given elemental structure is determined exclusively via neutron counting metrics. | false</textarea>
+                    </div>
 
-            <div class="section-title">Questions Engine</div>
-            <div class="form-group">
-                <label>Review Cards (Format: Prompt/Answer [Yes or No] - One per line)</label>
-                <textarea id="cfgQuestions" rows="5">Mitochondria generation creates cellular ATP via anaerobic respirations./No
-Light velocity decreases when passing through high density glass metrics./Yes
-Sound waves propagate faster in water than through standard air vacuum vectors./Yes</textarea>
-            </div>
+                    <div class="form-element">
+                        <label>Open-Ended Analytical Final Question Prompt Field</label>
+                        <input type="text" id="lastPromptText" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
+                    </div>
 
-            <div class="form-group">
-                <label>Last Question (Static Anchor - Never Jumbled)</label>
-                <input type="text" id="cfgLastQuestion" value="Write down your main takeaways or processing conceptual errors from this session.">
-            </div>
-
-            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="cfgRandomize" checked style="width:auto;">
-                <label for="cfgRandomize" style="margin-bottom:0;">Randomize Questions</label>
-            </div>
-
-            <button class="success-btn" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 20px;" onclick="saveAndLaunchLiveSession()">SAVE & START LIVE SESSION</button>
-        </div>
-
-        <div id="liveSessionHub" class="card hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px;">
-                <div>
-                    <h2 id="hubSessionName">Session</h2>
-                    <p style="color: var(--text-muted);">Access Room Code: <span id="hubSessionCode" style="font-weight: bold; color: var(--primary); font-size: 20px;"></span></p>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 32px; font-weight: bold; color: var(--success);" id="liveCountLabel">0</div>
-                    <label style="font-size: 12px; color: var(--text-muted); font-weight: bold;">LIVE PARTICIPANTS</label>
-                </div>
-            </div>
-
-            <div class="live-panel-grid">
-                <div class="text-center" style="border-right: 1px solid var(--border-color); padding-right: 20px;">
-                    <label style="margin-bottom: 10px; display: block; font-size: 11px; font-weight: bold; color: var(--text-muted);">DISPATCH ACCESS QR</label>
-                    <div id="qrcode"></div>
-                    <p style="font-size: 11px; margin-top: 10px; word-break: break-all; color: var(--primary);">https://praejames.github.io/justapps/Swipe%20app.html</p>
-                    <button class="primary-btn" style="width:100%; margin-top:15px; font-size:13px;" onclick="broadcastNextCard()">DISPATCH NEXT CARD</button>
+                    <button class="action-btn" style="background:var(--success); padding: 16px;" onclick="deployProductionLiveEngine()">LAUNCH PRODUCTION ENGINE</button>
                 </div>
 
-                <div>
-                    <h3>Live Real-Time Standings</h3>
-                    <table id="hubLeaderboardTable">
-                        <thead>
-                            <tr><th>Rank</th><th>Participant Name</th><th>Score Metrics</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="4" class="text-center" style="color:var(--text-muted);">Waiting for active connection handshakes...</td></tr>
-                        </tbody>
-                    </table>
+                <div style="border-left: 1px solid var(--border-color); padding-left: 24px;">
+                    <div class="form-element text-center">
+                        <label>Room Target QR</label>
+                        <div id="canvasQR" style="margin: 12px auto; display: inline-block;"></div>
+                    </div>
+                    
+                    <div style="margin-top: 32px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>Realtime Leaderboard</h3>
+                            <span id="clientCount" style="font-weight:800; color:var(--success);">0 Live</span>
+                        </div>
+                        <table id="rosterTable">
+                            <thead>
+                                <tr><th>Pilot</th><th>Metrics</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="2" style="color:var(--text-muted); text-align:center;">Awaiting sync connections...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button class="action-btn" style="margin-top: 32px; background: var(--primary);" onclick="dispatchNextMatrixCard()">DISPATCH NEXT CARD</button>
                 </div>
             </div>
         </div>
 
-        <div id="participantEngine" class="card hidden text-center">
-            <div id="participantWaiting">
-                <h2>Connected to Room Engine</h2>
-                <p id="roomDisplayLabel" style="color: var(--primary); font-weight: bold; margin: 10px 0;"></p>
-                <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
-                <div style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div id="participantDashboard" class="card centered-panel hidden text-center">
+            <div id="stageWait">
+                <h3>Connected to Room Engine</h3>
+                <p id="channelEcho" style="font-weight: 700; color: var(--primary); margin-top: 8px;"></p>
+                <div class="spinner"></div>
+                <p style="color:var(--text-muted); font-size:14px;">Waiting for Facilitator to dispatch production cards...</p>
             </div>
 
-            <div id="participantActiveGame" class="hidden">
-                <div style="display:flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 10px;">
-                    <div id="partScoreDisplay">Score: 0</div>
-                    <div id="partTimerDisplay" style="color: var(--danger);">Time: --</div>
+            <div id="stageAction" class="hidden">
+                <div style="display:flex; justify-content:space-between; font-weight:700; font-size:14px; margin-bottom: 16px;">
+                    <div id="liveScoreCounter">Score: 0 pts</div>
+                    <div id="liveClockDisplay" style="color:var(--danger);">Time Left: --s</div>
                 </div>
 
-                <div class="deck-container">
-                    <div class="swipe-indicator indicator-right" id="indRight">CAP</div>
-                    <div class="swipe-indicator indicator-left" id="indLeft">TRAP</div>
-                    <div class="swipe-card" id="activeSwipeCard">
-                        Hold tight! Card stream syncing...
+                <div class="card-deck-viewport">
+                    <div class="tag-overlay tag-cap" id="capIndicator">CAP</div>
+                    <div class="tag-overlay tag-trap" id="trapIndicator">TRAP</div>
+                    <div class="gesture-card" id="swipeCardAnchor">
+                        Initializing Matrix Stream...
                     </div>
                 </div>
-                <p style="color: var(--text-muted); font-size: 13px;">Flick Right for TRUE (CAP) • Left for FALSE (TRAP)<br>Flick Up to SKIP • Down to TRASH</p>
+                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">Flick Right (CAP) • Flick Left (TRAP)<br>Flick Up (SKIP) • Flick Down (TRASH)</p>
             </div>
         </div>
     </div>
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     <script>
-        let role = 'participant';
-        let fMode = 'new';
-        let client, roomTopic, nickname, myCurrentScore = 0;
-        let questionsList = [];
-        let currentCardIndex = -1;
-        let localRoster = {};
-        let cardTimerInterval;
+        let currentRole = 'participant';
+        let globalSocket = null;
+        let globalRoomCode = "";
+        let globalNickname = "";
+        let runningScore = 0;
+        let parsedDeckMatrix = [];
+        let activeCardIndex = -1;
+        let connectionMap = {};
+        let cardCountdownTimer;
 
-        // MQTT Public Broker Configuration over WebSockets
-        const BROKER = "wss://broker.hivemq.com:8000/mqtt";
-
-        function toggleTheme() {
-            const cur = document.documentElement.getAttribute('data-theme');
-            document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+        function toggleThemeMode() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
         }
 
-        function handleWallpaperUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) { document.body.style.backgroundImage = `url('${evt.target.result}')`; };
-                reader.readAsDataURL(file);
-            }
+        function switchRoleView(selectedRole) {
+            currentRole = selectedRole;
+            document.getElementById('tabPart').classList.toggle('active', selectedRole === 'participant');
+            document.getElementById('tabFac').classList.toggle('active', selectedRole === 'facilitator');
+            document.getElementById('formPart').classList.toggle('hidden', selectedRole !== 'participant');
+            document.getElementById('formFac').classList.toggle('hidden', selectedRole !== 'facilitator');
         }
 
-        function setRole(r) {
-            role = r;
-            document.getElementById('btnParticipantRole').classList.toggle('active', r === 'participant');
-            document.getElementById('btnFacilitatorRole').classList.toggle('active', r === 'facilitator');
-            document.getElementById('participantForm').classList.toggle('hidden', r !== 'participant');
-            document.getElementById('facilitatorForm').classList.toggle('hidden', r !== 'facilitator');
-        }
-
-        function setFacMode(m) {
-            fMode = m;
-            document.getElementById('btnStartNew').classList.toggle('active', m === 'new');
-            document.getElementById('btnEnterExisting').classList.toggle('active', m === 'existing');
-            document.getElementById('existingSessionConfirm').classList.toggle('hidden', m !== 'existing');
-        }
-
-        // 24 HOUR EXPIRATION COMPLIANCE CHECKS
-        function runLifecycleChecks(key, targetName) {
-            const record = localStorage.getItem(`session_${key}`);
-            if(!record) return null;
-            const data = JSON.parse(record);
-            if(new Date().getTime() - data.created > 86400000) {
-                localStorage.removeItem(`session_${key}`);
-                return null;
-            }
-            return data;
-        }
-
-        function startFacilitator() {
-            const key = document.getElementById('facCode').value.trim();
-            if(!key) return alert("Please specify room key context.");
+        // Bulletproof open-source real-time signaling backbone configuration
+        function establishNetworkTunnel(roomCode, isFacilitator) {
+            globalRoomCode = roomCode;
+            const targetChannel = encodeURIComponent(`room_cap_trap_${roomCode}`);
             
-            if(fMode === 'existing') {
-                const recovered = runLifecycleChecks(key);
-                if(!recovered) {
-                    alert("Session has passed its 24-hour retention framework or doesn't exist.");
-                    return;
+            // Using direct, configurationless open scaling broker tunnel
+            globalSocket = new WebSocket(`wss://api.piesocket.com/v3/${targetChannel}?api_key=VCXCEuvhGcBDP7XhiJJ2thEB3XwP56wCHgj3XHPu&notify_self=0`);
+
+            globalSocket.onopen = () => {
+                if (!isFacilitator) {
+                    // Instantly announce arrival into room session
+                    globalSocket.send(JSON.stringify({ action: 'JOIN', user: globalNickname }));
                 }
-                document.getElementById('dashSessionName').value = recovered.name;
-                document.getElementById('cfgQuestions').value = recovered.rawQuestions;
-            }
-            
-            document.getElementById('dashSessionKey').value = key;
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('facilitatorDashboard').classList.remove('hidden');
-        }
+            };
 
-        function startParticipant() {
-            nickname = document.getElementById('partNickname').value.trim();
-            const code = document.getElementById('partCode').value.trim();
-            if(!nickname || !code) return alert("Missing validation credentials.");
-
-            roomTopic = `justapps/swipe/room/${code}`;
-            setupNetworkConnection(false);
-
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('participantEngine').classList.remove('hidden');
-            document.getElementById('roomDisplayLabel').innerText = `Room Key Channel: ${code}`;
-        }
-
-        function setupNetworkConnection(isFacilitator) {
-            client = mqtt.connect(BROKER);
-            
-            client.on('connect', () => {
-                client.subscribe(roomTopic);
-                if(!isFacilitator) {
-                    // Signal to facilitator room presence
-                    client.publish(roomTopic, JSON.stringify({ type: 'JOIN', name: nickname }));
-                }
-            });
-
-            client.on('message', (topic, message) => {
-                const packet = JSON.parse(message.toString());
+            globalSocket.onmessage = (event) => {
+                const payload = JSON.parse(event.data);
                 
-                if(isFacilitator) {
-                    if(packet.type === 'JOIN') {
-                        localRoster[packet.name] = { score: 0, status: 'Connected' };
-                        updateLeaderboardDisplay();
+                if (isFacilitator) {
+                    if (payload.action === 'JOIN') {
+                        connectionMap[payload.user] = { points: 0 };
+                        refreshLeaderboardDOM();
                     }
-                    if(packet.type === 'SCORE_UPDATE') {
-                        if(localRoster[packet.name]) {
-                            localRoster[packet.name].score = packet.score;
-                            updateLeaderboardDisplay();
-                        }
+                    if (payload.action === 'UPDATE_SCORE') {
+                        connectionMap[payload.user] = { points: payload.points };
+                        refreshLeaderboardDOM();
                     }
                 } else {
-                    // Participant Event Handling Framework
-                    if(packet.type === 'DISPATCH_CARD') {
-                        document.getElementById('participantWaiting').classList.add('hidden');
-                        document.getElementById('participantActiveGame').classList.remove('hidden');
-                        renderIncomingCard(packet);
+                    if (payload.action === 'TRANSMIT_CARD') {
+                        document.getElementById('stageWait').classList.add('hidden');
+                        document.getElementById('stageAction').classList.remove('hidden');
+                        bindIncomingCardMatrix(payload);
                     }
                 }
+            };
+        }
+
+        function initiateFacilitatorDashboard() {
+            const secretKey = document.getElementById('facCode').value.trim();
+            if(!secretKey) return alert("Please establish verification key.");
+
+            document.getElementById('sessionKeyDisplay').value = secretKey;
+            document.getElementById('entranceStep').classList.add('hidden');
+            document.getElementById('facilitatorDashboard').classList.remove('hidden');
+
+            establishNetworkTunnel(secretKey, true);
+        }
+
+        function initiateParticipantSession() {
+            globalNickname = document.getElementById('joinName').value.trim();
+            const accessKey = document.getElementById('joinCode').value.trim();
+            if(!globalNickname || !accessKey) return alert("Credentials mandatory.");
+
+            document.getElementById('entranceStep').classList.add('hidden');
+            document.getElementById('participantDashboard').classList.remove('hidden');
+            document.getElementById('channelEcho').innerText = `ROOM KEY: ${accessKey}`;
+
+            establishNetworkTunnel(accessKey, false);
+        }
+
+        function deployProductionLiveEngine() {
+            const lines = document.getElementById('deckRawSource').value.split('\n').filter(l => l.includes('|'));
+            parsedDeckMatrix = lines.map(line => {
+                const chunks = line.split('|');
+                return { query: chunks[0].trim(), verification: chunks[1].trim() };
             });
+            parsedDeckMatrix.push({ query: document.getElementById('lastPromptText').value, verification: 'OPEN' });
+
+            const qrBox = document.getElementById('canvasQR');
+            qrBox.innerHTML = "";
+            new QRCode(qrBox, { text: window.location.href, width: 140, height: 140 });
+            alert("Live production engine listening successfully.");
         }
 
-        function saveAndLaunchLiveSession() {
-            const key = document.getElementById('dashSessionKey').value;
-            const name = document.getElementById('dashSessionName').value;
-            roomTopic = `justapps/swipe/room/${key}`;
-
-            // Save state internally for 24-hour lifecycle retrieval verification
-            localStorage.setItem(`session_${key}`, JSON.stringify({
-                name: name,
-                created: new Date().getTime(),
-                rawQuestions: document.getElementById('cfgQuestions').value
-            }));
-
-            // Prepare local parsed structural questions
-            processQuestionsArray();
-
-            setupNetworkConnection(true);
-
-            document.getElementById('hubSessionName').innerText = name;
-            document.getElementById('hubSessionCode').innerText = key;
-
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: "https://praejames.github.io/justapps/Swipe%20app.html", width: 130, height: 130 });
-
-            document.getElementById('facilitatorDashboard').classList.add('hidden');
-            document.getElementById('liveSessionHub').classList.remove('hidden');
-        }
-
-        function processQuestionsArray() {
-            const raw = document.getElementById('cfgQuestions').value.split('\n').filter(l => l.trim().includes('/'));
-            questionsList = raw.map(line => {
-                const parts = line.split('/');
-                return { q: parts[0].trim(), a: parts[1].trim() };
-            });
-
-            if(document.getElementById('cfgRandomize').checked) {
-                questionsList.sort(() => Math.random() - 0.5);
-            }
-            // Append the static anchored last question without disruption
-            questionsList.push({ q: document.getElementById('cfgLastQuestion').value, a: 'OPEN' });
-        }
-
-        function broadcastNextCard() {
-            currentCardIndex++;
-            if(currentCardIndex < questionsList.length) {
+        function dispatchNextMatrixCard() {
+            activeCardIndex++;
+            if(activeCardIndex < parsedDeckMatrix.length) {
                 const packet = {
-                    type: 'DISPATCH_CARD',
-                    index: currentCardIndex,
-                    prompt: questionsList[currentCardIndex].q,
-                    ans: questionsList[currentCardIndex].a,
-                    time: parseInt(document.getElementById('cfgTime').value) || 20,
-                    pts: parseInt(document.getElementById('cfgPoints').value) || 10,
-                    labels: {
-                        right: document.getElementById('cfgRight').value,
-                        left: document.getElementById('cfgLeft').value,
-                        up: document.getElementById('cfgUp').value,
-                        down: document.getElementById('cfgDown').value
+                    action: 'TRANSMIT_CARD',
+                    prompt: parsedDeckMatrix[activeCardIndex].query,
+                    truth: parsedDeckMatrix[activeCardIndex].verification,
+                    countdown: parseInt(document.getElementById('limitTime').value) || 15,
+                    pointsValue: parseInt(document.getElementById('valPoints').value) || 10,
+                    lexicon: {
+                        cap: document.getElementById('lblRight').value,
+                        trap: document.getElementById('lblLeft').value
                     }
                 };
-                client.publish(roomTopic, JSON.stringify(packet));
+                globalSocket.send(JSON.stringify(packet));
             } else {
-                alert("Assessment cards finished.");
+                alert("Matrix bank sequence completed.");
             }
         }
 
-        function updateLeaderboardDisplay() {
-            const tbody = document.getElementById('hubLeaderboardTable').querySelector('tbody');
+        function refreshLeaderboardDOM() {
+            const tbody = document.getElementById('rosterTable').querySelector('tbody');
             tbody.innerHTML = "";
-            const keys = Object.keys(localRoster).sort((a,b) => localRoster[b].score - localRoster[a].score);
-            document.getElementById('liveCountLabel').innerText = keys.length;
+            const dynamicKeys = Object.keys(connectionMap).sort((a,b) => connectionMap[b].points - connectionMap[a].points);
+            document.getElementById('clientCount').innerText = `${dynamicKeys.length} Live`;
 
-            if(keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center">No participants tracked yet.</td></tr>`;
+            if(dynamicKeys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Awaiting sync connections...</td></tr>`;
                 return;
             }
-            keys.forEach((k, idx) => {
-                tbody.innerHTML += `<tr><td>#${idx+1}</td><td>${k}</td><td>${localRoster[k].score} pts</td><td>${localRoster[k].status}</td></tr>`;
+            dynamicKeys.forEach(k => {
+                tbody.innerHTML += `<tr><td><strong>${k}</strong></td><td>${connectionMap[k].points} pts</td></tr>`;
             });
         }
 
-        // PHYSICAL GESTURE HANDLING FOR MOBILE PARTICIPANTS
-        let activeCardData = null;
-        function renderIncomingCard(packet) {
-            activeCardData = packet;
-            const card = document.getElementById('activeSwipeCard');
-            card.style.transform = "none";
-            card.style.opacity = "1";
-            card.innerText = packet.prompt;
+        let focusedCardPayload = null;
+        function bindIncomingCardMatrix(data) {
+            focusedCardPayload = data;
+            const targetElement = document.getElementById('swipeCardAnchor');
+            targetElement.style.transform = "none";
+            targetElement.style.opacity = "1";
+            targetElement.innerText = data.prompt;
 
-            document.getElementById('indRight').innerText = packet.labels.right;
-            document.getElementById('indLeft').innerText = packet.labels.left;
+            document.getElementById('capIndicator').innerText = data.lexicon.cap;
+            document.getElementById('trapIndicator').innerText = data.lexicon.trap;
 
-            let timeLeft = packet.time;
-            document.getElementById('partTimerDisplay').innerText = `Time: ${timeLeft}s`;
-            clearInterval(cardTimerInterval);
-            cardTimerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('partTimerDisplay').innerText = `Time: ${timeLeft}s`;
-                if(timeLeft <= 0) {
-                    clearInterval(cardTimerInterval);
-                    executeSwipeSelection('TIMEOUT');
+            let ticks = data.countdown;
+            document.getElementById('liveClockDisplay').innerText = `Time Left: ${ticks}s`;
+            clearInterval(cardCountdownTimer);
+            cardCountdownTimer = setInterval(() => {
+                ticks--;
+                document.getElementById('liveClockDisplay').innerText = `Time Left: ${ticks}s`;
+                if(ticks <= 0) {
+                    clearInterval(cardCountdownTimer);
+                    processMatrixResolution('TIMEOUT');
                 }
             }, 1000);
 
-            setupCardGestures(card);
+            bindMobileTouchMechanics(targetElement);
         }
 
-        function setupCardGestures(el) {
-            let startX = 0, startY = 0, moveX = 0, moveY = 0;
-            const indRight = document.getElementById('indRight');
-            const indLeft = document.getElementById('indLeft');
+        function bindMobileTouchMechanics(el) {
+            let initialX = 0, initialY = 0, deltaX = 0, deltaY = 0;
+            const cInd = document.getElementById('capIndicator');
+            const tInd = document.getElementById('trapIndicator');
 
             el.ontouchstart = (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
+                initialX = e.touches[0].clientX;
+                initialY = e.touches[0].clientY;
             };
 
             el.ontouchmove = (e) => {
-                moveX = e.touches[0].clientX - startX;
-                moveY = e.touches[0].clientY - startY;
+                deltaX = e.touches[0].clientX - initialX;
+                deltaY = e.touches[0].clientY - initialY;
+                el.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${deltaX / 12}deg)`;
                 
-                // Track real-time tilting visuals
-                el.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${moveX / 10}deg)`;
-                
-                // Opacity feedback indicators
-                if(moveX > 30) { indRight.style.opacity = Math.min(moveX/100, 1); indLeft.style.opacity = 0; }
-                else if(moveX < -30) { indLeft.style.opacity = Math.min(Math.abs(moveX)/100, 1); indRight.style.opacity = 0; }
-                else { indRight.style.opacity = 0; indLeft.style.opacity = 0; }
+                if(deltaX > 40) { cInd.style.opacity = Math.min(deltaX/120, 1); tInd.style.opacity = 0; }
+                else if(deltaX < -40) { tInd.style.opacity = Math.min(Math.abs(deltaX)/120, 1); cInd.style.opacity = 0; }
+                else { cInd.style.opacity = 0; tInd.style.opacity = 0; }
             };
 
             el.ontouchend = () => {
-                indRight.style.opacity = 0;
-                indLeft.style.opacity = 0;
+                cInd.style.opacity = 0;
+                tInd.style.opacity = 0;
 
-                if (moveX > 120) executeSwipeSelection('Yes'); 
-                else if (moveX < -120) executeSwipeSelection('No');
-                else if (moveY < -120) executeSwipeSelection('Skip');
-                else if (moveY > 120) executeSwipeSelection('Trash');
+                if (deltaX > 140) processMatrixResolution('true'); 
+                else if (deltaX < -140) processMatrixResolution('false');
+                else if (deltaY < -140) processMatrixResolution('skip');
+                else if (deltaY > 140) processMatrixResolution('trash');
                 else {
-                    el.style.transform = "translate(0,0) rotate(0deg)";
+                    el.style.transform = "translate(0px, 0px) rotate(0deg)";
                 }
             };
         }
 
-        function executeSwipeSelection(decision) {
-            clearInterval(cardTimerInterval);
-            const card = document.getElementById('activeSwipeCard');
-            card.style.opacity = "0";
-            card.innerText = "Synchronizing score with host...";
+        function processMatrixResolution(evalChoice) {
+            clearInterval(cardCountdownTimer);
+            const targetElement = document.getElementById('swipeCardAnchor');
+            targetElement.style.opacity = "0";
+            targetElement.innerText = "Syncing scoring arrays...";
 
-            if(activeCardData && activeCardData.ans !== 'OPEN') {
-                if(decision === activeCardData.ans) {
-                    myCurrentScore += activeCardData.pts;
+            if(focusedCardPayload && focusedCardPayload.truth !== 'OPEN') {
+                if(evalChoice === focusedCardPayload.truth) {
+                    runningScore += focusedCardPayload.pointsValue;
                 }
             }
-            document.getElementById('partScoreDisplay').innerText = `Score: ${myCurrentScore}`;
-            
-            // Transmit results directly to facilitator live dashboard
-            client.publish(roomTopic, JSON.stringify({
-                type: 'SCORE_UPDATE',
-                name: nickname,
-                score: myCurrentScore
+            document.getElementById('liveScoreCounter').innerText = `Score: ${runningScore} pts`;
+
+            globalSocket.send(JSON.stringify({
+                action: 'UPDATE_SCORE',
+                user: globalNickname,
+                points: runningScore
             }));
         }
 
-        function downloadTemplate() {
-            const template = "Prompt Text 1 Here/Yes\nPrompt Text 2 Here/No";
-            blobDownload(template, "swipe_template.txt");
+        function fetchTextTemplate() {
+            const raw = "Sample Core Question Prompt Matrix | true\nAlternative Conceptual Prompt Fact | false";
+            blobAssetDownload(raw, "matrix_template.txt");
         }
-        function triggerImport() { document.getElementById('fileImport').click(); }
-        function handleImport(e) {
+        function triggerFileImport() { document.getElementById('uploadGate').click(); }
+        function parseDeckUpload(e) {
             const file = e.target.files[0];
             if(!file) return;
-            const r = new FileReader();
-            r.onload = function(evt) { document.getElementById('cfgQuestions').value = evt.target.result; alert("Cards imported successfully."); };
-            r.readAsText(file);
+            const reader = new FileReader();
+            reader.onload = function(evt) { document.getElementById('deckRawSource').value = evt.target.result; };
+            reader.readAsText(file);
         }
-        function exportSession() {
-            const raw = document.getElementById('cfgQuestions').value;
-            blobDownload(raw, "exported_swipe_session.txt");
-        }
-        function blobDownload(t, f) {
-            const blob = new Blob([t], { type: 'text/plain' });
+        function blobAssetDownload(text, name) {
+            const b = new Blob([text], {type: 'text/plain'});
             const a = document.createElement('a');
-            a.download = f; a.href = window.URL.createObjectURL(blob); a.click();
+            a.download = name; a.href = window.URL.createObjectURL(b); a.click();
         }
     </script>
 </body>
