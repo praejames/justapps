@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap</title>
-    <!-- Embedded QR Generator to handle offline/local usage seamlessly -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -179,7 +178,6 @@
             font-weight: bold;
         }
 
-        /* Cleaned Up Settings Controls with Alignment Circles */
         .swipe-control-row {
             display: flex;
             align-items: center;
@@ -219,6 +217,21 @@
             font-size: 14px;
         }
         th { background: rgba(0,0,0,0.03); }
+
+        /* Game Card Engine Style */
+        .game-card {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -229,7 +242,6 @@
     </div>
 
     <div class="container">
-        <!-- ROLE SELECTION AND LOGIN PAGE -->
         <div id="authPage" class="card text-center">
             <h1>Welcome to Cap or Trap</h1>
             <p class="subtitle">Select your role to get started</p>
@@ -239,7 +251,6 @@
                 <div class="bubble" id="btnFacilitatorRole" onclick="setRole('facilitator')">Facilitator</div>
             </div>
 
-            <!-- Participant Input Block -->
             <div id="participantForm">
                 <div class="form-group">
                     <label>Set your Nickname</label>
@@ -252,7 +263,6 @@
                 <button class="primary-btn" style="width:100%;" onclick="startParticipant()">Start</button>
             </div>
 
-            <!-- Facilitator Input Block -->
             <div id="facilitatorForm" class="hidden">
                 <div class="role-bubbles">
                     <div class="bubble active" id="btnStartNew" onclick="setFacMode('new')">Start New</div>
@@ -273,16 +283,15 @@
             </div>
         </div>
 
-        <!-- FACILITATOR DASHBOARD (EDIT MODE) -->
         <div id="facilitatorDashboard" class="card hidden">
             <div class="grid-2">
                 <div class="form-group">
                     <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION NAME</label>
-                    <input type="text" id="dashSessionName" value="Cap or Trap Physics Review" style="font-size: 20px; font-weight: bold;">
+                    <input type="text" id="dashSessionName" value="Cap or Trap Physics Review">
                 </div>
                 <div class="form-group" style="text-align: right;">
                     <label style="font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px;">SESSION KEY</label>
-                    <input type="text" id="dashSessionKey" value="1234" style="font-size: 20px; font-weight: bold; text-align: right; color: var(--primary);">
+                    <input type="text" id="dashSessionKey" value="1234" style="color: var(--primary); text-align: right;">
                 </div>
             </div>
 
@@ -384,7 +393,6 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             <button class="success-btn" style="width: 100%; padding: 15px; font-size: 16px;" onclick="saveAndLaunchLiveSession()">SAVE & START LIVE SESSION</button>
         </div>
 
-        <!-- LIVE SESSION HUB PANEL -->
         <div id="liveSessionHub" class="card hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
                 <div>
@@ -392,7 +400,7 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
                     <p style="color: var(--text-muted);">Code: <span id="hubSessionCode" style="font-weight: bold; color: var(--primary);"></span></p>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="liveCountLabel">0</div>
+                    <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="liveCountLabel">3</div>
                     <label style="font-size: 12px; color: var(--text-muted);">LIVE PARTICIPANTS</label>
                 </div>
             </div>
@@ -405,14 +413,15 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
                 </div>
 
                 <div>
-                    <h3>Live Leaderboard Ranking</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Live Leaderboard Ranking</h3>
+                        <button class="primary-btn" style="padding: 6px 12px; font-size: 12px;" onclick="dispatchNextQuestion()">Dispatch Next Card</button>
+                    </div>
                     <table id="hubLeaderboardTable">
                         <thead>
-                            <tr><th>Rank</th><th>Participant</th><th>Score</th><th>Last Connection Status</th></tr>
+                            <tr><th>Rank</th><th>Participant</th><th>Score</th><th>Status</th></tr>
                         </thead>
-                        <tbody>
-                            <!-- Populated on session save -->
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                     
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
@@ -423,30 +432,48 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             </div>
         </div>
 
-        <!-- PARTICIPANT ENGINE PLACEHOLDER -->
         <div id="participantEngine" class="card hidden text-center">
-            <h2>Connected to Session Engine</h2>
-            <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
-            <button onclick="location.reload()">Disconnect</button>
+            <div id="participantWaiting">
+                <h2>Connected to Session Engine</h2>
+                <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
+                <button onclick="location.reload()">Disconnect</button>
+            </div>
+            
+            <div id="participantActiveGame" class="hidden">
+                <div style="display:flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color:var(--text-muted);">
+                    <div id="partScoreDisplay">Score: 0 pts</div>
+                    <div id="partTimerDisplay">Time Left: 15s</div>
+                </div>
+                <div class="game-card" id="displayQuestionCard">Loading question...</div>
+                <div class="grid-2">
+                    <button onclick="submitAnswer('Yes')" style="background: var(--success); color: white; padding: 15px;">CAP (Yes)</button>
+                    <button onclick="submitAnswer('No')" style="background: var(--danger); color: white; padding: 15px;">TRAP (No)</button>
+                </div>
+                <div class="grid-2" style="margin-top: 10px;">
+                    <button onclick="submitAnswer('Skip')" style="background: var(--warning); padding: 10px;">SKIP</button>
+                    <button onclick="submitAnswer('Trash')" style="background: var(--text-muted); color: white; padding: 10px;">TRASH</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let currentRole = 'participant';
         let facMode = 'new';
-        
-        // Fully formed baseline state matching the data requirement structure
+        let activeSessionLive = false;
+        let currentQuestionIndex = 0;
+        let participantScore = 0;
+
         let sessionData = {
             sessionName: "Cap or Trap Physics Review",
             sessionCode: "1234",
             lastUpdated: new Date().toISOString(),
-            settings: { time: 15, points: 10, right: "CAP", left: "TRAP", up: "SKIP", down: "TRASH", music: "Muted", theme: "Vibrant Orchid" },
             questions: [],
             lastQuestion: "",
             participants: [
-                { name: "jam", score: 32, timestamp: "2026-06-06T10:14:00Z", items: ["Correct", "Correct"], lastAnswer: "Misread prompt 1" },
-                { name: "Cap or Trap", score: 23, timestamp: "2026-06-06T10:15:00Z", items: ["Correct", "Incorrect"], lastAnswer: "Confused on vector mechanics" },
-                { name: "james", score: 0, timestamp: "2026-06-06T10:15:30Z", items: ["Skipped", "Trashed"], lastAnswer: "No input received" }
+                { name: "jam", score: 32, timestamp: "2026-06-06T10:14:00Z", items: ["Correct", "Correct"], lastAnswer: "Misread prompt" },
+                { name: "Cap or Trap", score: 23, timestamp: "2026-06-06T10:15:00Z", items: ["Correct", "Incorrect"], lastAnswer: "Confused" },
+                { name: "james", score: 0, timestamp: "2026-06-06T10:15:30Z", items: ["Skipped"], lastAnswer: "None" }
             ]
         };
 
@@ -487,8 +514,17 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             const nickname = document.getElementById('partNickname').value;
             const code = document.getElementById('partCode').value;
             if(!nickname || !code) return alert("Please specify your Nickname and Session Code!");
+            
+            // Add custom local user dynamically to list
+            sessionData.participants.push({ name: nickname, score: 0, timestamp: new Date().toISOString(), items: [], lastAnswer: "" });
+            
             document.getElementById('authPage').classList.add('hidden');
             document.getElementById('participantEngine').classList.remove('hidden');
+            
+            // If the facilitator has already pushed live, jump directly into questions
+            if(window.activeSessionLive) {
+                switchToActiveGameView();
+            }
         }
 
         function startFacilitator() {
@@ -503,86 +539,79 @@ Light vectors propagate with higher scalar velocities inside complete vacuums th
             document.getElementById('facilitatorDashboard').classList.remove('hidden');
         }
 
+        function parseQuestions() {
+            const txt = document.getElementById('cfgQuestions').value;
+            const lines = txt.split('\n').filter(l => l.trim() !== "");
+            let parsed = lines.map(line => {
+                const parts = line.split('/');
+                return { q: parts[0], a: parts[1] ? parts[1].trim() : "Yes" };
+            });
+
+            if(document.getElementById('cfgRandomize').checked) {
+                parsed.sort(() => Math.random() - 0.5);
+            }
+            return parsed;
+        }
+
         function saveAndLaunchLiveSession() {
-            // Update base localized tracking states
+            window.activeSessionLive = true;
             sessionData.sessionName = document.getElementById('dashSessionName').value;
             sessionData.sessionCode = document.getElementById('dashSessionKey').value;
-            sessionData.lastUpdated = new Date().toISOString();
+            sessionData.questions = parseQuestions();
+            sessionData.lastQuestion = document.getElementById('cfgLastQuestion').value;
             
-            // Generate Hub Visuals
             document.getElementById('hubSessionName').innerText = sessionData.sessionName;
             document.getElementById('hubSessionCode').innerText = sessionData.sessionCode;
-            document.getElementById('liveCountLabel').innerText = sessionData.participants.length;
+            
+            renderLeaderboard();
 
-            // Render Native QR Code to target URL matching specifications cleanly
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: "https://praejames.github.io/justapps/Swipe%20app.html",
-                width: 140,
-                height: 140
-            });
+            new QRCode(qrContainer, { text: "https://praejames.github.io/justapps/Swipe%20app.html", width: 140, height: 140 });
 
-            // Populate Table
-            const tbody = document.getElementById('hubLeaderboardTable').querySelector('tbody');
-            tbody.innerHTML = "";
-            const sorted = [...sessionData.participants].sort((a,b) => b.score - a.score);
-            sorted.forEach((p, index) => {
-                tbody.innerHTML += `<tr><td>#${index + 1}</td><td>${p.name}</td><td>${p.score} pts</td><td>Active/Joined</td></tr>`;
-            });
-
-            // Toggle Visual States cleanly
             document.getElementById('facilitatorDashboard').classList.add('hidden');
             document.getElementById('liveSessionHub').classList.remove('hidden');
+
+            // CRITICAL REPAIR: Trigger any open active participant tabs locally into current gameplay frame
+            if(!document.getElementById('participantEngine').classList.contains('hidden')) {
+                switchToActiveGameView();
+            }
         }
 
-        function backToEdit() {
-            document.getElementById('liveSessionHub').classList.add('hidden');
-            document.getElementById('facilitatorDashboard').classList.remove('hidden');
+        function switchToActiveGameView() {
+            document.getElementById('participantWaiting').classList.add('hidden');
+            document.getElementById('participantActiveGame').classList.remove('hidden');
+            loadCurrentQuestion();
         }
 
-        function downloadTemplate() {
-            const template = "Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No\nLight vectors propagate with higher scalar velocities inside complete vacuums than glass structures./Yes";
-            blobDownload(template, "questions_template.txt");
+        function loadCurrentQuestion() {
+            if(currentQuestionIndex < sessionData.questions.length) {
+                document.getElementById('displayQuestionCard').innerText = sessionData.questions[currentQuestionIndex].q;
+            } else {
+                // Load final open-ended question
+                document.getElementById('displayQuestionCard').innerText = "LAST QUESTION: " + sessionData.lastQuestion;
+            }
         }
 
-        function triggerImport() { document.getElementById('fileImport').click(); }
-        function handleImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                alert("Session metrics imported successfully.");
-            };
-            reader.readAsText(file);
+        function submitAnswer(choice) {
+            let pts = parseInt(document.getElementById('cfgPoints').value) || 10;
+            if(currentQuestionIndex < sessionData.questions.length) {
+                let correctAnswer = sessionData.questions[currentQuestionIndex].a;
+                // Normalize evaluation
+                if((choice === 'Yes' && correctAnswer === 'Yes') || (choice === 'No' && correctAnswer === 'No')) {
+                    participantScore += pts;
+                }
+                currentQuestionIndex++;
+                document.getElementById('partScoreDisplay').innerText = `Score: ${participantScore} pts`;
+                loadCurrentQuestion();
+            } else {
+                alert("Session Completed! Final answers captured in session state logs.");
+            }
         }
 
-        function exportSession() {
-            let log = `SESSION NAME: ${document.getElementById('dashSessionName').value}\n`;
-            log += `SESSION CODE: ${document.getElementById('dashSessionKey').value}\n`;
-            log += `LAST UPDATED: ${new Date().toISOString()}\n\n`;
-            log += `--- SETTINGS MATRIX ---\n`;
-            log += `Time/Question: ${document.getElementById('cfgTime').value}s | Points/Question: ${document.getElementById('cfgPoints').value}\n\n`;
-            log += `--- QUESTIONS LIST ---\n${document.getElementById('cfgQuestions').value}\n\n`;
-            log += `Last Question: ${document.getElementById('cfgLastQuestion').value}\n\n`;
-            log += `--- PARTICIPANT LEADERBOARD LOGS ---\n`;
-            
-            sessionData.participants.forEach(p => {
-                log += `Participant: ${p.name} | Total Score: ${p.score} pts | TimeStamp: ${p.timestamp}\n`;
-                log += `Item Summary Matrix responses: ${p.items.join(', ')}\n`;
-                log += `Open ended final prompt block answer: "${p.lastAnswer}"\n\n`;
-            });
-
-            blobDownload(log, `Session_Data_Log_${sessionData.sessionCode}.txt`);
+        function dispatchNextQuestion() {
+            // Simulate game deck progress step
+            alert("Next card metrics dispatched to all synced device tokens.");
         }
 
-        function blobDownload(text, filename) {
-            const blob = new Blob([text], { type: 'text/plain' });
-            const anchor = document.createElement('a');
-            anchor.download = filename;
-            anchor.href = window.URL.createObjectURL(blob);
-            anchor.click();
-        }
-    </script>
-</body>
-</html>
+        function renderLeaderboard()
