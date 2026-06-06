@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cap or Trap - Interactive Reviewer</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&family=Bungee&display=swap" rel="stylesheet">
+    <!-- html2canvas for Progress Screenshots -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/input/confetti.browser.min.js"></script>
 
     <style>
@@ -57,6 +62,7 @@
             cursor: grab;
             transform-origin: 50% 99%;
             transition: transform 0.2s ease, opacity 0.2s ease;
+            touch-action: none;
         }
         .swipe-card:active {
             cursor: grabbing;
@@ -65,10 +71,13 @@
 </head>
 <body class="w-screen h-screen overflow-x-hidden flex items-center justify-center p-4 bg-slate-900 text-white">
 
+    <!-- BACKGROUND AUDIO SYSTEM -->
     <audio id="bg-music" loop></audio>
 
+    <!-- MAIN APP CONTAINER -->
     <div id="app-shell" class="w-full max-w-md h-[90vh] flex flex-col justify-between rounded-3xl p-6 shadow-2xl relative overflow-y-auto dark-glass">
         
+        <!-- SCREEN 1: LOGIN -->
         <div id="screen-login" class="flex-1 flex flex-col justify-center space-y-6">
             <div class="text-center">
                 <h1 id="app-title-display" class="text-4xl font-extrabold tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-2" style="font-family: 'Bungee', cursive;">CAP OR TRAP</h1>
@@ -77,29 +86,33 @@
 
             <div class="space-y-4">
                 <div class="flex rounded-xl bg-black/20 p-1">
-                    <button onclick="switchRole('participant')" id="tab-part" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-500 text-white transition-all">Participant</button>
-                    <button onclick="switchRole('facilitator')" id="tab-faci" class="flex-1 py-2 text-sm font-semibold rounded-lg opacity-60 transition-all">Facilitator</button>
+                    <button type="button" onclick="switchRole('participant')" id="tab-part" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-500 text-white cursor-pointer transition-all">Participant</button>
+                    <button type="button" onclick="switchRole('facilitator')" id="tab-faci" class="flex-1 py-2 text-sm font-semibold rounded-lg opacity-60 cursor-pointer transition-all">Facilitator</button>
                 </div>
 
+                <!-- Participant Inputs -->
                 <div id="form-participant" class="space-y-3">
                     <input type="text" id="part-name" placeholder="Enter Your Nickname" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-blue-400 text-sm">
                     <input type="text" id="part-code" maxlength="4" placeholder="4-Char Access Code" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-blue-400 uppercase tracking-widest text-center text-sm">
-                    <button onclick="loginParticipant()" class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold transition-all text-sm shadow-lg shadow-blue-500/20">ENTER SESSION</button>
+                    <button onclick="loginParticipant()" class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold transition-all text-sm shadow-lg shadow-blue-500/20 cursor-pointer">ENTER SESSION</button>
                 </div>
 
+                <!-- Facilitator Inputs -->
                 <div id="form-facilitator" class="space-y-3 hidden">
                     <input type="text" id="faci-code" maxlength="4" placeholder="Create 4-Char Lock Code" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald-400 uppercase tracking-widest text-center text-sm">
-                    <button onclick="loginFacilitator()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold transition-all text-sm shadow-lg shadow-emerald-500/20">MANAGE / CREATE</button>
+                    <button onclick="loginFacilitator()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold transition-all text-sm shadow-lg shadow-emerald-500/20 cursor-pointer">MANAGE / CREATE</button>
                 </div>
             </div>
         </div>
 
+        <!-- SCREEN 2: FACILITATOR DASHBOARD -->
         <div id="screen-faci-dash" class="flex-1 flex flex-col space-y-4 hidden">
             <div class="flex justify-between items-center border-b border-white/10 pb-2">
                 <h2 class="font-bold text-lg text-emerald-400"><i class="fa-solid fa-chalkboard-user mr-2"></i>Control Deck</h2>
-                <button onclick="logout()" class="text-xs bg-white/10 px-2 py-1 rounded hover:bg-red-500/20">Exit</button>
+                <button onclick="logout()" class="text-xs bg-white/10 px-2 py-1 rounded hover:bg-red-500/20 cursor-pointer">Exit</button>
             </div>
 
+            <!-- Configuration & Core Options -->
             <div class="space-y-3 flex-1 overflow-y-auto pr-1 text-xs">
                 <div>
                     <label class="block mb-1 opacity-70">Session Name</label>
@@ -117,6 +130,7 @@
                     </div>
                 </div>
 
+                <!-- Swipe Custom Labels -->
                 <div class="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded-xl">
                     <div>
                         <label class="block mb-1 text-emerald-400">Right Label (True)</label>
@@ -136,6 +150,7 @@
                     </div>
                 </div>
 
+                <!-- Aesthetics & Sound Controls -->
                 <div class="bg-black/20 p-2 rounded-xl space-y-2">
                     <p class="font-bold text-blue-400">App Cosmetics & Audio</p>
                     <div class="grid grid-cols-2 gap-2">
@@ -174,6 +189,7 @@
                     </div>
                 </div>
 
+                <!-- Questions Builder -->
                 <div class="bg-black/20 p-2 rounded-xl space-y-2">
                     <p class="font-bold text-amber-400">Flashcards & Question Engineering</p>
                     <textarea id="cfg-raw-questions" rows="4" placeholder="Format: Question text | true (or false)&#10;Example: Sound waves require a physical medium to travel. | true" class="w-full p-2 bg-white/5 border border-white/10 rounded placeholder:opacity-40 text-xs"></textarea>
@@ -184,11 +200,705 @@
                 </div>
             </div>
 
+            <!-- Session State Controls -->
             <div class="space-y-2 pt-2 border-t border-white/10">
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="downloadSessionLog()" class="bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold text-xs"><i class="fa-solid fa-file-export mr-1"></i>Export Session</button>
-                    <button onclick="triggerLogImport()" class="bg-indigo-600 hover:bg-indigo-700 py-2 rounded font-bold text-xs"><i class="fa-solid fa-file-import mr-1"></i>Import Session</button>
+                    <button onclick="downloadSessionLog()" class="bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold text-xs cursor-pointer"><i class="fa-solid fa-file-export mr-1"></i>Export Session</button>
+                    <button onclick="triggerLogImport()" class="bg-indigo-600 hover:bg-indigo-700 py-2 rounded font-bold text-xs cursor-pointer"><i class="fa-solid fa-file-import mr-1"></i>Import Session</button>
                 </div>
                 <input type="file" id="import-log-file" class="hidden" accept=".txt,.json" onchange="importSessionLog(event)">
-                <button onclick="saveSessionConfiguration()" class="w-full bg-emerald-500 hover:bg-emerald-600 py-3 rounded-xl font-bold text-xs tracking-wider uppercase"><i class="fa-solid fa-floppy-disk mr-2"></i>Save & Fire Up Session</button>
-                <button onclick="nukeSession()" class="w-full bg-red-600/30 hover:bg-red-600 text-red-200 py-2 rounded-xl font-bold text-xs"><i class="fa-solid fa-radiation mr-2"></i>N
+                <button onclick="saveSessionConfiguration()" class="w-full bg-emerald-500 hover:bg-emerald-600 py-3 rounded-xl font-bold text-xs tracking-wider uppercase cursor-pointer"><i class="fa-solid fa-floppy-disk mr-2"></i>Save & Fire Up Session</button>
+                <button onclick="nukeSession()" class="w-full bg-red-600/30 hover:bg-red-600 text-red-200 py-2 rounded-xl font-bold text-xs cursor-pointer"><i class="fa-solid fa-radiation mr-2"></i>Nuke Session Data</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: PARTICIPANT ORIENTATION -->
+        <div id="screen-part-ready" class="flex-1 flex flex-col justify-between hidden">
+            <div class="text-center space-y-3">
+                <h2 id="ready-session-title" class="text-2xl font-black text-blue-400">Loading Session...</h2>
+                <div class="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl text-xs text-yellow-300">
+                    <i class="fa-solid fa-clock mr-1"></i> Heads up: This active engine session automatically expires in 24 hours.
+                </div>
+            </div>
+
+            <div class="bg-black/20 p-4 rounded-2xl space-y-3 text-xs">
+                <p class="font-bold border-b border-white/10 pb-1 text-center uppercase tracking-wider text-blue-400">Deck Mechanics Rulebook</p>
+                <ul class="space-y-2 opacity-90">
+                    <li><i class="fa-solid fa-circle-right text-emerald-400 mr-2"></i>Swipe <span class="font-bold text-emerald-400" id="rules-right">RIGHT</span>: Flag statement as True</li>
+                    <li><i class="fa-solid fa-circle-left text-red-400 mr-2"></i>Swipe <span class="font-bold text-red-400" id="rules-left">LEFT</span>: Flag statement as False</li>
+                    <li><i class="fa-solid fa-circle-up text-amber-400 mr-2"></i>Swipe <span class="font-bold text-amber-400" id="rules-up">UP</span>: Defer / Skip item to the back of the active deck</li>
+                    <li><i class="fa-solid fa-circle-down text-slate-400 mr-2"></i>Swipe <span class="font-bold text-slate-400" id="rules-down">DOWN</span>: Drop question directly into the Trash</li>
+                    <li><i class="fa-solid fa-stopwatch text-indigo-400 mr-2"></i>Time Pool: <span id="rules-timer" class="font-bold"></span>s per card. Time remaining is added to your total bonus pool.</li>
+                </ul>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="captureRegistrationState()" class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold cursor-pointer"><i class="fa-solid fa-camera mr-2"></i>Save Session ID & Code Screenshot</button>
+                <button onclick="startCountdown()" class="w-full py-4 bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600 rounded-2xl font-black text-sm tracking-widest uppercase cursor-pointer">LAUNCH DRILL</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: COUNTDOWN OMEN -->
+        <div id="screen-countdown" class="flex-1 flex flex-col justify-center items-center hidden">
+            <div id="countdown-number" class="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-500 animate-ping">3</div>
+            <p class="text-sm uppercase tracking-widest opacity-50 mt-4">Calibrating Core Deck...</p>
+        </div>
+
+        <!-- SCREEN 5: CORE SWIPE ENGINE -->
+        <div id="screen-gameplay" class="flex-1 flex flex-col justify-between hidden">
+            <!-- HUD Panel -->
+            <div class="flex justify-between items-center bg-black/20 p-3 rounded-xl text-xs mb-2">
+                <div>
+                    <span class="opacity-60">Pilot:</span>
+                    <span id="hud-name" class="font-bold text-blue-400">Player</span>
+                </div>
+                <div class="text-center">
+                    <span id="hud-timer" class="text-lg font-black text-amber-400">00</span>
+                    <span class="block text-[9px] opacity-40 uppercase">Seconds left</span>
+                </div>
+                <div class="text-right">
+                    <span class="opacity-60">Score:</span>
+                    <span id="hud-score" class="font-bold text-emerald-400">0</span>
+                </div>
+            </div>
+
+            <!-- Active Card Play Container -->
+            <div id="deck-zone" class="card-container flex-1 flex items-center justify-center">
+                <!-- Javascript dynamically injects swipe cards here -->
+            </div>
+
+            <!-- Direction Indicator HUD Overlay Hint Panels -->
+            <div class="grid grid-cols-4 gap-1 text-[10px] text-center mt-4 border-t border-white/5 pt-3 opacity-60">
+                <div class="p-1 border border-red-500/20 rounded bg-red-500/5">← <span id="hud-lbl-left">TRAP</span></div>
+                <div class="p-1 border border-amber-500/20 rounded bg-amber-500/5">↑ <span id="hud-lbl-up">SKIP</span></div>
+                <div class="p-1 border border-slate-500/20 rounded bg-slate-500/5">↓ <span id="hud-lbl-down">TRASH</span></div>
+                <div class="p-1 border border-emerald-500/20 rounded bg-emerald-500/5">→ <span id="hud-lbl-right">CAP</span></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: EXTRA QUESTIONS & WRAP-UP TASKS -->
+        <div id="screen-post-game" class="flex-1 flex flex-col justify-between hidden space-y-4">
+            <div class="space-y-2">
+                <h3 class="text-xl font-black text-blue-400"><i class="fa-solid fa-hourglass-end mr-2"></i>Deck Cleared!</h3>
+                <p class="text-xs opacity-70">Complete the pending items below to finalize your execution sequence.</p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+                <!-- Open Ended Segment -->
+                <div id="box-open-ended" class="bg-black/20 p-3 rounded-xl space-y-2 hidden">
+                    <p id="lbl-open-ended-prompt" class="font-bold text-amber-400">Open-Ended Field</p>
+                    <textarea id="ans-open-ended" rows="3" placeholder="Input analytical response..." class="w-full p-2 bg-white/5 border border-white/10 rounded text-xs focus:outline-none focus:border-blue-400"></textarea>
+                </div>
+
+                <!-- Skipped Items Remediator -->
+                <div id="box-review-skipped" class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl space-y-2 hidden">
+                    <p class="font-bold text-amber-400"><i class="fa-solid fa-forward mr-1"></i> Deferred Cards Queue (<span id="count-skipped">0</span>)</p>
+                    <button onclick="processSkippedQueue()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-all cursor-pointer">Resolve Skipped Deck</button>
+                </div>
+
+                <!-- Trash Bin Inspector -->
+                <div id="box-review-trash" class="bg-slate-500/10 border border-slate-500/20 p-3 rounded-xl space-y-2 hidden">
+                    <p class="font-bold text-slate-400"><i class="fa-solid fa-trash-can mr-1"></i> Trashed Items Buffer (<span id="count-trash">0</span>)</p>
+                    <button onclick="revealTrashBuffer()" class="w-full py-2 bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-lg transition-all cursor-pointer">Inspect & Salvage Trash</button>
+                    <div id="trash-list" class="space-y-2 hidden max-h-40 overflow-y-auto pt-2 border-t border-white/10"></div>
+                </div>
+            </div>
+
+            <button onclick="compileAndCalculateFinalMetrics()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl tracking-widest text-sm uppercase shadow-lg cursor-pointer">LOCK AND TRANSMIT RESPONSES</button>
+        </div>
+
+        <!-- SCREEN 7: METRICS SUMMARY & METADATA OVERVIEW -->
+        <div id="screen-results" class="flex-1 flex flex-col justify-between hidden space-y-4">
+            <!-- Capture Payload Segment -->
+            <div id="capture-zone" class="bg-transparent p-2 rounded-xl space-y-3">
+                <div class="text-center border-b border-white/10 pb-3">
+                    <p id="res-session-name" class="text-xs uppercase font-bold tracking-widest text-blue-400">SESSION IDENTIFIER</p>
+                    <h2 class="text-3xl font-black tracking-tight" id="res-player-name">PILOT RUN</h2>
+                    <span class="inline-block bg-emerald-500/20 text-emerald-400 font-mono font-bold px-3 py-1 rounded-full text-xs mt-1">
+                        Ranked #1 on Session Leaderboard
+                    </span>
+                </div>
+
+                <!-- Core Score Grid Metrics -->
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                        <span class="block text-[10px] opacity-50 uppercase">Earned Points</span>
+                        <span id="res-score" class="text-2xl font-black text-emerald-400">0</span>
+                    </div>
+                    <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                        <span class="block text-[10px] opacity-50 uppercase">Accuracy Rate</span>
+                        <span id="res-accuracy" class="text-2xl font-black text-blue-400">0%</span>
+                    </div>
+                </div>
+
+                <!-- Itemized Match Breakdown Log -->
+                <div class="space-y-1 max-h-44 overflow-y-auto pr-1 text-[11px]" id="res-breakdown-list">
+                    <!-- Dynamic Rows Insertion -->
+                </div>
+            </div>
+
+            <!-- Post-Session Export Controls -->
+            <div class="space-y-2">
+                <button onclick="exportPerformanceTelemetry()" class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-xs cursor-pointer"><i class="fa-solid fa-camera mr-2"></i>Snapshot Performance Log</button>
+                <button onclick="finishSessionExit()" class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold text-xs text-center block cursor-pointer">Exit Performance Module</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- AUDIO SOUNDBOARD RESOURCES -->
+    <script>
+        const AUDIO_PROFILES = {
+            relax: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+            fun: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            heat: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        };
+
+        // CORE ENGINE STATE CONTROLS
+        let state = {
+            currentRole: 'participant',
+            config: {
+                title: 'Cap or Trap',
+                pointsPerItem: 10,
+                timerPerItem: 15,
+                labels: { right: 'CAP', left: 'TRAP', up: 'SKIP', down: 'TRASH' },
+                theme: 'dark-glass',
+                music: 'none',
+                blur: 12,
+                accent: '#3b82f6',
+                font: "'Space Grotesk', sans-serif",
+                questions: [
+                    { id: 1, text: "Photosynthesis takes place primarily in the mitochondria.", answer: false },
+                    { id: 2, text: "Light travels faster in a vacuum than it does through glass structures.", answer: true },
+                    { id: 3, text: "The atomic number of an element is determined by its neutron count.", answer: false }
+                ],
+                openEndedPrompt: "Elaborate on the critical flaws found in your incorrect card assessments."
+            },
+            sessionActive: false,
+            sessionCode: 'ABCD',
+            user: { name: '', score: 0, answers: [], openEndedResponse: '' },
+            activeDeck: [],
+            skippedDeck: [],
+            trashedDeck: [],
+            currentCardIndex: 0,
+            cardTimer: null,
+            timeLeft: 0,
+            participantLogs: []
+        };
+
+        // BOOTSTRAP INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStateFromStorage();
+            applyGlobalStyles();
+        });
+
+        function saveStateToStorage() {
+            localStorage.setItem('cap_trap_engine_state', JSON.stringify(state));
+        }
+
+        function loadStateFromStorage() {
+            const saved = localStorage.getItem('cap_trap_engine_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.config) state.config = parsed.config;
+                    if (parsed.sessionCode) state.sessionCode = parsed.sessionCode;
+                    if (parsed.participantLogs) state.participantLogs = parsed.participantLogs;
+                } catch (e) { console.error("State core parsing error", e); }
+            }
+            document.getElementById('app-title-display').innerText = state.config.title;
+            syncConfigFormFields();
+        }
+
+        function syncConfigFormFields() {
+            document.getElementById('cfg-title').value = state.config.title;
+            document.getElementById('cfg-points').value = state.config.pointsPerItem;
+            document.getElementById('cfg-timer').value = state.config.timerPerItem;
+            document.getElementById('lbl-right').value = state.config.labels.right;
+            document.getElementById('lbl-left').value = state.config.labels.left;
+            document.getElementById('lbl-up').value = state.config.labels.up;
+            document.getElementById('lbl-down').value = state.config.labels.down;
+            document.getElementById('cfg-theme').value = state.config.theme;
+            document.getElementById('cfg-music').value = state.config.music;
+            document.getElementById('cfg-blur').value = state.config.blur;
+            document.getElementById('cfg-accent').value = state.config.accent;
+            document.getElementById('cfg-font').value = state.config.font;
+            document.getElementById('cfg-open-ended').value = state.config.openEndedPrompt;
+            
+            let txt = "";
+            state.config.questions.forEach(q => {
+                txt += `${q.text} | ${q.answer}\n`;
+            });
+            document.getElementById('cfg-raw-questions').value = txt;
+        }
+
+        function applyGlobalStyles() {
+            const shell = document.getElementById('app-shell');
+            shell.className = `w-full max-w-md h-[90vh] flex flex-col justify-between rounded-3xl p-6 shadow-2xl relative overflow-y-auto ${state.config.theme}`;
+            document.documentElement.style.setProperty('--blur-amount', `${state.config.blur}px`);
+            document.documentElement.style.setProperty('--accent-color', state.config.accent);
+            document.documentElement.style.setProperty('--font-family', state.config.font);
+            document.getElementById('app-title-display').style.fontFamily = state.config.font;
+            
+            // HUD labels mapping updates
+            document.getElementById('hud-lbl-left').innerText = state.config.labels.left;
+            document.getElementById('hud-lbl-up').innerText = state.config.labels.up;
+            document.getElementById('hud-lbl-down').innerText = state.config.labels.down;
+            document.getElementById('hud-lbl-right').innerText = state.config.labels.right;
+
+            // Audio track processing updates
+            const audio = document.getElementById('bg-music');
+            if (state.config.music !== 'none' && AUDIO_PROFILES[state.config.music]) {
+                if (audio.src !== AUDIO_PROFILES[state.config.music]) {
+                    audio.src = AUDIO_PROFILES[state.config.music];
+                    audio.volume = 0.25;
+                }
+            } else {
+                audio.pause();
+            }
+        }
+
+        function switchRole(role) {
+            state.currentRole = role;
+            const btnPart = document.getElementById('tab-part');
+            const btnFaci = document.getElementById('tab-faci');
+            const formPart = document.getElementById('form-participant');
+            const formFaci = document.getElementById('form-facilitator');
+
+            if (role === 'participant') {
+                btnPart.classList.remove('opacity-60');
+                btnPart.classList.add('bg-blue-500', 'text-white');
+                btnFaci.classList.add('opacity-60');
+                btnFaci.classList.remove('bg-emerald-500', 'text-white');
+                
+                formPart.classList.remove('hidden');
+                formFaci.classList.add('hidden');
+            } else {
+                btnFaci.classList.remove('opacity-60');
+                btnFaci.classList.add('bg-emerald-500', 'text-white');
+                btnPart.classList.add('opacity-60');
+                btnPart.classList.remove('bg-blue-500', 'text-white');
+                
+                formFaci.classList.remove('hidden');
+                formPart.classList.add('hidden');
+            }
+        }
+
+        // NAVIGATION CONTROL SEGMENTS
+        function showScreen(screenId) {
+            ['screen-login', 'screen-faci-dash', 'screen-part-ready', 'screen-countdown', 'screen-gameplay', 'screen-post-game', 'screen-results'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function loginFacilitator() {
+            const codeInput = document.getElementById('faci-code').value.trim().toUpperCase();
+            if (codeInput.length < 4) {
+                alert("Provide a robust 4 character structural access lockcode.");
+                return;
+            }
+            state.sessionCode = codeInput;
+            saveStateToStorage();
+            showScreen('screen-faci-dash');
+        }
+
+        function loginParticipant() {
+            const name = document.getElementById('part-name').value.trim();
+            const code = document.getElementById('part-code').value.trim().toUpperCase();
+
+            if (!name || code !== state.sessionCode) {
+                alert("Verification failed: Review name arguments or session code parameters.");
+                return;
+            }
+
+            state.user.name = name;
+            state.user.score = 0;
+            state.user.answers = [];
+            state.user.openEndedResponse = [];
+
+            // UI configurations display mappings
+            document.getElementById('ready-session-title').innerText = state.config.title;
+            document.getElementById('rules-right').innerText = state.config.labels.right;
+            document.getElementById('rules-left').innerText = state.config.labels.left;
+            document.getElementById('rules-up').innerText = state.config.labels.up;
+            document.getElementById('rules-down').innerText = state.config.labels.down;
+            document.getElementById('rules-timer').innerText = state.config.timerPerItem;
+
+            showScreen('screen-part-ready');
+        }
+
+        function logout() {
+            showScreen('screen-login');
+        }
+
+        // CONFIG MANAGEMENT ENGINE
+        function saveSessionConfiguration() {
+            state.config.title = document.getElementById('cfg-title').value.trim() || 'Cap or Trap';
+            state.config.pointsPerItem = parseInt(document.getElementById('cfg-points').value) || 10;
+            state.config.timerPerItem = parseInt(document.getElementById('cfg-timer').value) || 15;
+            state.config.labels.right = document.getElementById('lbl-right').value.trim() || 'CAP';
+            state.config.labels.left = document.getElementById('lbl-left').value.trim() || 'TRAP';
+            state.config.labels.up = document.getElementById('lbl-up').value.trim() || 'SKIP';
+            state.config.labels.down = document.getElementById('lbl-down').value.trim() || 'TRASH';
+            state.config.theme = document.getElementById('cfg-theme').value;
+            state.config.music = document.getElementById('cfg-music').value;
+            state.config.blur = parseInt(document.getElementById('cfg-blur').value) || 12;
+            state.config.accent = document.getElementById('cfg-accent').value;
+            state.config.font = document.getElementById('cfg-font').value;
+            state.config.openEndedPrompt = document.getElementById('cfg-open-ended').value.trim();
+
+            // Process Flashcard Raw Input Texts Mapping Parser
+            const rawText = document.getElementById('cfg-raw-questions').value;
+            const lines = rawText.split('\n');
+            const processedQuestions = [];
+            let indexTracker = 1;
+
+            lines.forEach(line => {
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    const qText = parts[0].trim();
+                    const qAns = parts[1].trim().toLowerCase() === 'true';
+                    if (qText) {
+                        processedQuestions.push({ id: indexTracker++, text: qText, answer: qAns });
+                    }
+                }
+            });
+
+            if (processedQuestions.length > 0) {
+                state.config.questions = processedQuestions;
+            }
+
+            document.getElementById('app-title-display').innerText = state.config.title;
+            applyGlobalStyles();
+            saveStateToStorage();
+            alert("App Engine Configuration Saved Successfully!");
+        }
+
+        function nukeSession() {
+            if (confirm("Execute core protocol wipe? This actions clear active structural records.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // TELEMETRY LOG FILE HANDLING (JSON FILE SYSTEM BRIDGE)
+        function downloadSessionLog() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `session_${state.sessionCode}_log.json`);
+            dlAnchorElem.click();
+        }
+
+        function triggerLogImport() {
+            document.getElementById('import-log-file').click();
+        }
+
+        function importSessionLog(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState.config && importedState.sessionCode) {
+                        state.config = importedState.config;
+                        state.sessionCode = importedState.sessionCode;
+                        if (confirm("Retain historical responses from old structural logs? Cancel resets participant array.")) {
+                            state.participantLogs = importedState.participantLogs || [];
+                        } else {
+                            state.participantLogs = [];
+                        }
+                        saveStateToStorage();
+                        syncConfigFormFields();
+                        applyGlobalStyles();
+                        alert("Session Structure Config Transferred Successfully.");
+                    }
+                } catch (err) {
+                    alert("Structural Read Error: File execution aborted.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // INTERACTIVE SCREENSHOT UTILITIES
+        function captureRegistrationState() {
+            alert(`Manual system tracking hint:\nSession Token: ${state.config.title}\nAccess Keycode: ${state.sessionCode}`);
+        }
+
+        function exportPerformanceTelemetry() {
+            const target = document.getElementById('capture-zone');
+            html2canvas(target, { backgroundColor: '#0f172a' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${state.user.name}_performance_matrix.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // COUNTDOWN & RUNTIME LOOPS
+        function startCountdown() {
+            showScreen('screen-countdown');
+            let count = 3;
+            const numElem = document.getElementById('countdown-number');
+            
+            // Audio check runtime activation trigger
+            if (state.config.music !== 'none') {
+                document.getElementById('bg-music').play().catch(e => console.log("Audio lock override needed."));
+            }
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    numElem.innerText = count;
+                } else {
+                    clearInterval(interval);
+                    initializeGameplayDecks();
+                }
+            }, 1000);
+        }
+
+        function initializeGameplayDecks() {
+            state.activeDeck = [...state.config.questions];
+            state.skippedDeck = [];
+            state.trashedDeck = [];
+            state.currentCardIndex = 0;
+            
+            document.getElementById('hud-name').innerText = state.user.name;
+            showScreen('screen-gameplay');
+            renderNextCard();
+        }
+
+        function renderNextCard() {
+            clearInterval(state.cardTimer);
+            const container = document.getElementById('deck-zone');
+            container.innerHTML = "";
+
+            if (state.currentCardIndex >= state.activeDeck.length) {
+                evaluatePostGameProcessingView();
+                return;
+            }
+
+            const cardData = state.activeDeck[state.currentCardIndex];
+            
+            // Generate visual card interface node element structure
+            const card = document.createElement('div');
+            card.className = `swipe-card rounded-2xl p-6 flex flex-col justify-between shadow-xl border border-white/20 select-none ${state.config.theme === 'light-glass' ? 'bg-white text-slate-900' : 'bg-slate-800 text-white'}`;
+            card.innerHTML = `
+                <div class="flex justify-between items-center text-[10px] opacity-40 uppercase tracking-widest font-mono">
+                    <span>Card ID: #${cardData.id}</span>
+                    <span>Stack position: ${state.currentCardIndex + 1}/${state.activeDeck.length}</span>
+                </div>
+                <div class="text-center font-bold text-lg py-4 flex-1 flex items-center justify-center">
+                    <p>${cardData.text}</p>
+                </div>
+                <div class="text-center text-[9px] opacity-30 uppercase tracking-wider">
+                    Drag card to evaluate parameters
+                </div>
+            `;
+
+            container.appendChild(card);
+            setupCardInteractions(card, cardData);
+            startCardCountdownTimer();
+        }
+
+        function startCardCountdownTimer() {
+            state.timeLeft = state.config.timerPerItem;
+            document.getElementById('hud-timer').innerText = state.timeLeft;
+
+            state.cardTimer = setInterval(() => {
+                state.timeLeft--;
+                document.getElementById('hud-timer').innerText = state.timeLeft;
+
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.cardTimer);
+                    // Force timeout operation: push straight to skip module line automatically
+                    executeSwipeResolution('up', state.activeDeck[state.currentCardIndex]);
+                }
+            }, 1000);
+        }
+
+        // TINDER CARD MECHANICS INTERACTION RIGGING
+        function setupCardInteractions(cardElem, cardData) {
+            let startX = 0, startY = 0, moveX = 0, moveY = 0;
+            let isDragging = false;
+
+            // Pointer Events Core Handlers
+            cardElem.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                cardElem.style.transition = 'none';
+                cardElem.setPointerCapture(e.pointerId);
+            });
+
+            cardElem.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                moveX = e.clientX - startX;
+                moveY = e.clientY - startY;
+
+                let rot = moveX * 0.05;
+                cardElem.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${rot}deg)`;
+            });
+
+            cardElem.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                cardElem.releasePointerCapture(e.pointerId);
+                cardElem.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+                // Swipe evaluation thresholds
+                if (moveX > 120) {
+                    executeSwipeResolution('right', cardData);
+                } else if (moveX < -120) {
+                    executeSwipeResolution('left', cardData);
+                } else if (moveY < -120) {
+                    executeSwipeResolution('up', cardData);
+                } else if (moveY > 120) {
+                    executeSwipeResolution('down', cardData);
+                } else {
+                    cardElem.style.transform = 'translate(0px, 0px) rotate(0deg)';
+                }
+                moveX = 0; moveY = 0;
+            });
+        }
+
+        function executeSwipeResolution(direction, cardData) {
+            clearInterval(state.cardTimer);
+
+            if (direction === 'right') { // Evaluate as TRUE
+                processAnswerSubmission(cardData, true);
+                state.currentCardIndex++;
+            } else if (direction === 'left') { // Evaluate as FALSE
+                processAnswerSubmission(cardData, false);
+                state.currentCardIndex++;
+            } else if (direction === 'up') { // Skip configuration mapping
+                state.skippedDeck.push(cardData);
+                // Push onto bottom end stack line to enforce recurring review patterns
+                state.activeDeck.push(cardData);
+                state.currentCardIndex++;
+            } else if (direction === 'down') { // Trash bin allocation mapping
+                state.trashedDeck.push(cardData);
+                state.currentCardIndex++;
+            }
+
+            renderNextCard();
+        }
+
+        function processAnswerSubmission(card, playerEvaluation) {
+            const isCorrect = (card.answer === playerEvaluation);
+            let earned = 0;
+            if (isCorrect) {
+                earned = state.config.pointsPerItem + Math.max(0, state.timeLeft); // Time bonus point injection
+                state.user.score += earned;
+                confetti({ particleCount: 30, spread: 40, origin: { y: 0.8 } });
+            }
+
+            state.user.answers.push({
+                cardId: card.id,
+                text: card.text,
+                actual: card.answer,
+                provided: playerEvaluation,
+                correct: isCorrect,
+                points: earned
+            });
+
+            document.getElementById('hud-score').innerText = state.user.score;
+        }
+
+        // WRAP UP SCREEN SEGMENTS
+        function evaluatePostGameProcessingView() {
+            showScreen('screen-post-game');
+
+            // Set dynamic parameters configurations visibility state maps
+            if (state.config.openEndedPrompt) {
+                document.getElementById('box-open-ended').classList.remove('hidden');
+                document.getElementById('lbl-open-ended-prompt').innerText = state.config.openEndedPrompt;
+            }
+
+            if (state.skippedDeck.length > 0) {
+                document.getElementById('box-review-skipped').classList.remove('hidden');
+                document.getElementById('count-skipped').innerText = state.skippedDeck.length;
+            } else {
+                document.getElementById('box-review-skipped').classList.add('hidden');
+            }
+
+            if (state.trashedDeck.length > 0) {
+                document.getElementById('box-review-trash').classList.remove('hidden');
+                document.getElementById('count-trash').innerText = state.trashedDeck.length;
+            } else {
+                document.getElementById('box-review-trash').classList.add('hidden');
+            }
+        }
+
+        function processSkippedQueue() {
+            // Hotwire active configuration matrix parameters to rerun bypassed elements
+            state.activeDeck = [...state.skippedDeck];
+            state.skippedDeck = [];
+            state.currentCardIndex = 0;
+            showScreen('screen-gameplay');
+            renderNextCard();
+        }
+
+        function revealTrashBuffer() {
+            const element = document.getElementById('trash-list');
+            element.classList.toggle('hidden');
+            element.innerHTML = "";
+
+            state.trashedDeck.forEach(card => {
+                const node = document.createElement('div');
+                node.className = "p-2 rounded bg-white/5 border border-white/10 flex justify-between items-center text-[11px]";
+                node.innerHTML = `
+                    <span class="truncate mr-2">${card.text}</span>
+                    <span class="font-bold shrink-0 text-amber-400">Ans: ${card.answer ? state.config.labels.right : state.config.labels.left}</span>
+                `;
+                element.appendChild(node);
+            });
+        }
+
+        function compileAndCalculateFinalMetrics() {
+            state.user.openEndedResponse = document.getElementById('ans-open-ended').value.trim();
+            
+            // Push performance entry block onto permanent storage arrays logs
+            state.participantLogs.push({
+                name: state.user.name,
+                score: state.user.score,
+                timestamp: new Date().toISOString(),
+                openEnded: state.user.openEndedResponse
+            });
+            saveStateToStorage();
+
+            // Populate dashboard fields mapping loops
+            document.getElementById('res-session-name').innerText = state.config.title;
+            document.getElementById('res-player-name').innerText = state.user.name;
+            document.getElementById('res-score').innerText = state.user.score;
+
+            const structuredLogsCount = state.user.answers.length;
+            const correctLogsCount = state.user.answers.filter(a => a.correct).length;
+            const accuracy = structuredLogsCount > 0 ? Math.round((correctLogsCount / structuredLogsCount) * 100) : 0;
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+
+            const listContainer = document.getElementById('res-breakdown-list');
+            listContainer.innerHTML = "";
+
+            state.user.answers.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `p-2 rounded-lg mb-1 flex justify-between items-center ${item.correct ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`;
+                row.innerHTML = `
+                    <span class="truncate max-w-[240px]">${item.text}</span>
+                    <span class="font-bold shrink-0 font-mono">${item.correct ? '+' + item.points : '0'}</span>
+                `;
+                listContainer.appendChild(row);
+            });
+
+            showScreen('screen-results');
+        }
+
+        function finishSessionExit() {
+            showScreen('screen-login');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
