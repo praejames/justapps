@@ -3,1005 +3,545 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cap or Trap - Material Review Engine</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/input/confetti.browser.min.js"></script>
-
+    <title>Cap or Trap</title>
     <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --primary: #0d6efd;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #198754;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f8f9fa;
+            --text-muted: #a1a1a1;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--bg-color);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
         }
-        /* Material Dynamic Expressive Accents System mapping */
-        .theme-dark {
-            --md-bg: #121318;
-            --md-surface: #1a1b20;
-            --md-surface-variant: #24262d;
-            --md-primary: #adc6ff;
-            --md-on-primary: #002e69;
-            --md-secondary: #bbc6e4;
-            --md-error: #ffb4ab;
-            --md-text: #e3e2e6;
-            --md-border: #434753;
+
+        .header-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-        .theme-light {
-            --md-bg: #f9f9fe;
-            --md-surface: #f0f0f7;
-            --md-surface-variant: #e1e2ec;
-            --md-primary: #1b5ebe;
-            --md-on-primary: #ffffff;
-            --md-secondary: #555f71;
-            --md-error: #ba1a1a;
-            --md-text: #191c21;
-            --md-border: #c3c6cf;
+
+        button {
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-weight: 600;
         }
-        .md-canvas { background-color: var(--md-bg); color: var(--md-text); }
-        .md-panel { background-color: var(--md-surface); border: 1px solid var(--md-border); }
-        .md-chip { background-color: var(--md-surface-variant); }
-        
-        .card-stack-viewport {
-            position: relative;
-            perspective: 1200px;
+
+        button.primary-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
         }
-        .engine-card {
-            position: absolute;
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h1 { margin-bottom: 10px; }
+        p.subtitle { color: var(--text-muted); margin-bottom: 25px; }
+
+        .role-bubbles {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .bubble {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .bubble.active {
+            border-color: var(--primary);
+            background: rgba(13, 110, 253, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
             width: 100%;
-            height: 100%;
-            touch-action: none;
-            transform-origin: center bottom;
-            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 16px;
         }
+
+        .warning-banner {
+            background: rgba(220, 53, 65, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .hidden { display: none !important; }
+
+        .section-title {
+            margin: 25px 0 10px 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+            font-size: 18px;
+        }
+
+        /* Color-coded settings swipes */
+        .swipe-cap { border-left: 5px solid var(--success); }
+        .swipe-trap { border-left: 5px solid var(--danger); }
+        .swipe-skip { border-left: 5px solid var(--warning); }
+        .swipe-trash { border-left: 5px solid var(--text-muted); }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th { background: rgba(0,0,0,0.05); }
     </style>
 </head>
-<body class="theme-dark md-canvas min-w-full min-h-screen flex flex-col justify-between p-4 md:p-8 m-0 overflow-x-hidden">
+<body>
 
-    <audio id="audio-playback-engine" loop></audio>
+    <div class="header-controls">
+        <button id="themeToggle" onclick="toggleTheme()">Toggle Mode</button>
+    </div>
 
-    <header class="w-full flex justify-between items-center max-w-6xl mx-auto mb-6">
-        <div class="flex items-center space-x-2">
-            <span class="material-icons-outlined text-3xl text-[--md-primary]">swiper</span>
-            <span id="global-runtime-logo" class="text-2xl font-extrabold tracking-tight">CAP OR TRAP</span>
-        </div>
-        <div class="flex items-center space-x-3">
-            <button onclick="toggleVisualThemeStyle()" class="md-chip p-3 rounded-full flex items-center justify-center border-0 cursor-pointer text-[--md-text]">
-                <span id="theme-icon-indicator" class="material-icons-outlined">light_mode</span>
-            </button>
-            <span id="countdown-banner-ticker" class="hidden text-xs md-chip px-3 py-2 rounded-full font-medium tracking-wide"></span>
-        </div>
-    </header>
+    <div class="container">
+        <!-- ROLE SELECTION AND LOGIN PAGE -->
+        <div id="authPage" class="card text-center">
+            <h1 id="mainTitle">Welcome to Cap or Trap</h1>
+            <p class="subtitle" id="mainSubtitle">Select your role to get started</p>
 
-    <main class="w-full flex-1 max-w-6xl mx-auto flex flex-col items-center justify-center">
-        
-        <div id="view-auth-gate" class="w-full max-w-md md-panel rounded-3xl p-6 md:p-8 space-y-6 shadow-xl">
-            <div class="text-center space-y-1">
-                <h2 class="text-2xl font-extrabold tracking-tight">Welcome Pilot</h2>
-                <p class="text-sm opacity-70">Establish system deployment role parameters to continue.</p>
+            <div class="role-bubbles">
+                <div class="bubble active" id="btnParticipantRole" onclick="setRole('participant')">Participant</div>
+                <div class="bubble" id="btnFacilitatorRole" onclick="setRole('facilitator')">Facilitator</div>
             </div>
 
-            <div class="flex rounded-2xl bg-[--md-surface-variant] p-1.5">
-                <button onclick="toggleIdentityRole('participant')" id="tab-identity-part" class="flex-1 py-3 text-sm font-bold rounded-xl bg-[--md-primary] text-[--md-on-primary] border-0 transition-all cursor-pointer">Participant</button>
-                <button onclick="toggleIdentityRole('facilitator')" id="tab-identity-faci" class="flex-1 py-3 text-sm font-bold rounded-xl opacity-60 border-0 transition-all cursor-pointer text-[--md-text]">Facilitator</button>
+            <!-- Participant Input Block -->
+            <div id="participantForm">
+                <div class="form-group">
+                    <label>Set your Nickname</label>
+                    <input type="text" id="partNickname" placeholder="e.g. Alex">
+                </div>
+                <div class="form-group">
+                    <label>Enter the Session code</label>
+                    <input type="text" id="partCode" placeholder="4-digit code">
+                </div>
+                <button class="primary-btn" style="width:100%;" onclick="startParticipant()">Start</button>
             </div>
 
-            <div id="form-context-participant" class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold uppercase opacity-60 tracking-wider">Player Nickname</label>
-                    <input type="text" id="input-part-name" placeholder="Enter Call Sign" class="w-full px-4 py-3 bg-[--md-surface-variant] border border-[--md-border] rounded-xl focus:outline-none focus:ring-2 focus:ring-[--md-primary] text-[--md-text]">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-xs font-bold uppercase opacity-60 tracking-wider">Access Token</label>
-                    <input type="text" id="input-part-code" maxlength="4" placeholder="4-Digit Secure Key" class="w-full px-4 py-3 bg-[--md-surface-variant] border border-[--md-border] rounded-xl focus:outline-none focus:ring-2 focus:ring-[--md-primary] uppercase tracking-widest text-center text-[--md-text]">
-                </div>
-                <button onclick="verifyAndLaunchParticipantSession()" class="w-full py-4 bg-[--md-primary] text-[--md-on-primary] border-0 font-bold rounded-xl transition-all cursor-pointer shadow-lg">CONNECT TO ENGINE</button>
-            </div>
-
-            <div id="form-context-facilitator" class="space-y-4 hidden">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold uppercase opacity-60 tracking-wider">Establish Administration Key</label>
-                    <input type="text" id="input-faci-code" maxlength="4" placeholder="Generate 4-Digit Passcode" class="w-full px-4 py-3 bg-[--md-surface-variant] border border-[--md-border] rounded-xl focus:outline-none focus:ring-2 focus:ring-[--md-primary] uppercase tracking-widest text-center text-[--md-text]">
-                </div>
-                <button onclick="verifyAndLaunchFacilitatorDashboard()" class="w-full py-4 bg-[--md-primary] text-[--md-on-primary] border-0 font-bold rounded-xl transition-all cursor-pointer shadow-lg">INITIALIZE PANEL</button>
-            </div>
-        </div>
-
-        <div id="view-facilitator-panel" class="w-full hidden grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            
-            <div class="lg:col-span-2 md-panel rounded-3xl p-6 space-y-6 shadow-xl">
-                <div class="flex justify-between items-center border-b border-[--md-border] pb-3">
-                    <h3 class="text-lg font-bold flex items-center gap-2 text-[--md-primary]"><span class="material-icons-outlined">tune</span> System Design Parameters</h3>
-                    <button onclick="terminateActiveSessionIdentity()" class="text-xs md-chip px-3 py-2 rounded-lg font-medium border-0 cursor-pointer text-[--md-text]">Disconnect Panel</button>
+            <!-- Facilitator Input Block -->
+            <div id="facilitatorForm" class="hidden">
+                <div class="role-bubbles">
+                    <div class="bubble active" id="btnStartNew" onclick="setFacMode('new')">Start New</div>
+                    <div class="bubble" id="btnEnterExisting" onclick="setFacMode('existing')">Enter a Session code</div>
                 </div>
 
-                <div class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Review Session Title</label>
-                            <input type="text" id="panel-cfg-title" class="w-full p-2.5 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Core Color Identity Palettes</label>
-                            <select id="panel-cfg-palette" onchange="adjustColorPaletteTheme(this.value)" class="w-full p-2.5 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                                <option value="blue">Electric Cobalt (Default)</option>
-                                <option value="emerald">Expressive Jade</option>
-                                <option value="purple">Vibrant Orchid</option>
-                                <option value="amber">Solar Amber</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Base Card Match</label>
-                            <input type="number" id="panel-cfg-points" class="w-full p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Countdown / Item</label>
-                            <input type="number" id="panel-cfg-timer" class="w-full p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Vibe Music Feed</label>
-                            <select id="panel-cfg-music" class="w-full p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                                <option value="none">Mute Soundtrack Feed</option>
-                                <option value="relax">Lofi Ambient Run</option>
-                                <option value="fun">Upbeat Synth Track</option>
-                                <option value="heat">High Velocity Drills</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-70">Font Profile Typo</label>
-                            <select id="panel-cfg-font" class="w-full p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                                <option value="'Plus Jakarta Sans', sans-serif">Standard Modern Sans</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="bg-[--md-surface-variant] p-4 rounded-2xl grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-emerald-400 mb-1">Right Swipe (True)</label>
-                            <input type="text" id="panel-lbl-right" class="w-full p-2 bg-[--md-surface] border border-[--md-border] rounded-lg text-xs text-[--md-text]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-red-400 mb-1">Left Swipe (False)</label>
-                            <input type="text" id="panel-lbl-left" class="w-full p-2 bg-[--md-surface] border border-[--md-border] rounded-lg text-xs text-[--md-text]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-amber-400 mb-1">Up Swipe (Skip)</label>
-                            <input type="text" id="panel-lbl-up" class="w-full p-2 bg-[--md-surface] border border-[--md-border] rounded-lg text-xs text-[--md-text]">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">Down Swipe (Trash)</label>
-                            <input type="text" id="panel-lbl-down" class="w-full p-2 bg-[--md-surface] border border-[--md-border] rounded-lg text-xs text-[--md-text]">
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-xs font-bold uppercase opacity-70 tracking-wider">Review Deck Question Matrix Base Bank</label>
-                            <button onclick="downloadCSVTemplateDataBank()" class="text-[11px] text-[--md-primary] bg-transparent border-0 font-bold flex items-center gap-1 cursor-pointer"><span class="material-icons-outlined text-sm">download</span> Get CSV Text Sheet Template</button>
-                        </div>
-                        <textarea id="panel-cfg-raw" rows="5" class="w-full p-3 bg-[--md-surface-variant] border border-[--md-border] rounded-2xl text-xs font-mono placeholder:opacity-30 text-[--md-text]" placeholder="Format structural configurations: Statement details here | true/false"></textarea>
-                    </div>
-
-                    <div class="space-y-1">
-                        <label class="text-xs opacity-70">Open-Ended Analytical Final Question Prompt Field</label>
-                        <input type="text" id="panel-cfg-open" class="w-full p-2.5 bg-[--md-surface-variant] border border-[--md-border] rounded-xl text-[--md-text]">
-                    </div>
+                <div class="form-group">
+                    <label id="facCodeLabel">Session Code</label>
+                    <input type="text" id="facCode" placeholder="Enter or generate code">
                 </div>
 
-                <div class="pt-3 border-t border-[--md-border] space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <button onclick="triggerFileImportSystemBridge()" class="py-2.5 text-xs md-chip font-bold rounded-xl border-0 transition-all cursor-pointer text-[--md-text]"><span class="material-icons-outlined text-sm align-middle mr-1">file_upload</span> Import Deck Session</button>
-                        <button onclick="exportActiveSessionConfigurationPackage()" class="py-2.5 text-xs md-chip font-bold rounded-xl border-0 transition-all cursor-pointer text-[--md-text]"><span class="material-icons-outlined text-sm align-middle mr-1">file_download</span> Export Deck Session</button>
-                        <button onclick="launchFacilitatorSandboxPreviewRun()" class="py-2.5 text-xs bg-[--md-secondary] text-slate-900 font-bold rounded-xl border-0 transition-all cursor-pointer"><span class="material-icons-outlined text-sm align-middle mr-1">flaky</span> Launch Preview Sandbox Sandbox Sandbox Sandbox</button>
-                    </div>
-                    <input type="file" id="bridge-file-input" class="hidden" accept=".json,.txt" onchange="processImportedSessionStatePackage(event)">
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button onclick="commitAndSaveFacilitatorSystemConfiguration()" class="py-4 text-sm bg-[--md-primary] text-[--md-on-primary] font-bold rounded-2xl border-0 transition-all cursor-pointer shadow-lg uppercase tracking-wider"><span class="material-icons-outlined text-sm align-middle mr-1">bolt</span> Launch Production Engine</button>
-                        <button onclick="triggerDestructiveSessionWipe()" class="py-4 text-sm bg-red-600/20 text-red-200 hover:bg-red-600 hover:text-white font-bold rounded-2xl border-0 transition-all cursor-pointer"><span class="material-icons-outlined text-sm align-middle mr-1">delete_forever</span> Factory Nuke Active Arrays</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="md-panel rounded-3xl p-6 shadow-xl space-y-4">
-                    <h3 class="text-base font-bold flex items-center gap-2 text-emerald-400"><span class="material-icons-outlined">analytics</span> Live Metric Telemetry</h3>
-                    <div id="telemetry-live-ledger" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
-                        <p class="opacity-50 text-center py-4">Awaiting data streaming packages...</p>
-                    </div>
+                <div id="existingSessionConfirm" class="form-group hidden">
+                    <label>Session Title to Confirm</label>
+                    <input type="text" id="facConfirmTitle" placeholder="Enter exact title to verify and edit">
                 </div>
 
-                <div class="md-panel rounded-3xl p-6 shadow-xl space-y-4">
-                    <h3 class="text-base font-bold flex items-center gap-2 text-amber-400"><span class="material-icons-outlined">emoji_events</span> Realtime Session Leaderboard</h3>
-                    <div id="telemetry-live-leaderboard" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
-                        <p class="opacity-50 text-center py-4">No active rank records computed yet.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="view-participant-handshake" class="w-full max-w-xl md-panel rounded-3xl p-6 md:p-8 space-y-6 shadow-xl hidden">
-            <div class="text-center space-y-2">
-                <h2 id="handshake-title" class="text-3xl font-black text-[--md-primary]">Loading Deck Metadata...</h2>
-                <span class="inline-block px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-xs text-yellow-300 font-medium">
-                    <span class="material-icons-outlined text-xs align-middle mr-1">history_toggle_off</span> Active engine profile session locks expire within 24 hours
-                </span>
-            </div>
-
-            <div class="bg-[--md-surface-variant] p-5 rounded-2xl space-y-3 text-sm">
-                <p class="font-bold border-b border-[--md-border] pb-2 text-center uppercase tracking-widest text-[--md-primary]">Deck Evaluation Mechanics</p>
-                <ul class="space-y-3 opacity-90 list-none p-0 m-0">
-                    <li class="flex items-center gap-2"><span class="material-icons-outlined text-emerald-400">arrow_forward</span> Swipe <span class="font-bold text-emerald-400" id="handshake-lbl-right">RIGHT</span> / Click True: Accept Statement</li>
-                    <li class="flex items-center gap-2"><span class="material-icons-outlined text-red-400">arrow_back</span> Swipe <span class="font-bold text-red-400" id="handshake-lbl-left">LEFT</span> / Click False: Deny Statement</li>
-                    <li class="flex items-center gap-2"><span class="material-icons-outlined text-amber-400">arrow_upward</span> Swipe <span class="font-bold text-amber-400" id="handshake-lbl-up">UP</span> / Click Skip: Cycle Item to Back of Stacks</li>
-                    <li class="flex items-center gap-2"><span class="material-icons-outlined text-slate-400">arrow_downward</span> Swipe <span class="font-bold text-slate-400" id="handshake-lbl-down">DOWN</span> / Click Trash: Purge to Trash Buffer</li>
-                    <li class="flex items-center gap-2"><span class="material-icons-outlined text-[--md-primary]">timer</span> Allocation: <span id="handshake-timer" class="font-bold"></span>s per card. Acceleration increases velocity scores.</li>
-                </ul>
-            </div>
-
-            <div class="space-y-3">
-                <button onclick="captureHandshakeMetadataReceipt()" class="w-full py-2.5 text-xs md-chip font-bold rounded-xl border-0 cursor-pointer text-[--md-text]"><span class="material-icons-outlined text-sm align-middle mr-1">photo_camera</span> Screenshot Configuration Identity Parameters</button>
-                <button onclick="initializeCountdownSequence()" class="w-full py-4 text-base bg-gradient-to-r from-[--md-primary] to-[--md-secondary] text-slate-900 font-black rounded-2xl border-0 tracking-widest uppercase shadow-lg cursor-pointer">LAUNCH SESSION EXECUTION</button>
+                <button class="primary-btn" style="width:100%;" onclick="startFacilitator()">Start</button>
             </div>
         </div>
 
-        <div id="view-countdown-splash" class="w-full hidden text-center space-y-4">
-            <div id="countdown-splash-digit" class="text-9xl font-black text-[--md-primary] transition-all transform scale-150 duration-300">3</div>
-            <p class="text-sm uppercase tracking-widest opacity-60">Synchronizing Session Core Parameters...</p>
-        </div>
-
-        <div id="view-gameplay-stage" class="w-full max-w-3xl flex flex-col justify-between hidden space-y-6">
-            <div class="w-full grid grid-cols-3 items-center bg-[--md-surface] border border-[--md-border] p-4 rounded-2xl text-sm shadow-md">
+        <!-- FACILITATOR DASHBOARD -->
+        <div id="facilitatorDashboard" class="card hidden">
+            <div class="grid-2">
                 <div>
-                    <span class="block text-xs opacity-50 uppercase tracking-wider font-bold">Pilot Callsign</span>
-                    <span id="hud-display-name" class="font-bold text-[--md-primary]">User</span>
+                    <label style="font-size: 12px; color: var(--text-muted);">SESSION NAME</label>
+                    <h2 id="dashSessionName" style="margin-bottom:10px;">Default Session</h2>
                 </div>
-                <div class="text-center">
-                    <span id="hud-display-timer" class="text-4xl font-black text-amber-400 tracking-tighter">00</span>
-                    <span class="block text-[10px] opacity-40 uppercase tracking-widest font-bold">Sec remaining</span>
-                </div>
-                <div class="text-right">
-                    <span class="block text-xs opacity-50 uppercase tracking-wider font-bold">Metric Score</span>
-                    <span id="hud-display-score" class="font-bold text-emerald-400">0</span>
+                <div style="text-align: right;">
+                    <label style="font-size: 12px; color: var(--text-muted);">SESSION KEY</label>
+                    <h2 id="dashSessionKey" style="color: var(--primary);">UNSET</h2>
                 </div>
             </div>
 
-            <div id="card-stack-viewport" class="card-stack-viewport w-full h-[420px] md:h-[480px]">
-                </div>
-
-            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button onclick="triggerManualButtonSwipeResolution('left')" class="py-3 px-4 bg-red-600/10 hover:bg-red-600 hover:text-white border border-red-500/30 text-red-300 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                    <span class="material-icons-outlined">arrow_back</span> <span id="btn-lbl-left">TRAP</span>
-                </button>
-                <button onclick="triggerManualButtonSwipeResolution('up')" class="py-3 px-4 bg-amber-600/10 hover:bg-amber-600 hover:text-white border border-amber-500/30 text-amber-300 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                    <span class="material-icons-outlined">arrow_upward</span> <span id="btn-lbl-up">SKIP</span>
-                </button>
-                <button onclick="triggerManualButtonSwipeResolution('down')" class="py-3 px-4 bg-slate-600/10 hover:bg-slate-600 hover:text-white border border-slate-500/30 text-slate-300 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                    <span class="material-icons-outlined">arrow_downward</span> <span id="btn-lbl-down">TRASH</span>
-                </button>
-                <button onclick="triggerManualButtonSwipeResolution('right')" class="py-3 px-4 bg-emerald-600/10 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 text-emerald-300 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                    <span class="material-icons-outlined">arrow_forward</span> <span id="btn-lbl-right">CAP</span>
-                </button>
+            <div class="warning-banner">
+                WARNING: Save your Session Key! You will not be able to access this session again; it will be permanently deleted after the timer expires.
             </div>
+
+            <div class="grid-3">
+                <button onclick="downloadTemplate()">Get Template (.txt)</button>
+                <button onclick="triggerImport()">Import Session (.txt)</button>
+                <button onclick="exportSession()">Export Session (.txt)</button>
+            </div>
+            <input type="file" id="fileImport" class="hidden" accept=".txt" onchange="handleImport(event)">
+
+            <div class="section-title">Settings Control</div>
+            <div class="grid-2">
+                <div class="form-group swipe-cap">
+                    <label>Right Swipe (True Label)</label>
+                    <input type="text" id="cfgRight" value="CAP">
+                </div>
+                <div class="form-group swipe-trap">
+                    <label>Left Swipe (False Label)</label>
+                    <input type="text" id="cfgLeft" value="TRAP">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group swipe-skip">
+                    <label>Up Swipe (Skip Label)</label>
+                    <input type="text" id="cfgUp" value="SKIP">
+                </div>
+                <div class="form-group swipe-trash">
+                    <label>Down Swipe (Trash Label)</label>
+                    <input type="text" id="cfgDown" value="TRASH">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Time per question (seconds)</label>
+                    <input type="number" id="cfgTime" value="15">
+                </div>
+                <div class="form-group">
+                    <label>Points per question</label>
+                    <input type="number" id="cfgPoints" value="10">
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Music</label>
+                    <select id="cfgMusic">
+                        <option>Muted</option>
+                        <option>Chiptune Track 1</option>
+                        <option>Synthwave Loop</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Theme</label>
+                    <select id="cfgTheme">
+                        <option>Vibrant Orchid</option>
+                        <option>Classic Slate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Wallpaper URL</label>
+                    <input type="text" id="cfgWallpaper" placeholder="Paste image link" onchange="updateWallpaper(this.value)">
+                </div>
+            </div>
+
+            <div class="section-title">Review Questions</div>
+            <div class="form-group">
+                <label>Questions Matrix (Format: Question/Answer - One per paragraph)</label>
+                <textarea id="cfgQuestions" rows="6">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria./No
+Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures./Yes</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Last question</label>
+                <input type="text" id="cfgLastQuestion" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
+            </div>
+
+            <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="cfgRandomize" style="width:auto;">
+                <label for="cfgRandomize" style="margin-bottom:0;">Randomize to Participants</label>
+            </div>
+
+            <div class="grid-3" style="margin-top:20px;">
+                <button onclick="triggerQuestionImport()">Import Questions (.txt)</button>
+                <button class="primary-btn" onclick="openLeaderboard()">Live Leaderboard</button>
+                <button onclick="downloadCurrentData()" style="background: var(--success); color: white; border: none;">Download Data</button>
+            </div>
+            <input type="file" id="questionImport" class="hidden" accept=".txt" onchange="handleQuestionImport(event)">
         </div>
 
-        <div id="view-post-game-buffer" class="w-full max-w-xl md-panel rounded-3xl p-6 md:p-8 space-y-6 shadow-xl hidden">
-            <div class="space-y-1">
-                <h3 class="text-2xl font-black text-[--md-primary] flex items-center gap-2"><span class="material-icons-outlined">fact_check</span> Processing Cycle Review</h3>
-                <p class="text-sm opacity-70">Complete pending secondary tasks to finish verification pipelines.</p>
-            </div>
-
-            <div class="space-y-4 text-sm max-h-[50vh] overflow-y-auto pr-2">
-                <div id="wrapper-open-ended-field" class="bg-[--md-surface-variant] p-4 rounded-2xl space-y-2 hidden">
-                    <p id="display-open-ended-prompt" class="font-bold text-amber-400 text-xs uppercase tracking-wider"></p>
-                    <textarea id="input-open-ended-response" rows="3" class="w-full p-3 bg-[--md-surface] border border-[--md-border] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[--md-primary] text-[--md-text]" placeholder="Provide concise conceptual writeup..."></textarea>
-                </div>
-
-                <div id="wrapper-skipped-remediation-field" class="bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl space-y-3 hidden">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-amber-400 flex items-center gap-1 text-xs uppercase tracking-wider"><span class="material-icons-outlined text-sm">forward</span> Skipped Deck Queues</span>
-                        <span id="badge-skipped-count" class="px-2.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full font-mono text-xs">0</span>
-                    </div>
-                    <button onclick="requeueSkippedDeckElementsForProcessing()" class="w-full py-2.5 bg-amber-500 text-slate-900 font-bold text-xs rounded-xl border-0 cursor-pointer">Process Skipped Cards Stack</button>
-                </div>
-
-                <div id="wrapper-trash-remediation-field" class="bg-slate-500/5 border border-slate-500/20 p-4 rounded-2xl space-y-3 hidden">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-400 flex items-center gap-1 text-xs uppercase tracking-wider"><span class="material-icons-outlined text-sm">delete</span> Trashed Buffer Storage</span>
-                        <span id="badge-trash-count" class="px-2.5 py-0.5 bg-slate-500/20 text-slate-300 rounded-full font-mono text-xs">0</span>
-                    </div>
-                    <button onclick="revealAndToggleTrashInspectionMatrix()" class="w-full py-2.5 bg-[--md-surface-variant] font-bold text-xs rounded-xl border-0 cursor-pointer text-[--md-text]">Inspect & Salvage Trashed Data</button>
-                    <div id="display-trash-inspection-matrix" class="space-y-2 hidden pt-2 border-t border-[--md-border]"></div>
-                </div>
-            </div>
-
-            <button onclick="lockAndTransmitFinalMetricsPackage()" class="w-full py-4 bg-[--md-primary] text-[--md-on-primary] border-0 font-bold rounded-2xl tracking-wider text-sm uppercase shadow-lg cursor-pointer">COMPILE AND TRANSMIT DATA PACKAGES</button>
+        <!-- PARTICIPANT WAITING ENGINE PLACEHOLDER -->
+        <div id="participantEngine" class="card hidden text-center">
+            <h2>Connected to Session Engine</h2>
+            <p class="subtitle">Waiting for Facilitator to dispatch production cards...</p>
+            <button onclick="location.reload()">Disconnect</button>
         </div>
+    </div>
 
-        <div id="view-results-display" class="w-full max-w-2xl md-panel rounded-3xl p-6 md:p-8 space-y-6 shadow-xl hidden">
-            
-            <div id="capture-boundary-box" class="space-y-6 p-2 rounded-2xl bg-transparent">
-                <div class="text-center border-b border-[--md-border] pb-4 space-y-1">
-                    <p id="receipt-session-identity" class="text-xs uppercase font-bold tracking-widest text-[--md-primary]">SESSION RECORD</p>
-                    <h2 id="receipt-pilot-callsign" class="text-4xl font-black tracking-tight">PILOT NAME</h2>
-                    <div id="receipt-leaderboard-placement" class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold px-3 py-1 rounded-full text-xs mt-1">
-                        <span class="material-icons-outlined text-xs">leaderboard</span> Syncing tracking position records...
-                    </div>
-                </div>
+    <!-- LIVE LEADERBOARD MODAL -->
+    <div id="leaderboardModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Live Session Status & Leaderboard</h3>
+            <div class="section-title">Top 10 Rankings</div>
+            <table id="leaderboardTable">
+                <thead><tr><th>Rank</th><th>Nickname</th><th>Points</th></tr></thead>
+                <tbody><!-- Dynamic --></tbody>
+            </table>
 
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="bg-[--md-surface-variant] p-4 rounded-2xl border border-[--md-border]">
-                        <span class="block text-xs opacity-60 uppercase font-bold tracking-wider mb-1">Accumulated Score</span>
-                        <span id="receipt-metric-score" class="text-3xl font-black text-emerald-400">0</span>
-                    </div>
-                    <div class="bg-[--md-surface-variant] p-4 rounded-2xl border border-[--md-border]">
-                        <span class="block text-xs opacity-60 uppercase font-bold tracking-wider mb-1">Accuracy Factor</span>
-                        <span id="receipt-metric-accuracy" class="text-3xl font-black text-[--md-primary]">0%</span>
-                    </div>
-                </div>
-
-                <div class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs" id="receipt-itemized-breakdown-list">
-                    </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onclick="generateHighResolutionPerformanceImageLog()" class="py-3 bg-[--md-primary] text-[--md-on-primary] font-bold rounded-xl border-0 flex items-center justify-center gap-2 cursor-pointer shadow shadow-md"><span class="material-icons-outlined text-sm">file_download</span> Export Analytics Image Log</button>
-                <button onclick="terminateActiveParticipantStateAndReset()" class="py-3 md-chip font-bold rounded-xl border-0 text-center cursor-pointer text-[--md-text]">Return to Interface Gate</button>
-            </div>
+            <div class="section-title">Item Analysis (Question Performance)</div>
+            <table id="itemAnalysisTable">
+                <thead>
+                    <tr><th>Question</th><th>Correct</th><th>Incorrect</th><th>Skipped</th><th>Trashed</th></tr>
+                </thead>
+                <tbody><!-- Dynamic --></tbody>
+            </table>
+            <button onclick="closeLeaderboard()" style="margin-top:20px; width:100%;">Close Live Monitor</button>
         </div>
-
-    </main>
-
-    <footer class="w-full text-center text-[10px] opacity-40 uppercase tracking-widest mt-6 max-w-6xl mx-auto">
-        Material Review Engine Architecture v2.5.0 • Client-Driven Static State Deployment Pipeline
-    </footer>
+    </div>
 
     <script>
-        const AUDIO_ASSET_DICTIONARY = {
-            relax: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-            fun: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-            heat: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        // Mock State Database for runtime logic consistency
+        let currentRole = 'participant';
+        let facMode = 'new';
+        let sessionData = {
+            sessionName: "Cap or Trap Physics Review",
+            sessionCode: "4921",
+            lastUpdated: new Date().toISOString(),
+            settings: { time: 15, points: 10, right: "CAP", left: "TRAP", up: "SKIP", down: "TRASH", music: "Muted", theme: "Vibrant Orchid", wallpaper: "" },
+            questions: [
+                { q: "Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria.", a: "No" },
+                { q: "Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures.", a: "Yes" }
+            ],
+            lastQuestion: "Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.",
+            participants: [
+                { name: "jam", score: 32, timestamp: "2026-06-06T10:14:00Z", items: ["Correct", "Correct"], lastAnswer: "Misread prompt 1" },
+                { name: "Cap or Trap", score: 23, timestamp: "2026-06-06T10:15:00Z", items: ["Correct", "Incorrect"], lastAnswer: "Confused on vector mechanics" },
+                { name: "james", score: 0, timestamp: "2026-06-06T10:15:30Z", items: ["Skipped", "Trashed"], lastAnswer: "Ran out of time entirely" }
+            ]
         };
 
-        let state = {
-            currentRole: 'participant',
-            sandboxPreviewActive: false,
-            config: {
-                title: 'Cap or Trap',
-                pointsPerItem: 10,
-                timerPerItem: 15,
-                labels: { right: 'CAP', left: 'TRAP', up: 'SKIP', down: 'TRASH' },
-                theme: 'theme-dark',
-                music: 'none',
-                palette: 'blue',
-                questions: [
-                    { id: 1, text: "Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria.", answer: false },
-                    { id: 2, text: "Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures.", answer: true },
-                    { id: 3, text: "The atomic identity number of any given elemental structure is determined exclusively via neutron counting metrics.", answer: false }
-                ],
-                openEndedPrompt: "Analyze the core conceptual dependencies that contributed to processing errors on flagged cards."
-            },
-            sessionCode: 'ABCD',
-            user: { name: '', score: 0, answers: [], openEndedResponse: '' },
-            activeDeck: [], skippedDeck: [], trashedDeck: [],
-            currentCardIndex: 0, cardTimer: null, timeLeft: 0,
-            participantLogs: []
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadStateFromPersistenceStore();
-            initializeSystemTimerCountdownClock();
-        });
-
-        function saveStateToPersistenceStore() {
-            localStorage.setItem('material_review_engine_state', JSON.stringify(state));
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
         }
 
-        function loadStateFromPersistenceStore() {
-            const saved = localStorage.getItem('material_review_engine_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.config) state.config = parsed.config;
-                    if (parsed.sessionCode) state.sessionCode = parsed.sessionCode;
-                    if (parsed.participantLogs) state.participantLogs = parsed.participantLogs;
-                } catch (e) { console.error("Error structural configuration parse failures", e); }
+        function updateWallpaper(url) {
+            document.body.style.backgroundImage = url ? `url('${url}')` : 'none';
+        }
+
+        function setRole(role) {
+            currentRole = role;
+            document.getElementById('btnParticipantRole').classList.toggle('active', role === 'participant');
+            document.getElementById('btnFacilitatorRole').classList.toggle('active', role === 'facilitator');
+            document.getElementById('participantForm').classList.toggle('hidden', role !== 'participant');
+            document.getElementById('facilitatorForm').classList.toggle('hidden', role !== 'facilitator');
+        }
+
+        function setFacMode(mode) {
+            facMode = mode;
+            document.getElementById('btnStartNew').classList.toggle('active', mode === 'new');
+            document.getElementById('btnEnterExisting').classList.toggle('active', mode === 'existing');
+            document.getElementById('existingSessionConfirm').classList.toggle('hidden', mode !== 'existing');
+            document.getElementById('facCodeLabel').innerText = mode === 'existing' ? "Enter Session Code" : "Session Code";
+        }
+
+        function startParticipant() {
+            const nickname = document.getElementById('partNickname').value;
+            const code = document.getElementById('partCode').value;
+            if(!nickname || !code) return alert("Please specify your Nickname and Session Code!");
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('participantEngine').classList.remove('hidden');
+        }
+
+        function startFacilitator() {
+            const code = document.getElementById('facCode').value || "7712";
+            if(facMode === 'existing') {
+                const confirmTitle = document.getElementById('facConfirmTitle').value;
+                if(!confirmTitle) return alert("Please supply the original Session Title to verify configurations.");
+                sessionData.sessionName = confirmTitle;
             }
-            document.getElementById('global-runtime-logo').innerText = state.config.title.toUpperCase();
-            document.body.className = `min-w-full min-h-screen flex flex-col justify-between p-4 md:p-8 m-0 overflow-x-hidden ${state.config.theme || 'theme-dark'}`;
-            adjustColorPaletteTheme(state.config.palette || 'blue');
-            syncFacilitatorControlPanelFields();
-        }
-
-        function syncFacilitatorControlPanelFields() {
-            document.getElementById('panel-cfg-title').value = state.config.title;
-            document.getElementById('panel-cfg-palette').value = state.config.palette;
-            document.getElementById('panel-cfg-points').value = state.config.pointsPerItem;
-            document.getElementById('panel-cfg-timer').value = state.config.timerPerItem;
-            document.getElementById('panel-cfg-music').value = state.config.music;
-            document.getElementById('panel-lbl-right').value = state.config.labels.right;
-            document.getElementById('panel-lbl-left').value = state.config.labels.left;
-            document.getElementById('panel-lbl-up').value = state.config.labels.up;
-            document.getElementById('panel-lbl-down').value = state.config.labels.down;
-            document.getElementById('panel-cfg-open').value = state.config.openEndedPrompt;
+            sessionData.sessionCode = code;
             
-            let block = "";
-            state.config.questions.forEach(q => { block += `${q.text} | ${q.answer}\n`; });
-            document.getElementById('panel-cfg-raw').value = block;
-
-            // Render live streaming data logs
-            renderLiveTelemetryLedgersAndLeaderboards();
+            document.getElementById('dashSessionName').innerText = sessionData.sessionName;
+            document.getElementById('dashSessionKey').innerText = sessionData.sessionCode;
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('facilitatorDashboard').classList.remove('hidden');
         }
 
-        function toggleVisualThemeStyle() {
-            const current = document.body.classList.contains('theme-dark') ? 'theme-dark' : 'theme-light';
-            if (current === 'theme-dark') {
-                document.body.classList.remove('theme-dark');
-                document.body.classList.add('theme-light');
-                state.config.theme = 'theme-light';
-                document.getElementById('theme-icon-indicator').innerText = 'dark_mode';
-            } else {
-                document.body.classList.remove('theme-light');
-                document.body.classList.add('theme-dark');
-                state.config.theme = 'theme-dark';
-                document.getElementById('theme-icon-indicator').innerText = 'light_mode';
-            }
-            saveStateToStorageNoReload();
+        function downloadTemplate() {
+            const template = "Session Name: Sample Review Session\nCode: 0000\n---\nQuestion prompt goes here/Yes\nAnother true or false query goes here/No";
+            blobDownload(template, "cap_or_trap_template.txt");
         }
 
-        function saveStateToStorageNoReload() {
-            localStorage.setItem('material_review_engine_state', JSON.stringify(state));
-        }
-
-        function adjustColorPaletteTheme(colorHexOptionValue) {
-            state.config.palette = colorHexOptionValue;
-            let root = document.documentElement;
-            if (colorHexOptionValue === 'blue') {
-                root.style.setProperty('--md-primary', document.body.classList.contains('theme-light') ? '#1b5ebe' : '#adc6ff');
-                root.style.setProperty('--md-secondary', '#555f71');
-            } else if (colorHexOptionValue === 'emerald') {
-                root.style.setProperty('--md-primary', document.body.classList.contains('theme-light') ? '#006d43' : '#6cdb9e');
-                root.style.setProperty('--md-secondary', '#4f6354');
-            } else if (colorHexOptionValue === 'purple') {
-                root.style.setProperty('--md-primary', document.body.classList.contains('theme-light') ? '#8100ef' : '#d7baff');
-                root.style.setProperty('--md-secondary', '#645b70');
-            } else if (colorHexOptionValue === 'amber') {
-                root.style.setProperty('--md-primary', document.body.classList.contains('theme-light') ? '#765a00' : '#ffdf9d');
-                root.style.setProperty('--md-secondary', '#6a5d3f');
-            }
-            saveStateToStorageNoReload();
-        }
-
-        function toggleIdentityRole(targetRoleTypeString) {
-            state.currentRole = targetRoleTypeString;
-            const tabPart = document.getElementById('tab-identity-part');
-            const tabFaci = document.getElementById('tab-identity-faci');
-            const formPart = document.getElementById('form-context-participant');
-            const formFaci = document.getElementById('form-context-facilitator');
-
-            if (targetRoleTypeString === 'participant') {
-                tabPart.className = "flex-1 py-3 text-sm font-bold rounded-xl bg-[--md-primary] text-[--md-on-primary] border-0 transition-all cursor-pointer";
-                tabFaci.className = "flex-1 py-3 text-sm font-bold rounded-xl opacity-60 border-0 transition-all cursor-pointer text-[--md-text]";
-                formPart.classList.remove('hidden');
-                formFaci.classList.add('hidden');
-            } else {
-                tabFaci.className = "flex-1 py-3 text-sm font-bold rounded-xl bg-[--md-primary] text-[--md-on-primary] border-0 transition-all cursor-pointer";
-                tabPart.className = "flex-1 py-3 text-sm font-bold rounded-xl opacity-60 border-0 transition-all cursor-pointer text-[--md-text]";
-                formFaci.classList.remove('hidden');
-                formPart.classList.add('hidden');
-            }
-        }
-
-        function switchVisibleInterfaceRouteView(viewIdStringTarget) {
-            ['view-auth-gate', 'view-facilitator-panel', 'view-participant-handshake', 'view-countdown-splash', 'view-gameplay-stage', 'view-post-game-buffer', 'view-results-display'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(viewIdStringTarget).classList.remove('hidden');
-        }
-
-        function verifyAndLaunchFacilitatorDashboard() {
-            const input = document.getElementById('input-faci-code').value.trim().toUpperCase();
-            if (input.length < 4) {
-                alert("Security Error: Lock code sequence must meet the structural 4-character requirement.");
-                return;
-            }
-            state.sessionCode = input;
-            saveStateToPersistenceStore();
-            switchVisibleInterfaceRouteView('view-facilitator-panel');
-        }
-
-        function verifyAndLaunchParticipantSession() {
-            const name = document.getElementById('input-part-name').value.trim();
-            const code = document.getElementById('input-part-code').value.trim().toUpperCase();
-
-            if (!name || code !== state.sessionCode) {
-                alert("Authentication Failed: Session access vectors rejected. Verify code or profile name validation matrices.");
-                return;
-            }
-
-            state.user.name = name;
-            state.user.score = 0;
-            state.user.answers = [];
-            state.user.openEndedResponse = '';
-            state.sandboxPreviewActive = false;
-
-            document.getElementById('handshake-title').innerText = state.config.title.toUpperCase();
-            document.getElementById('handshake-lbl-right').innerText = state.config.labels.right;
-            document.getElementById('handshake-lbl-left').innerText = state.config.labels.left;
-            document.getElementById('handshake-lbl-up').innerText = state.config.labels.up;
-            document.getElementById('handshake-lbl-down').innerText = state.config.labels.down;
-            document.getElementById('handshake-timer').innerText = state.config.timerPerItem;
-
-            switchVisibleInterfaceRouteView('view-participant-handshake');
-        }
-
-        function launchFacilitatorSandboxPreviewRun() {
-            state.user.name = "Facilitator (Sandbox Run)";
-            state.user.score = 0;
-            state.user.answers = [];
-            state.user.openEndedResponse = '';
-            state.sandboxPreviewActive = true;
-
-            document.getElementById('handshake-title').innerText = `SANDBOX PREVIEW: ${state.config.title.toUpperCase()}`;
-            document.getElementById('handshake-lbl-right').innerText = state.config.labels.right;
-            document.getElementById('handshake-lbl-left').innerText = state.config.labels.left;
-            document.getElementById('handshake-lbl-up').innerText = state.config.labels.up;
-            document.getElementById('handshake-lbl-down').innerText = state.config.labels.down;
-            document.getElementById('handshake-timer').innerText = state.config.timerPerItem;
-
-            switchVisibleInterfaceRouteView('view-participant-handshake');
-        }
-
-        function terminateActiveSessionIdentity() {
-            switchVisibleInterfaceRouteView('view-auth-gate');
-        }
-
-        function commitAndSaveFacilitatorSystemConfiguration() {
-            state.config.title = document.getElementById('panel-cfg-title').value.trim() || 'Cap or Trap';
-            state.config.pointsPerItem = parseInt(document.getElementById('panel-cfg-points').value) || 10;
-            state.config.timerPerItem = parseInt(document.getElementById('panel-cfg-timer').value) || 15;
-            state.config.labels.right = document.getElementById('panel-lbl-right').value.trim() || 'CAP';
-            state.config.labels.left = document.getElementById('panel-lbl-left').value.trim() || 'TRAP';
-            state.config.labels.up = document.getElementById('panel-lbl-up').value.trim() || 'SKIP';
-            state.config.labels.down = document.getElementById('panel-lbl-down').value.trim() || 'TRASH';
-            state.config.music = document.getElementById('panel-cfg-music').value;
-            state.config.openEndedPrompt = document.getElementById('panel-cfg-open').value.trim();
-
-            const rawText = document.getElementById('panel-cfg-raw').value;
-            const lines = rawText.split('\n');
-            const parsedQuestions = [];
-            let tracker = 1;
-
-            lines.forEach(line => {
-                if (line.includes('|')) {
-                    const fragments = line.split('|');
-                    const text = fragments[0].trim();
-                    const evalTrueFalse = fragments[1].trim().toLowerCase() === 'true';
-                    if (text) {
-                        parsedQuestions.push({ id: tracker++, text: text, answer: evalTrueFalse });
-                    }
-                }
-            });
-
-            if (parsedQuestions.length > 0) state.config.questions = parsedQuestions;
-
-            document.getElementById('global-runtime-logo').innerText = state.config.title.toUpperCase();
-            saveStateToPersistenceStore();
-            alert("Platform System Configuration Deployed Successfully.");
-        }
-
-        function triggerDestructiveSessionWipe() {
-            if (confirm("System Alert: Wipe entire local storage profiles and terminate configurations? This step resets tracking databases.")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        function downloadCSVTemplateDataBank() {
-            const dataHeader = "Question Text Matrix Structural Area Element String | Expected Verification Factor (true / false)\nSample Core Chemistry Statement Placeholder Elements | true\nSample High Energy Density Thermodynamic Statement Profile | false";
-            const hiddenAnchor = document.createElement('a');
-            hiddenAnchor.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataHeader);
-            hiddenAnchor.target = '_blank';
-            hiddenAnchor.download = 'cap_or_trap_question_template.txt';
-            hiddenAnchor.click();
-        }
-
-        function exportActiveSessionConfigurationPackage() {
-            const payload = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const dlNode = document.createElement('a');
-            dlNode.setAttribute("href", payload);
-            dlNode.setAttribute("download", `session_node_${state.sessionCode}_manifest.json`);
-            dlNode.click();
-        }
-
-        function triggerFileImportSystemBridge() {
-            document.getElementById('bridge-file-input').click();
-        }
-
-        function processImportedSessionStatePackage(evt) {
-            const targetFile = evt.target.files[0];
-            if (!targetFile) return;
-            const frameworkFileReader = new FileReader();
-            frameworkFileReader.onload = function(e) {
-                try {
-                    const statePackage = JSON.parse(e.target.result);
-                    if (statePackage.config && statePackage.sessionCode) {
-                        state.config = statePackage.config;
-                        state.sessionCode = statePackage.sessionCode;
-                        if (confirm("Telemetry Sync Check: Maintain historical client logging responses? Select cancel to wipe telemetry indexes.")) {
-                            state.participantLogs = statePackage.participantLogs || [];
-                        } else {
-                            state.participantLogs = [];
-                        }
-                        saveStateToPersistenceStore();
-                        syncFacilitatorControlPanelFields();
-                        alert("Session Architecture Stream Upload Complete.");
-                    }
-                } catch (err) { alert("File Processing Error: Target data failed parsing checks."); }
+        function triggerImport() { document.getElementById('fileImport').click(); }
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                alert("Session parsed successfully via text stream pipeline data maps.");
+                document.getElementById('dashSessionName').innerText = "Imported Track Stack";
             };
-            frameworkFileReader.readAsText(targetFile);
+            reader.readAsText(file);
         }
 
-        function renderLiveTelemetryLedgersAndLeaderboards() {
-            const ledger = document.getElementById('telemetry-live-ledger');
-            const boards = document.getElementById('telemetry-live-leaderboard');
-
-            if (!state.participantLogs || state.participantLogs.length === 0) {
-                ledger.innerHTML = `<p class="opacity-50 text-center py-4">Awaiting streaming logging rows...</p>`;
-                boards.innerHTML = `<p class="opacity-50 text-center py-4">No active records computed.</p>`;
-                return;
-            }
-
-            ledger.innerHTML = "";
-            state.participantLogs.forEach(log => {
-                const row = document.createElement('div');
-                row.className = "p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl mb-1 flex justify-between";
-                row.innerHTML = `<span><strong>${log.name}</strong></span><span class="font-mono text-[--md-primary]">${log.score} pts</span>`;
-                ledger.appendChild(row);
-            });
-
-            const sorted = [...state.participantLogs].sort((x, y) => y.score - x.score);
-            boards.innerHTML = "";
-            sorted.forEach((log, index) => {
-                const row = document.createElement('div');
-                row.className = "p-2 bg-[--md-surface-variant] border border-[--md-border] rounded-xl mb-1 flex justify-between items-center";
-                row.innerHTML = `<span><strong>#${index + 1}</strong> ${log.name}</span><span class="font-mono font-bold text-emerald-400">${log.score}</span>`;
-                boards.appendChild(row);
-            });
+        function triggerQuestionImport() { document.getElementById('questionImport').click(); }
+        function handleQuestionImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('cfgQuestions').value = evt.target.result;
+            };
+            reader.readAsText(file);
         }
 
-        function initializeSystemTimerCountdownClock() {
-            const element = document.getElementById('countdown-banner-ticker');
-            element.classList.remove('hidden');
-            let currentOffset = 86400;
-            setInterval(() => {
-                currentOffset--;
-                if (currentOffset <= 0) {
-                    element.innerText = "SESSION STATUS: EXPIRED WIPE SEQUENCE ACTIVE";
-                    element.className = "text-xs bg-red-600/20 text-red-300 px-3 py-2 rounded-full";
-                } else {
-                    const hrs = Math.floor(currentOffset / 3600);
-                    const mins = Math.floor((currentOffset % 3600) / 60);
-                    const secs = currentOffset % 60;
-                    element.innerText = `Engine Lock Expiry: ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                }
-            }, 1000);
+        function exportSession() {
+            const dataString = generateSessionLogString();
+            blobDownload(dataString, `Session_Export_${sessionData.sessionCode}.txt`);
         }
 
-        function captureHandshakeMetadataReceipt() {
-            alert(`Metadata Frame Parameters Cached:\nSession ID: ${state.config.title}\nSecure Keycode: ${state.sessionCode}`);
+        function downloadCurrentData() {
+            exportSession();
         }
 
-        function initializeCountdownSequence() {
-            switchVisibleInterfaceRouteView('view-countdown-splash');
-            let val = 3;
-            const node = document.getElementById('countdown-splash-digit');
-
-            if (state.config.music !== 'none' && AUDIO_ASSET_DICTIONARY[state.config.music]) {
-                const enginePlayer = document.getElementById('audio-playback-engine');
-                enginePlayer.src = AUDIO_ASSET_DICTIONARY[state.config.music];
-                enginePlayer.volume = 0.3;
-                enginePlayer.play().catch(e => console.log("Audio pipeline requires viewport touch initialization."));
-            }
-
-            const frameTimerLoop = setInterval(() => {
-                val--;
-                if (val > 0) {
-                    node.innerText = val;
-                } else {
-                    clearInterval(frameTimerLoop);
-                    launchEngineGameplaySimulation();
-                }
-            }, 1000);
-        }
-
-        function launchEngineGameplaySimulation() {
-            state.activeDeck = [...state.config.questions];
-            state.skippedDeck = [];
-            state.trashedDeck = [];
-            state.currentCardIndex = 0;
-
-            document.getElementById('hud-display-name').innerText = state.user.name;
-            document.getElementById('hud-display-score').innerText = state.user.score;
-
-            // Sync structural control key labels
-            document.getElementById('btn-lbl-left').innerText = state.config.labels.left;
-            document.getElementById('btn-lbl-up').innerText = state.config.labels.up;
-            document.getElementById('btn-lbl-down').innerText = state.config.labels.down;
-            document.getElementById('btn-lbl-right').innerText = state.config.labels.right;
-
-            switchVisibleInterfaceRouteView('view-gameplay-stage');
-            renderActiveCardStackNodeIndex();
-        }
-
-        function renderActiveCardStackNodeIndex() {
-            clearInterval(state.cardTimer);
-            const stackBox = document.getElementById('card-stack-viewport');
-            stackBox.innerHTML = "";
-
-            if (state.currentCardIndex >= state.activeDeck.length) {
-                renderPostGameBufferEvaluations();
-                return;
-            }
-
-            const modelData = state.activeDeck[state.currentCardIndex];
-            const elementNode = document.createElement('div');
-            elementNode.className = "engine-card md-panel rounded-3xl p-8 flex flex-col justify-between shadow-2xl select-none";
+        function generateSessionLogString() {
+            let log = `SESSION NAME: ${document.getElementById('dashSessionName').innerText}\n`;
+            log += `SESSION CODE: ${sessionData.sessionCode}\n`;
+            log += `LAST UPDATED: ${new Date().toISOString()}\n\n`;
+            log += `--- SETTINGS MATRIX ---\n`;
+            log += `Time Per Card: ${document.getElementById('cfgTime').value}s | Points: ${document.getElementById('cfgPoints').value}\n`;
+            log += `Labels: R:${document.getElementById('cfgRight').value} L:${document.getElementById('cfgLeft').value} U:${document.getElementById('cfgUp').value} D:${document.getElementById('cfgDown').value}\n\n`;
             
-            elementNode.innerHTML = `
-                <div class="flex justify-between items-center text-xs opacity-50 font-mono tracking-wider">
-                    <span>Card Record: #${modelData.id}</span>
-                    <span>Evaluation Matrix Array: ${state.currentCardIndex + 1} of ${state.activeDeck.length}</span>
-                </div>
-                <div class="text-center py-6 flex-1 flex items-center justify-center">
-                    <p class="text-2xl md:text-4xl font-extrabold tracking-tight leading-snug break-words max-w-full">${modelData.text}</p>
-                </div>
-                <div class="text-center text-xs opacity-40 uppercase tracking-widest font-bold">
-                    Swipe or use bottom control panel keys to map execution routing
-                </div>
+            log += `--- QUESTIONS LIST ---\n${document.getElementById('cfgQuestions').value}\n\n`;
+            log += `Last Question: ${document.getElementById('cfgLastQuestion').value}\n\n`;
+            
+            log += `--- LIVE PARTICIPANT LOGS ---\n`;
+            sessionData.participants.forEach(p => {
+                log += `Participant: ${p.name} | Total Score: ${p.score} pts | Joined: ${p.timestamp}\n`;
+                log += `Responses: ${p.items.join(', ')}\n`;
+                log += `Last Question Response: "${p.lastAnswer}"\n\n`;
+            });
+            return log;
+        }
+
+        function openLeaderboard() {
+            document.getElementById('leaderboardModal').classList.remove('hidden');
+            const lBody = document.getElementById('leaderboardTable').querySelector('tbody');
+            lBody.innerHTML = "";
+            const sortedPart = [...sessionData.participants].sort((a,b) => b.score - a.score);
+            sortedPart.forEach((p, idx) => {
+                lBody.innerHTML += `<tr><td>#${idx+1}</td><td>${p.name}</td><td>${p.score} pts</td></tr>`;
+            });
+
+            const iBody = document.getElementById('itemAnalysisTable').querySelector('tbody');
+            iBody.innerHTML = `
+                <tr><td>Photosynthesis.../No</td><td>2</td><td>0</td><td>1</td><td>0</td></tr>
+                <tr><td>Light vectors.../Yes</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
             `;
-
-            stackBox.appendChild(elementNode);
-            bindPointerGesturesToTargetCard(elementNode, modelData);
-            launchItemizedCountdownProcessingLoop();
         }
 
-        function launchItemizedCountdownProcessingLoop() {
-            state.timeLeft = state.config.timerPerItem;
-            document.getElementById('hud-display-timer').innerText = state.timeLeft;
-
-            state.cardTimer = setInterval(() => {
-                state.timeLeft--;
-                document.getElementById('hud-display-timer').innerText = state.timeLeft;
-                if (state.timeLeft <= 0) {
-                    clearInterval(state.cardTimer);
-                    resolveCardProcessingDecisionRoute('up', state.activeDeck[state.currentCardIndex]);
-                }
-            }, 1000);
-        }
-
-        function bindPointerGesturesToTargetCard(targetNode, structuralModelData) {
-            let x0 = 0, y0 = 0, dx = 0, dy = 0, activeDrag = false;
-
-            targetNode.addEventListener('pointerdown', (e) => {
-                activeDrag = true;
-                x0 = e.clientX;
-                y0 = e.clientY;
-                targetNode.style.transition = 'none';
-                targetNode.setPointerCapture(e.pointerId);
-            });
-
-            targetNode.addEventListener('pointermove', (e) => {
-                if (!activeDrag) return;
-                dx = e.clientX - x0;
-                dy = e.clientY - y0;
-                let rotateFactor = dx * 0.04;
-                targetNode.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotateFactor}deg)`;
-            });
-
-            targetNode.addEventListener('pointerup', (e) => {
-                if (!activeDrag) return;
-                activeDrag = false;
-                targetNode.releasePointerCapture(e.pointerId);
-                targetNode.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-
-                if (dx > 140) {
-                    resolveCardProcessingDecisionRoute('right', structuralModelData);
-                } else if (dx < -140) {
-                    resolveCardProcessingDecisionRoute('left', structuralModelData);
-                } else if (dy < -140) {
-                    resolveCardProcessingDecisionRoute('up', structuralModelData);
-                } else if (dy > 140) {
-                    resolveCardProcessingDecisionRoute('down', structuralModelData);
-                } else {
-                    targetNode.style.transform = 'translate(0px, 0px) rotate(0deg)';
-                }
-                dx = 0; dy = 0;
-            });
-        }
-
-        function triggerManualButtonSwipeResolution(buttonDecisionDirectionRoute) {
-            if (state.currentCardIndex >= state.activeDeck.length) return;
-            const cardData = state.activeDeck[state.currentCardIndex];
-            const targetElementCardNode = document.querySelector('.engine-card');
-            
-            if (targetElementCardNode) {
-                targetElementCardNode.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-                if (buttonDecisionDirectionRoute === 'right') targetElementCardNode.style.transform = 'translate(400px, 0px) rotate(20deg)';
-                if (buttonDecisionDirectionRoute === 'left') targetElementCardNode.style.transform = 'translate(-400px, 0px) rotate(-20deg)';
-                if (buttonDecisionDirectionRoute === 'up') targetElementCardNode.style.transform = 'translate(0px, -400px)';
-                if (buttonDecisionDirectionRoute === 'down') targetElementCardNode.style.transform = 'translate(0px, 400px)';
-                targetElementCardNode.style.opacity = '0';
-            }
-
-            setTimeout(() => {
-                resolveCardProcessingDecisionRoute(buttonDecisionDirectionRoute, cardData);
-            }, 200);
-        }
-
-        function resolveCardProcessingDecisionRoute(directionRoute, cardModelScope) {
-            clearInterval(state.cardTimer);
-
-            if (directionRoute === 'right') {
-                commitEvaluatedPointsValueScore(cardModelScope, true);
-                state.currentCardIndex++;
-            } else if (directionRoute === 'left') {
-                commitEvaluatedPointsValueScore(cardModelScope, false);
-                state.currentCardIndex++;
-            } else if (directionRoute === 'up') {
-                state.skippedDeck.push(cardModelScope);
-                state.activeDeck.push(cardModelScope);
-                state.currentCardIndex++;
-            } else if (directionRoute === 'down') {
-                state.trashedDeck.push(cardModelScope);
-                state.currentCardIndex++;
-            }
-
-            renderActiveCardStackNodeIndex();
-        }
-
-        function commitEvaluatedPointsValueScore(cardScope, selectedBoolEvaluation) {
-            const correctnessFlag = (cardScope.answer === selectedBoolEvaluation);
-            let earnedScorePoints = 0;
-
-            if (correctnessFlag) {
-                earnedScorePoints = state.config.pointsPerItem + Math.max(0, state.timeLeft);
-                state.user.score += earnedScorePoints;
-                confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 } });
-            }
-
-            state.user.answers.push({
-                cardId: cardScope.id,
-                text: cardScope.text,
-                actual: cardScope.answer,
-                provided: selectedBoolEvaluation,
-                correct: correctnessFlag,
-                points: earnedScorePoints
-            });
-
-            document.getElementById('hud-display-score').innerText = state.user.score;
-        }
-
-        function renderPostGameBufferEvaluations() {
-            switchVisibleInterfaceRouteView('view-post-game-buffer');
-
-            if (state.config.openEndedPrompt) {
-                document.getElementById('wrapper-open-ended-field').classList.remove('hidden');
-                document.getElementById('display-open-ended-prompt').innerText = state.config.openEndedPrompt;
-            } else {
-                document.getElementById('wrapper-open-ended-field').classList.add('hidden');
-            }
-
-            if (state.skippedDeck.length > 0) {
-                document.getElementById('wrapper-skipped-remediation-field').classList.remove('hidden');
-                document.getElementById('badge-skipped-count').innerText = state.skippedDeck.length;
-            } else {
-                document.getElementById('wrapper-skipped-remediation-field').classList.add('hidden');
-            }
-
-            if (state.trashedDeck.length > 0) {
-                document.getElementById('wrapper-trash-remediation-field').classList.remove('hidden');
-                document.getElementById('badge-trash-count').innerText = state.trashedDeck.length;
-            } else {
-                document.getElementById('wrapper-trash-remediation-field').classList.add('hidden');
-            }
-        }
-
-        function requeueSkippedDeckElementsForProcessing() {
-            state.activeDeck = [...state.skippedDeck];
-            state.skippedDeck = [];
-            state.currentCardIndex = 0;
-            switchVisibleInterfaceRouteView('view-gameplay-stage');
-            renderActiveCardStackNodeIndex();
-        }
-
-        function revealAndToggleTrashInspectionMatrix() {
-            const areaBox = document.getElementById('display-trash-inspection-matrix');
-            areaBox.classList.toggle('hidden');
-            areaBox.innerHTML = "";
-
-            state.trashedDeck.forEach(card => {
-                const line = document.createElement('div');
-                line.className = "p-3 rounded-xl bg-[--md-surface] border border-[--md-border] flex justify-between items-center text-xs";
-                line.innerHTML = `<span class="truncate mr-4">${card.text}</span><span class="font-bold text-amber-400 shrink-0">Solution Key: ${card.answer ? state.config.labels.right : state.config.labels.left}</span>`;
-                areaBox.appendChild(line);
-            });
-        }
-
-        function lockAndTransmitFinalMetricsPackage() {
-            state.user.openEndedResponse = document.getElementById('input-open-ended-response').value.trim();
-
-            if (!state.sandboxPreviewActive) {
-                state.participantLogs.push({
-                    name: state.user.name,
-                    score: state.user.score,
-                    timestamp: new Date().toISOString(),
-                    openEnded: state.user.openEndedResponse
-                });
-                saveStateToPersistenceStore();
-            }
-
-            document.getElementById('receipt-session-identity').innerText = state.config.title.toUpperCase();
-            document.getElementById('receipt-pilot-callsign').innerText = state.user.name;
-            document.getElementById('receipt-metric-score').innerText = state.user.score;
-
-            const total = state.user.answers.length;
-            const cleanMatches = state.user.answers.filter(a => a.correct).length;
-            const accuracyRatio = total > 0 ? Math.round((cleanMatches / total) * 100) : 0;
-            document.getElementById('receipt-metric-accuracy').innerText = `${accuracyRatio}%`;
-
-            // Process rankings calculations dynamic updates
-            if (state.sandboxPreviewActive) {
-                document.getElementById('receipt-leaderboard-placement').innerText = "SANDBOX SANDBOX ENVIRONMENT ACTIVE RUNS ARE UNRANKED";
-            } else {
-                const rankSorted = [...state.participantLogs].sort((m, n) => n.score - m.score);
-                const rankIndex = rankSorted.findIndex(l => l.name === state.user.name && l.score === state.user.score);
-                document.getElementById('receipt-leaderboard-placement').innerHTML = `<span class="material-icons-outlined text-xs">leaderboard</span> Current Live Standing Pool Placement Rank: #${rankIndex !== -1 ? rankIndex + 1 : 1} of ${state.participantLogs.length}`;
-            }
-
-            const wrapperListBox = document.getElementById('receipt-itemized-breakdown-list');
-            wrapperListBox.innerHTML = "";
-
-            state.user.answers.forEach(item => {
-                const rowLine = document.createElement('div');
-                rowLine.className = `p-3 rounded-xl flex justify-between items-center border ${item.correct ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-red-500/10 border-red-500/20 text-red-300'}`;
-                rowLine.innerHTML = `<span class="truncate max-w-[70%] font-medium">${item.text}</span><span class="font-mono font-bold">${item.correct ? '+' + item.points : '0'}</span>`;
-                wrapperListBox.appendChild(rowLine);
-            });
-
-            // Shutdown backing tracks audio playback
-            document.getElementById('audio-playback-engine').pause();
-            switchVisibleInterfaceRouteView('view-results-display');
-        }
-
-        function generateHighResolutionPerformanceImageLog() {
-            const block = document.getElementById('capture-boundary-box');
-            html2canvas(block, { backgroundColor: '#121318', scale: 2 }).then(canvasElement => {
-                const anchor = document.createElement('a');
-                anchor.download = `performance_telemetry_receipt_${state.user.name}.png`;
-                anchor.href = canvasElement.toDataURL();
-                anchor.click();
-            });
-        }
-
-        function terminateActiveParticipantStateAndRefreshFacilitatorView() {
-            if (state.sandboxPreviewActive) {
-                switchVisibleInterfaceRouteView('view-facilitator-panel');
-                syncFacilitatorControlPanelFields();
-            } else {
-                switchVisibleInterfaceRouteView('view-auth-gate');
-                location.reload();
-            }
-        }
-
-        function terminateActiveParticipantStateAndReset() {
-            terminateActiveParticipantStateAndRefreshFacilitatorView();
+        function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); }
+        function blobDownload(text, filename) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = filename;
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
         }
     </script>
 </body>
