@@ -8,10 +8,9 @@ A curated collection of web apps designed for personal productivity and interact
 
 | Project Name | Live Preview | Description | Status |
 | :--- | :--- | :--- | :--- |
-| **Icebreaker App** | [Launch App 🌐](https://praejames.github.io/justapps/Icebreaker%20App.html) | Interactive icebreaker activity designed for students to kickstart classroom engagement. | 🟡 In Development |
-| **App Name 2** | [Launch App 🌐](https://praejames.github.io/justapps/Your_File_Name_Here.html) | Brief 1-sentence description of what this second app does for your teaching or workflow. | 🟡 In Development |
-
-*(To add more apps, just add a new row to the table above using the same format).*
+| **Icebreaker App** | [Launch App 🌐](https://praejames.github.io/justapps/Icebreaker%20App.html) | Interactive activity designed to kickstart classroom engagement and student interaction. | 🟡 In Development |
+| **Roulette App** | [Launch App 🌐](https://praejames.github.io/justapps/Roullete%20App.html) | A randomized selector tool, perfect for picking students or generating random prompts. | 🟡 In Development |
+| **Swipe App** | [Launch App 🌐](https://praejames.github.io/justapps/Swipe%20app.html) | A dynamic, gesture-based app featuring Firebase integration and optimized CSS styles. | 🟡 In Development |
 
 ---
 
