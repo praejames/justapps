@@ -3,1412 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roulette App by James Prae</title>
+    <title>AghámOS Roulette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ==========================================
-           GLOBAL DESIGN VARIABLES & SYSTEM THEMING
-           ========================================== */
-        :root {
-            --accent: #00f2fe;
-            --duration: 5s;
-            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            
-            /* Fallback Core Bases */
-            --bg: #07090e;
-            --surface: rgba(13, 17, 28, 0.95);
-            --text: #ffffff;
-            --text-muted: #64748b;
-            --border: rgba(255, 255, 255, 0.1);
-            --radius: 8px;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --backdrop: blur(0px);
-            --bg-gradient: none;
-            --wheel-border: #1e293b;
-        }
-
-        /* --- 1. CLASSIC THEME (Retro Mac / Windows Industrial) --- */
-        body.theme-classic.mode-light {
-            --bg: #E0E0E0;
-            --surface: #FFFFFF;
-            --text: #000000;
-            --text-muted: #555555;
-            --border: #000000;
-            --radius: 0px;
-            --shadow: 4px 4px 0px #000000;
-            --font-sans: 'Courier New', 'SF Pro Text', 'Chicago', monospace;
-            --wheel-border: #000000;
-        }
-        body.theme-classic.mode-dark {
-            --bg: #1A1A1A;
-            --surface: #2D2D2D;
-            --text: #FFFFFF;
-            --text-muted: #AAAAAA;
-            --border: #FFFFFF;
-            --radius: 0px;
-            --shadow: 4px 4px 0px #000000;
-            --font-sans: 'Courier New', 'SF Pro Text', 'Chicago', monospace;
-            --wheel-border: #FFFFFF;
-        }
-
-        /* --- 2. RETRO THEME (Vaporwave / Arcade Quads) --- */
-        body.theme-retro.mode-light {
-            --bg: #F5E6D3;
-            --surface: #E8D3BC;
-            --text: #111111;
-            --text-muted: #665544;
-            --border: #4a3c31;
-            --radius: 4px;
-            --shadow: 3px 3px 0px #4a3c31;
-            --font-sans: 'VT323', 'Press Start 2P', 'Impact', sans-serif;
-            --backdrop: blur(4px);
-            --wheel-border: #4a3c31;
-        }
-        body.theme-retro.mode-dark {
-            --bg: #0B001A;
-            --surface: #1F003A;
-            --text: #FFFFFF;
-            --text-muted: #FF007F;
-            --border: #FF007F;
-            --radius: 4px;
-            --shadow: 0 0 12px rgba(255, 0, 127, 0.6);
-            --font-sans: 'VT323', 'Press Start 2P', 'Impact', sans-serif;
-            --backdrop: blur(4px);
-            --wheel-border: #00F0FF;
-        }
-
-        /* --- 3. MODERN THEME (Android Material Expressive) --- */
-        body.theme-modern.mode-light {
-            --bg: #F9F6F0;
-            --surface: #FFFFFF;
-            --text: #1A2421;
-            --text-muted: #5C6A65;
-            --border: rgba(0, 0, 0, 0.05);
-            --radius: 24px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-            --font-sans: 'Inter', 'Roboto', 'Plus Jakarta Sans', sans-serif;
-            --wheel-border: rgba(0, 0, 0, 0.08);
-        }
-        body.theme-modern.mode-dark {
-            --bg: #121816;
-            --surface: #1C2422;
-            --text: #E3E9E6;
-            --text-muted: #8A9A94;
-            --border: rgba(255, 255, 255, 0.04);
-            --radius: 24px;
-            --shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            --font-sans: 'Inter', 'Roboto', 'Plus Jakarta Sans', sans-serif;
-            --wheel-border: rgba(255, 255, 255, 0.1);
-        }
-
-        /* --- 4. GLASS THEME (Liquid Glassmorphism) --- */
-        body.theme-glass.mode-light {
-            --bg: #E0E7FF;
-            --bg-gradient: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
-            --surface: rgba(255, 255, 255, 0.45);
-            --text: #1E1E2F;
-            --text-muted: #4B4B63;
-            --border: rgba(255, 255, 255, 0.4);
-            --radius: 16px;
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            --backdrop: blur(20px);
-            --font-sans: 'SF Pro Display', 'Inter', 'Helvetica Neue', sans-serif;
-            --wheel-border: rgba(255, 255, 255, 0.5);
-        }
-        body.theme-glass.mode-dark {
-            --bg: #0F0F19;
-            --bg-gradient: linear-gradient(135deg, #0F0C20 0%, #061726 50%, #02000A 100%);
-            --surface: rgba(15, 15, 25, 0.55);
-            --text: #FFFFFF;
-            --text-muted: #A0A0B5;
-            --border: rgba(255, 255, 255, 0.15);
-            --radius: 16px;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            --backdrop: blur(20px);
-            --font-sans: 'SF Pro Display', 'Inter', 'Helvetica Neue', sans-serif;
-            --wheel-border: rgba(255, 255, 255, 0.2);
-        }
-
-        /* ==========================================
-           CORE STYLING ARCHITECTURE
-           ========================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
         body {
-            background: var(--bg);
-            background-image: var(--bg-gradient);
-            color: var(--text);
-            font-family: var(--font-sans);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-            transition: background 0.3s ease, color 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-
-        #bg-canvas {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0.35;
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-
-        #top-bar {
-            position: absolute;
-            top: 0; left: 0; width: 100%;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
+        .dark-theme {
+            background-color: #09090b;
+            color: #f4f4f5;
         }
-
-        #activity-title a {
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: var(--text);
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 2px;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 12px;
-        }
-
-        /* Accessible Contrast Buttons */
-        .btn-action {
-            background: var(--text);
-            color: var(--bg);
-            border: 1px solid var(--border);
-            padding: 12px 24px;
-            border-radius: var(--radius);
-            font-weight: 700;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .btn-action:hover {
-            background: var(--accent);
-            color: #000000;
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        #main-stage {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-            padding: 20px;
-            margin-top: 50px;
-        }
-
-        #live-ticker {
-            font-size: 2.8rem;
-            font-weight: 900;
-            margin-bottom: 30px;
-            height: 60px;
-            line-height: 60px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            max-width: 90vw;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        #wheel-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 35px;
-        }
-
-        #wheel-wrapper {
-            position: relative;
-            width: 76vmin;
-            height: 76vmin;
-            max-width: 480px;
-            max-height: 480px;
-            border-radius: 50%;
-            box-shadow: var(--shadow);
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
-
-        #ticker-pin {
-            position: absolute;
-            top: -16px;
-            left: calc(50% - 15px);
-            width: 30px;
-            height: 38px;
-            background: var(--text);
-            clip-path: polygon(50% 100%, 0 0, 100% 0);
-            z-index: 15;
-            transform-origin: 50% 0%;
-        }
-
-        #start-button {
-            background: var(--accent);
-            color: #000000;
-            font-size: 1.1rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            padding: 16px 65px;
-            border: 2px solid var(--text);
-            border-radius: var(--radius);
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        #start-button:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
-        #start-button:disabled {
-            background: var(--text-muted) !important;
-            color: var(--bg) !important;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* --- Slidable Group Results Canvas Sheet --- */
-        #group-mode-layout {
-            display: none;
-            width: 100%;
-            height: 100%;
-            padding: 120px 40px 60px 40px;
-            overflow-x: auto;
-            white-space: nowrap;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 5;
-        }
-        .group-card {
-            display: inline-block;
-            vertical-align: top;
-            width: 290px;
-            background: var(--surface);
-            backdrop-filter: var(--backdrop);
-            -webkit-backdrop-filter: var(--backdrop);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-            margin-right: 25px;
-            white-space: normal;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .group-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-        }
-        .group-card h4 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 8px;
-            color: var(--text);
-        }
-        .group-member-item {
-            padding: 8px 0;
-            font-size: 0.95rem;
-            color: var(--text);
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* --- Sliding Sheet Panels --- */
-        .sliding-sheet {
-            position: fixed;
-            top: 0; right: 0;
-            width: 440px; max-width: 100vw; height: 100vh;
-            background: var(--surface);
-            backdrop-filter: var(--backdrop);
-            -webkit-backdrop-filter: var(--backdrop);
-            border-left: 2px solid var(--border);
-            box-shadow: var(--shadow);
-            z-index: 100;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
-        }
-        .sliding-sheet.open { transform: translateX(0); }
-
-        .sheet-header {
-            padding: 25px 30px;
-            border-bottom: 2px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .sheet-header h2 { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .sheet-body {
-            padding: 30px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        label { 
-            display: block; 
-            font-size: 0.8rem; 
-            margin-bottom: 8px; 
-            margin-top: 15px;
-            color: var(--text); 
-            font-weight: 800;
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-        }
-        
-        textarea, input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: var(--radius);
-            border: 2px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-        textarea { height: 110px; resize: none; }
-        textarea:focus, input:focus, select:focus { border-color: var(--accent); outline: none; }
-        
-        /* High-contrast Buttons inside menus */
-        .btn-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-row button { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: var(--radius); 
-            background: var(--text); 
-            border: 2px solid var(--border); 
-            color: var(--bg); 
-            font-weight: 800; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 0.75rem; 
-        }
-        .btn-row button:hover { background: var(--accent); color: #000000; }
-
-        /* Rainbow Selection Grid Node Elements */
-        .color-dots-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            margin-top: 5px;
-        }
-        .color-dot {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid var(--border);
-            transition: transform 0.2s;
-        }
-        .color-dot:hover { transform: scale(1.15); }
-        .color-dot.active { border-color: var(--text); transform: scale(1.1); box-shadow: 0 0 8px var(--accent); }
-        
-        .picker-wrapper {
-            position: relative;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--border);
-            background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
-        }
-        .picker-wrapper input[type="color"] {
-            position: absolute;
-            top: -10px; left: -10px;
-            width: 50px; height: 50px;
-            cursor: pointer;
-            opacity: 0;
-        }
-
-        #history-box {
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            height: 240px;
-            overflow-y: auto;
-            padding: 12px;
-        }
-        .item-log { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: bold; }
-
-        /* Fullscreen Result Focus Screen Cover Panel */
-        #reveal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.95);
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        #reveal-overlay.active { opacity: 1; pointer-events: auto; }
-
-        #reveal-word {
-            font-size: 6vw;
-            font-weight: 900;
-            text-align: center;
-            padding: 20px;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            color: #ffffff;
-            transform: scale(0.7);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #reveal-overlay.active #reveal-word { transform: scale(1); }
-
-        /* Prominent Focus Display for Maximized Groups */
-        #group-focus-overlay {
-            position: fixed;
-            top:0; left:0; width:100vw; height:100vh;
-            background: rgba(0, 0, 0, 0.96);
-            z-index: 250;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        #group-focus-title { font-size: 4.5rem; font-weight: 900; color: var(--accent); margin-bottom: 25px; text-transform: uppercase; }
-        #group-focus-list { font-size: 2.2rem; text-align: center; line-height: 1.6; max-width: 80%; color: #fff; }
-
-        .anim-relaxing { text-shadow: 0 0 20px rgba(255,255,255,0.6); color: #fff; }
-        .anim-exciting { animation: glowPulse 1.2s infinite ease-in-out; }
-        .anim-threatening { color: #ff0055 !important; animation: glitchShake 0.1s infinite alternate; }
-
-        @keyframes glowPulse {
-            0%, 100% { text-shadow: 0 0 30px var(--accent); color: #fff; }
-            50% { text-shadow: 0 0 60px #ff00ea; color: var(--accent); transform: scale(1.05); }
-        }
-        @keyframes glitchShake {
-            0% { transform: translate(2px, 1px); }
-            100% { transform: translate(-2px, -1px); }
-        }
-
-        .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.85rem; cursor: pointer; font-weight: bold; }
-        .checkbox-label input { width: auto; margin: 0; }
-
-        @media (max-width: 768px) {
-            #reveal-word { font-size: 13vw; }
-            #live-ticker { font-size: 1.8rem; }
-            .sliding-sheet { width: 100%; }
+        .wheel-clip {
+            mask-image: radial-gradient(circle, black 35%, transparent 35%);
+            -webkit-mask-image: radial-gradient(circle, black 35%, transparent 35%);
         }
     </style>
 </head>
-<body class="theme-modern mode-dark">
+<body class="dark-theme min-h-screen flex flex-col justify-between p-4 md:p-8 overflow-x-hidden">
 
-    <canvas id="bg-canvas"></canvas>
-
-    <div id="top-bar">
-        <div id="activity-title"><a href="https://praejames.github.io/justapps/" target="_blank">Roulette App by James Prae</a></div>
-        <div class="header-controls">
-            <button class="btn-action" onclick="togglePanel('sheet-history', event)">Results</button>
-            <button class="btn-action" onclick="togglePanel('sheet-settings', event)">Settings</button>
+    <!-- TOP BAR: Clean & Minimal -->
+    <header class="w-full max-w-6xl mx-auto flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <h1 class="text-lg font-semibold tracking-tight uppercase opacity-90">AghámOS // ROULETTE</h1>
         </div>
-    </div>
+        
+        <!-- Tab Navigation Toggle -->
+        <nav class="flex bg-zinc-900/80 p-1 rounded-xl border border-zinc-850" id="nav-tabs">
+            <button onclick="switchTab('app')" id="tab-app" class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm">
+                App
+            </button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200">
+                Settings
+            </button>
+        </nav>
+    </header>
 
-    <div id="main-stage">
-        <div id="live-ticker">Ready to Spin</div>
-        <div id="wheel-container">
-            <div id="ticker-pin"></div>
-            <div id="wheel-wrapper">
-                <canvas id="wheelCanvas" width="1200" height="1200"></canvas>
-            </div>
-            <button id="start-button" onclick="executeStartAction()">Start</button>
-        </div>
-    </div>
-
-    <div id="group-mode-layout"></div>
-
-    <div id="sheet-history" class="sliding-sheet">
-        <div class="sheet-header">
-            <h2>Results</h2>
-            <button class="btn-action" onclick="closePanels()">Close</button>
-        </div>
-        <div class="sheet-body">
-            <div class="btn-row">
-                <button onclick="exportTxtResults()">Export Txt Logs</button>
-                <button onclick="clearLogs()">Clear Log</button>
-            </div>
-            <div id="history-box"></div>
-        </div>
-    </div>
-
-    <div id="sheet-settings" class="sliding-sheet">
-        <div class="sheet-header">
-            <h2>Settings</h2>
-            <button class="btn-action" onclick="closePanels()">Close</button>
-        </div>
-        <div class="sheet-body">
-            <label>Entries (Line Separated)</label>
-            <textarea id="participants-input" oninput="loadFromInput()">Neon Pink&#10;Cyber Cyan&#10;Electric Violet&#10;Acid Lime&#10;Sunset Tangerine&#10;Quantum White&#10;Deep Matrix&#10;Solar Flare</textarea>
+    <!-- MAIN VIEWPORT (Responsive Flex Framework) -->
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center items-center">
+        
+        <!-- SECTION 1: THE RUNTIME INTERFACE -->
+        <section id="view-app" class="w-full flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 transition-all duration-300">
             
-            <div class="btn-row">
-                <button onclick="triggerRosterImport()">Import txt</button>
-                <button onclick="triggerRosterExport()">Export txt</button>
-                <button onclick="injectTemplateRoster()">Txt Template</button>
-            </div>
-            <input type="file" id="hidden-file-input" style="display:none" accept=".txt" onchange="processRosterImport(this)">
-
-            <label>Type of Roulette</label>
-            <select id="cfg-type" onchange="adjustRouletteType(this.value)">
-                <option value="normal" selected>Normal</option>
-                <option value="group">Group</option>
-            </select>
-
-            <div id="group-options-container" style="display:none;">
-                <label>Number of Groups Target</label>
-                <input type="number" id="cfg-group-count" value="2" min="2" max="12" onchange="recalculateGroupCapacities()">
+            <!-- Dynamic Scalable Canvas Rig -->
+            <div class="relative w-full max-w-[320px] sm:max-w-[420px] md:max-w-[480px] aspect-square flex items-center justify-center">
+                <!-- Selector Needle -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-emerald-500 drop-shadow-[0_4px_6px_rgba(16,185,129,0.4)]"></div>
+                
+                <!-- Core Canvas Engine -->
+                <canvas id="wheelCanvas" class="w-full h-full transform transition-transform duration-[4000ms] cubic-bezier(0.1, 0.8, 0.1, 1) drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]"></canvas>
+                
+                <!-- Center Physical Hub Trigger -->
+                <button onclick="spinWheel()" class="absolute w-20 h-20 bg-zinc-900 border-4 border-zinc-800 rounded-full flex items-center justify-center font-bold text-white tracking-wider text-sm active:scale-95 transition-transform shadow-2xl focus:outline-none group hover:border-emerald-500">
+                    <span class="group-hover:scale-105 transition-transform text-xs uppercase tracking-widest">SPIN</span>
+                </button>
             </div>
 
-            <label>Themes</label>
-            <select id="cfg-theme" onchange="updateThemeStyle(this.value)">
-                <option value="modern" selected>Modern</option>
-                <option value="classic">Classic</option>
-                <option value="glass">Glass</option>
-                <option value="retro">Retro</option>
-            </select>
-
-            <label>Mode</label>
-            <select id="cfg-lighting" onchange="updateLightingMode(this.value)">
-                <option value="dark" selected>Dark</option>
-                <option value="light">Light</option>
-            </select>
-
-            <label>Accent</label>
-            <div class="color-dots-container">
-                <div class="color-dot" style="background:#ff0055;" onclick="selectPresetColor('#ff0055', this)"></div>
-                <div class="color-dot" style="background:#ff7b00;" onclick="selectPresetColor('#ff7b00', this)"></div>
-                <div class="color-dot" style="background:#ffea00;" onclick="selectPresetColor('#ffea00', this)"></div>
-                <div class="color-dot" style="background:#00ff66;" onclick="selectPresetColor('#00ff66', this)"></div>
-                <div class="color-dot" style="background:#00f2fe;" onclick="selectPresetColor('#00f2fe', this)"></div>
-                <div class="color-dot" style="background:#0044ff;" onclick="selectPresetColor('#0044ff', this)"></div>
-                <div class="color-dot" style="background:#7000ff;" onclick="selectPresetColor('#7000ff', this)"></div>
-                <div class="picker-wrapper" id="picker-dot-housing">
-                    <input type="color" id="cfg-accent" value="#00f2fe" oninput="selectPresetColor(this.value, null)">
+            <!-- Context Output Panel -->
+            <div class="w-full lg:w-96 flex flex-col items-center lg:items-start text-center lg:text-left gap-6">
+                <div class="space-y-1">
+                    <p class="text-xs tracking-widest text-zinc-500 uppercase font-bold">Selected Result</p>
+                    <h2 id="winnerDisplay" class="text-3xl md:text-5xl font-black tracking-tight text-white line-clamp-2">READY</h2>
+                </div>
+                
+                <div class="w-full p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400">
+                    <span id="poolCount">Roster: 0 loaded</span>
+                    <span class="px-2 py-0.5 bg-zinc-800 rounded text-zinc-500 font-mono">[SPACEBAR]</span>
                 </div>
             </div>
+        </section>
 
-            <label>Spin Duration (Seconds)</label>
-            <input type="number" id="cfg-duration" value="5" min="2" max="15">
+        <!-- SECTION 2: SETTINGS (Isolated Architecture) -->
+        <section id="view-settings" class="w-full max-w-2xl hidden transition-all duration-300">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl">
+                <div>
+                    <h3 class="text-lg font-semibold text-white tracking-tight">Roster Setup</h3>
+                    <p class="text-xs text-zinc-500 mt-0.5">Input names or data points below, one entry per row.</p>
+                </div>
 
-            <label>Animation and Sound</label>
-            <select id="cfg-reveal">
-                <option value="relaxing">Relaxing</option>
-                <option value="exciting" selected>Exciting</option>
-                <option value="threatening">Threatening</option>
-            </select>
+                <textarea id="rosterInput" rows="8" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm font-mono text-zinc-300 focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700 transition-all resize-none" placeholder="Enter list items here..."></textarea>
 
-            <div id="normal-checkboxes">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="chk-remove-selected" checked> Auto-drop winner from pool
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="chk-avoid-repeats" checked> Prevent sequential duplicate wins
-                </label>
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button onclick="saveRoster()" class="flex-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold tracking-wider uppercase py-3 rounded-xl transition-all shadow-md active:scale-[0.99]">
+                        Apply Changes
+                    </button>
+                    <button onclick="clearRoster()" class="px-5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium py-3 rounded-xl transition-all active:scale-[0.99]">
+                        Clear
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <div id="reveal-overlay" onclick="closeReveal()">
-        <div id="reveal-word">WINNER</div>
-        <p style="opacity:0.5; font-size:0.8rem; margin-top:40px; letter-spacing:3px; text-transform:uppercase; color:#fff; font-weight:bold;">Tap Screen to Dismiss</p>
-    </div>
+    <!-- FOOTER STATUS STRIP -->
+    <footer class="w-full max-w-6xl mx-auto mt-6 pt-4 border-t border-zinc-900 text-[10px] tracking-widest text-zinc-600 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div>AGHAMOS ROULETTE // LOCAL STORAGE ACTIVE</div>
+        <div>OFFLINE COMPATIBLE BUILD</div>
+    </footer>
 
-    <div id="group-focus-overlay" onclick="dismissGroupFocus()">
-        <div id="group-focus-title">GROUP 1</div>
-        <div id="group-focus-list">Member Entry List</div>
-        <p style="opacity:0.4; font-size:0.8rem; margin-top:50px; letter-spacing:3px; text-transform:uppercase; color:#fff; font-weight:bold;">Tap Outside to Return</p>
-    </div>
-
+    <!-- RUNTIME APPARATUS MOTOR -->
     <script>
-        let participants = [];
-        let historyLog = [];
-        let lastWinner = null;
-        let currentRotation = 0;
+        // System Core State Array
+        let items = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"];
         let isSpinning = false;
-        
-        let isDragging = false;
-        let startAngle = 0;
-        let rotationVelocity = 0;
-        let frameRotationDelta = 0;
-
-        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let lastTickSegment = 0;
-
-        let groupsArray = [];
-        let groupSessionActive = false;
-        let sessionStartTimeString = "";
+        let currentAngle = 0;
 
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
-        const wheelWrapper = document.getElementById('wheel-wrapper');
-        const pinEl = document.getElementById('ticker-pin');
-        const bgCanvas = document.getElementById('bg-canvas');
-        const bgCtx = bgCanvas.getContext('2d');
 
-        // Design language palette arrays
-        const palettes = {
-            modern: ['#ff0055', '#00f2fe', '#7000ff', '#ffb800', '#00ff66', '#ff00aa', '#0055ff', '#a1ff00'],
-            classic: ['#1A1A1A', '#4D4D4D', '#808080', '#AEAEAE', '#333333', '#666666', '#CCCCCC', '#555555'],
-            glass: ['rgba(0,242,254,0.4)', 'rgba(255,0,85,0.4)', 'rgba(112,0,255,0.4)', 'rgba(0,255,102,0.4)'],
-            retro: ['#FF007F', '#00FF00', '#00F0FF', '#FFB800', '#7000ff', '#ff0055']
-        };
+        // Color Arrays (High Contrast, Accessible Minimalist UI palette)
+        const colors = [
+            '#18181b', '#27272a', '#3f3f46', '#52525b',
+            '#09090b', '#1c1917', '#2e2a24', '#1e1b4b'
+        ];
 
-        let particlesArray = [];
-
-        window.onload = () => {
-            configureCanvasViewports();
-            window.addEventListener('resize', configureCanvasViewports);
-            setupInteractivePhysics();
-            setupOutsideDismissal();
+        // System Lifecycle Init
+        window.addEventListener('DOMContentLoaded', () => {
+            initLocalStorage();
+            resizeCanvasRig();
+            drawWheel();
             
-            // Local storage cache values loading loop
-            if (localStorage.getItem('jpr_participants')) {
-                document.getElementById('participants-input').value = localStorage.getItem('jpr_participants');
-            }
-            if (localStorage.getItem('jpr_theme')) {
-                document.getElementById('cfg-theme').value = localStorage.getItem('jpr_theme');
-            }
-            if (localStorage.getItem('jpr_lighting')) {
-                document.getElementById('cfg-lighting').value = localStorage.getItem('jpr_lighting');
-            }
-            if (localStorage.getItem('jpr_accent')) {
-                document.getElementById('cfg-accent').value = localStorage.getItem('jpr_accent');
-            }
-
-            updateThemeAndModeClasses();
-            syncAccentUIPreset(document.getElementById('cfg-accent').value);
-            loadFromInput();
-            initAmbientParticles();
-            runParticleEngine();
-        };
-
-        function configureCanvasViewports() {
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            renderWheel();
-        }
-
-        function togglePanel(id, event) {
-            if (event) event.stopPropagation();
-            const panel = document.getElementById(id);
-            const isOpen = panel.classList.contains('open');
-            closePanels();
-            if (!isOpen) panel.classList.add('open');
-        }
-
-        function closePanels() {
-            document.querySelectorAll('.sliding-sheet').forEach(p => p.classList.remove('open'));
-            saveToLocalStorage();
-        }
-
-        function setupOutsideDismissal() {
-            window.addEventListener('click', (e) => {
-                const openSheets = document.querySelectorAll('.sliding-sheet.open');
-                openSheets.forEach(sheet => {
-                    if (!sheet.contains(e.target)) closePanels();
-                });
+            // Physical Hotkey Hook
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && document.activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    if (document.getElementById('view-app').classList.contains('hidden')) {
+                        switchTab('app');
+                    }
+                    spinWheel();
+                }
             });
-            document.querySelectorAll('.sliding-sheet').forEach(sheet => {
-                sheet.addEventListener('click', (e) => e.stopPropagation());
+
+            window.addEventListener('resize', () => {
+                resizeCanvasRig();
+                drawWheel();
             });
-        }
+        });
 
-        function saveToLocalStorage() {
-            localStorage.setItem('jpr_participants', document.getElementById('participants-input').value);
-            localStorage.setItem('jpr_theme', document.getElementById('cfg-theme').value);
-            localStorage.setItem('jpr_lighting', document.getElementById('cfg-lighting').value);
-            localStorage.setItem('jpr_accent', document.getElementById('cfg-accent').value);
-        }
-
-        function selectPresetColor(color, element) {
-            document.getElementById('cfg-accent').value = color;
-            syncAccentUIPreset(color);
-            if(element) {
-                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-                element.classList.add('active');
-            }
-        }
-
-        function syncAccentUIPreset(color) {
-            document.documentElement.style.setProperty('--accent', color);
-            document.getElementById('picker-dot-housing').style.borderColor = color;
-            saveToLocalStorage();
-            renderWheel();
-        }
-
-        function updateThemeStyle(val) {
-            updateThemeAndModeClasses();
-            saveToLocalStorage();
-        }
-
-        function updateLightingMode(mode) {
-            updateThemeAndModeClasses();
-            saveToLocalStorage();
-        }
-
-        function updateThemeAndModeClasses() {
-            const theme = document.getElementById('cfg-theme').value;
-            const mode = document.getElementById('cfg-lighting').value;
-            document.body.className = `theme-${theme} mode-${mode}`;
-            renderWheel();
-        }
-
-        function loadFromInput() {
-            const data = document.getElementById('participants-input').value;
-            participants = data.split(/[\n,]+/).map(item => item.trim()).filter(item => item.length > 0);
-            recalculateGroupCapacities();
-            saveToLocalStorage();
-            renderWheel();
-        }
-
-        function adjustRouletteType(type) {
-            const groupOpts = document.getElementById('group-options-container');
-            const normOpts = document.getElementById('normal-checkboxes');
-            if (type === 'group') {
-                groupOpts.style.display = 'block';
-                normOpts.style.display = 'none';
-                initiateGroupArrays();
+        // Initialize Local Roster Engine
+        function initLocalStorage() {
+            const stored = localStorage.getItem('aghamos_roster');
+            if (stored) {
+                items = JSON.parse(stored);
             } else {
-                groupOpts.style.display = 'none';
-                normOpts.style.display = 'block';
-                exitGroupModeView();
+                localStorage.setItem('aghamos_roster', JSON.stringify(items));
             }
-            recalculateGroupCapacities();
+            document.getElementById('rosterInput').value = items.join('\n');
+            updateStatusTrackers();
         }
 
-        function recalculateGroupCapacities() {
-            const type = document.getElementById('cfg-type').value;
-            if(type !== 'group') return;
+        // Adaptive Canvas Scaler Matrix
+        function resizeCanvasRig() {
+            const container = canvas.parentElement;
+            const size = container.clientWidth;
+            canvas.width = size * window.devicePixelRatio;
+            canvas.height = size * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        // Render Canvas Wheel Segments
+        function drawWheel() {
+            const size = canvas.width / window.devicePixelRatio;
+            const center = size / 2;
+            const radius = center - 10;
             
-            let targetCount = parseInt(document.getElementById('cfg-group-count').value) || 2;
-            if (participants.length < 4) {
-                document.getElementById('cfg-group-count').value = 2;
-                return;
-            }
-            if (targetCount * 2 > participants.length) {
-                targetCount = Math.floor(participants.length / 2);
-                document.getElementById('cfg-group-count').value = targetCount;
-            }
-            if(groupSessionActive) initiateGroupArrays();
-        }
-
-        function initiateGroupArrays() {
-            groupSessionActive = true;
-            sessionStartTimeString = new Date().toLocaleString();
-            const count = parseInt(document.getElementById('cfg-group-count').value) || 2;
-            groupsArray = [];
-            for(let i=0; i<count; i++) {
-                groupsArray.push([]);
-            }
-            document.getElementById('group-mode-layout').style.display = 'none';
-            document.getElementById('wheel-container').style.display = 'flex';
-            document.getElementById('live-ticker').innerText = "Ready for Group Setup";
-        }
-
-        function exitGroupModeView() {
-            groupSessionActive = false;
-            document.getElementById('group-mode-layout').style.display = 'none';
-            document.getElementById('wheel-container').style.display = 'flex';
-            document.getElementById('live-ticker').innerText = "Ready to Spin";
-        }
-
-        function injectTemplateRoster() {
-            const sample = "Alice Smith\nBob Jones\nCharlie Brown\nDavid Miller\nEmma Wilson\nFrank Thomas\nGrace Davis\nHenry Taylor";
-            document.getElementById('participants-input').value = sample;
-            loadFromInput();
-        }
-
-        function triggerRosterImport() {
-            document.getElementById('hidden-file-input').click();
-        }
-
-        function processRosterImport(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('participants-input').value = e.target.result;
-                loadFromInput();
-            };
-            reader.readAsText(file);
-        }
-
-        function triggerRosterExport() {
-            const contents = document.getElementById('participants-input').value;
-            triggerBlobDownload(contents, 'roulette-roster.txt');
-        }
-
-        function clearLogs() {
-            historyLog = [];
-            document.getElementById('history-box').innerHTML = '';
-        }
-
-        function exportTxtResults() {
-            if (historyLog.length === 0) {
-                alert("No structural entries log caught yet.");
-                return;
-            }
-            let text = `ROULETTE SELECTION MATRIX RUN LOG\n`;
-            text += `Export Date: ${new Date().toLocaleString()}\n`;
-            text += `===========================================\n`;
-            historyLog.forEach((item, index) => {
-                text += `${index + 1}. [${item.time}] ${item.name}\n`;
-            });
-            triggerBlobDownload(text, 'roulette-results.txt');
-        }
-
-        function triggerBlobDownload(text, filename) {
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function playSoundNotification(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            ctx.clearRect(0, 0, size, size);
             
-            if (type === 'tick') {
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.02);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.02);
-                return;
-            }
-
-            const soundSetting = document.getElementById('cfg-reveal').value;
-            let duration = soundSetting === 'relaxing' ? 1.4 : soundSetting === 'threatening' ? 2.2 : 0.9;
-            
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            
-            if(soundSetting === 'relaxing') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(554.37, audioCtx.currentTime + 0.3);
-                osc.frequency.linearRampToValueAtTime(659.25, audioCtx.currentTime + 0.8);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            } else if (soundSetting === 'threatening') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.6);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            } else {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            }
-            
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function getCalculatedColors() {
-            const selected = document.getElementById('cfg-theme').value;
-            if (selected === 'classic') {
-                // Return dynamic gray distribution array
-                return palettes.classic;
-            }
-            return palettes[selected] || palettes.modern;
-        }
-
-        // Legible Text Engine: Top-to-Bottom character scaling logic
-        function renderWheel() {
-            const count = participants.length;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (count === 0) {
-                ctx.fillStyle = '#64748b';
-                ctx.textAlign = 'center';
-                ctx.font = '700 24px var(--font-sans)';
-                ctx.fillText('NO ENTRIES LOADED', canvas.width/2, canvas.height/2);
-                return;
-            }
-
-            const arcStep = (2 * Math.PI) / count;
-            const themeColors = getCalculatedColors();
-            const mode = document.getElementById('cfg-lighting').value;
-
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const radius = canvas.width / 2 - 30;
-
-            // Outer Structural Boundary Rim Loop
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius + 10, 0, 2 * Math.PI);
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--wheel-border').trim();
-            ctx.fill();
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(currentRotation);
-
-            for (let i = 0; i < count; i++) {
-                const currentSectorAngle = i * arcStep;
-                
-                ctx.fillStyle = themeColors[i % themeColors.length];
+            if (items.length === 0) {
                 ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.arc(0, 0, radius, currentSectorAngle, currentSectorAngle + arcStep);
-                ctx.lineTo(0, 0);
+                ctx.arc(center, center, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#18181b';
                 ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#27272a';
+                ctx.stroke();
+                return;
+            }
 
-                ctx.strokeStyle = mode === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)';
+            const arcSize = (2 * Math.PI) / items.length;
+
+            items.forEach((item, i) => {
+                const angle = currentAngle + (i * arcSize);
+                
+                // Draw Slices
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, angle, angle + arcSize);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                
+                // Radial Divider Lines
                 ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#09090b';
                 ctx.stroke();
 
-                // Typography Alignment Passing 
+                // Typography Plotting
                 ctx.save();
-                ctx.rotate(currentSectorAngle + arcStep / 2);
+                ctx.translate(center, center);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#f4f4f5';
                 
-                // Keep scale constraints proportional to space
-                let fontSize = Math.min(26, (radius * 0.65) * arcStep / 1.8);
-                if (fontSize < 12) fontSize = 12;
-
-                ctx.font = `800 ${fontSize}px var(--font-sans)`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
+                // Adaptive text sizing based on container width
+                const fontSize = Math.max(11, Math.min(15, size / 28));
+                ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`;
                 
-                // Color contrast computation for texts inside segments
-                if (document.getElementById('cfg-theme').value === 'classic') {
-                    ctx.fillStyle = i % 2 === 0 ? '#FFFFFF' : '#000000';
-                } else {
-                    ctx.fillStyle = mode === 'light' ? '#111111' : '#ffffff';
+                // Avoid rendering long text overflows out of wheel limits
+                const maxLength = radius * 0.55;
+                let text = item;
+                if (ctx.measureText(text).width > maxLength) {
+                    while (ctx.measureText(text + '...').width > maxLength && text.length > 0) {
+                        text = text.slice(0, -1);
+                    }
+                    text += '...';
                 }
 
-                let stringVal = participants[i];
-                let characters = Array.from(stringVal);
-                
-                let maxAllowedChars = Math.floor((radius * 0.75) / (fontSize * 1.2));
-                if (characters.length > maxAllowedChars) {
-                    characters = characters.slice(0, maxAllowedChars - 1);
-                    characters.push('…');
-                }
-
-                let startingRadialDistance = radius - 30;
-                characters.forEach((char, index) => {
-                    let currentYOffset = startingRadialDistance - (index * fontSize * 1.2);
-                    ctx.save();
-                    ctx.translate(currentYOffset, 0);
-                    ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(char, 0, 0);
-                    ctx.restore();
-                });
-                
+                ctx.fillText(text, radius - 25, fontSize / 3);
                 ctx.restore();
-            }
-            ctx.restore();
+            });
 
-            // Decorative Hub Caps Node
+            // Outer Structural Ring
             ctx.beginPath();
-            ctx.arc(cx, cy, radius * 0.06, 0, 2 * Math.PI);
-            ctx.fillStyle = mode === 'light' ? '#FFFFFF' : '#07090e';
-            ctx.strokeStyle = varAccent();
-            ctx.lineWidth = 3;
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#27272a';
             ctx.stroke();
-            ctx.fill();
         }
 
-        function varAccent() {
-            return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-        }
-
-        // Interactive Physical Drag Accelerators
-        function setupInteractivePhysics() {
-            wheelWrapper.addEventListener('mousedown', initiateDragSequence);
-            window.addEventListener('mousemove', processDragSequence);
-            window.addEventListener('mouseup', terminateDragSequence);
-
-            wheelWrapper.addEventListener('touchstart', (e) => initiateDragSequence(e.touches[0]), {passive: true});
-            window.addEventListener('touchmove', (e) => {
-                processDragSequence(e.touches[0]);
-                e.preventDefault();
-            }, {passive: false});
-            window.addEventListener('touchend', terminateDragSequence);
-        }
-
-        function parseCenterAngle(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - (rect.left + rect.width / 2);
-            const y = e.clientY - (rect.top + rect.height / 2);
-            return Math.atan2(y, x);
-        }
-
-        function initiateDragSequence(e) {
-            if (isSpinning) return;
-            isDragging = true;
-            startAngle = parseCenterAngle(e) - currentRotation;
-            rotationVelocity = 0;
-            frameRotationDelta = currentRotation;
-        }
-
-        function processDragSequence(e) {
-            if (!isDragging) return;
-            const calculatedAngle = parseCenterAngle(e);
-            currentRotation = calculatedAngle - startAngle;
-            velocityEvaluationTrack();
-            synchronizePinSelection();
-            renderWheel();
-        }
-
-        function velocityEvaluationTrack() {
-            rotationVelocity = currentRotation - frameRotationDelta;
-            frameRotationDelta = currentRotation;
-        }
-
-        function terminateDragSequence() {
-            if (!isDragging) return;
-            isDragging = false;
-            if (Math.abs(rotationVelocity) > 0.02) {
-                executeMomentumSpin(rotationVelocity * 35);
-            }
-        }
-
-        function executeStartAction() {
-            if (isSpinning || participants.length === 0) return;
-            const pushVector = (Math.random() * 25 + 25);
-            executeMomentumSpin(pushVector);
-        }
-
-        function synchronizePinSelection() {
-            if(participants.length === 0) return;
-            const count = participants.length;
-            const arcStep = (2 * Math.PI) / count;
-            
-            let normalizedRotation = (-currentRotation - Math.PI/2) % (2 * Math.PI);
-            if (normalizedRotation < 0) normalizedRotation += (2 * Math.PI);
-            
-            let targetSegmentIndex = Math.floor(normalizedRotation / arcStep) % count;
-            if (targetSegmentIndex < 0) targetSegmentIndex += count;
-            
-            document.getElementById('live-ticker').innerText = participants[targetSegmentIndex];
-
-            if (targetSegmentIndex !== lastTickSegment) {
-                playSoundNotification('tick');
-                pinEl.style.transform = `rotate(15deg)`;
-                setTimeout(() => pinEl.style.transform = `rotate(0deg)`, 40);
-                lastTickSegment = targetSegmentIndex;
-            }
-        }
-
-        function executeMomentumSpin(forceVector) {
-            if (isSpinning || participants.length === 0) return;
+        // Kinetic Spin Core Loop
+        function spinWheel() {
+            if (isSpinning || items.length === 0) return;
             isSpinning = true;
+
+            document.getElementById('winnerDisplay').innerText = "SPINNING...";
+            document.getElementById('winnerDisplay').classList.add('opacity-50');
+
+            const spinRotations = 5 + Math.floor(Math.random() * 5); 
+            const targetAdditionalAngle = Math.random() * 2 * Math.PI;
+            const totalTargetRotation = (spinRotations * 2 * Math.PI) + targetAdditionalAngle;
             
-            document.getElementById('start-button').disabled = true;
-            const maxDuration = parseFloat(document.getElementById('cfg-duration').value) * 1000;
-            let timestampStart = null;
-            const initialAngle = currentRotation;
+            const startAngle = currentAngle;
+            const startTime = performance.now();
+            const duration = 4000; // Time in milliseconds
 
-            function runDecelerationFrame(timestamp) {
-                if (!timestampStart) timestampStart = timestamp;
-                const progressTime = (timestamp - timestampStart) / maxDuration;
-
-                const quinticEaseOut = 1 - Math.pow(1 - progressTime, 5);
-                currentRotation = initialAngle + (quinticEaseOut * forceVector);
-                
-                synchronizePinSelection();
-                renderWheel();
-
-                if (progressTime < 1) {
-                    requestAnimationFrame(runDecelerationFrame);
+            function animateSpin(currentTime) {
+                const elapsed = currentTime - startTime;
+                if (elapsed >= duration) {
+                    currentAngle = (startAngle + totalTargetRotation) % (2 * Math.PI);
+                    drawWheel();
+                    evaluateWinner();
+                    isSpinning = false;
+                    document.getElementById('winnerDisplay').classList.remove('opacity-50');
                 } else {
-                    finalizeSelectionCalculation();
+                    // Cubic Bezier Ease-Out Approximation
+                    const t = elapsed / duration;
+                    const easeOut = 1 - Math.pow(1 - t, 4); 
+                    currentAngle = startAngle + (easeOut * totalTargetRotation);
+                    drawWheel();
+                    requestAnimationFrame(animateSpin);
                 }
             }
-            requestAnimationFrame(runDecelerationFrame);
+            requestAnimationFrame(animateSpin);
         }
 
-        function finalizeSelectionCalculation() {
-            isSpinning = false;
-            document.getElementById('start-button').disabled = false;
+        // Calculate Pointer Collision Index
+        function evaluateWinner() {
+            if (items.length === 0) return;
             
-            const count = participants.length;
-            const arcStep = (2 * Math.PI) / count;
+            // Standardizing angles to range [0, 2*PI]
+            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            const arcSize = (2 * Math.PI) / items.length;
             
-            let normalizedRotation = (-currentRotation - Math.PI/2) % (2 * Math.PI);
-            if (normalizedRotation < 0) normalizedRotation += (2 * Math.PI);
-            
-            let selectedIndex = Math.floor(normalizedRotation / arcStep) % count;
-            if (selectedIndex < 0) selectedIndex += count;
-            
-            let roundWinner = participants[selectedIndex];
+            // Top pointer sits at 1.5 * PI radians inside standard canvas coordinate maps
+            const pointerAngle = (1.5 * Math.PI);
+            let absoluteTarget = pointerAngle - normalizedAngle;
+            if (absoluteTarget < 0) absoluteTarget += 2 * Math.PI;
 
-            const type = document.getElementById('cfg-type').value;
-            if(type === 'normal') {
-                if(document.getElementById('chk-avoid-repeats').checked && roundWinner === lastWinner && count > 1) {
-                    selectedIndex = (selectedIndex + 1) % count;
-                    roundWinner = participants[selectedIndex];
-                }
-                lastWinner = roundWinner;
-                launchCinematicFullscreen(roundWinner, selectedIndex);
-            } else {
-                processGroupModeWinner(roundWinner, selectedIndex);
-            }
+            const winningIndex = Math.floor(absoluteTarget / arcSize) % items.length;
+            document.getElementById('winnerDisplay').innerText = items[winningIndex];
         }
 
-        function launchCinematicFullscreen(winner, index) {
-            const mode = document.getElementById('cfg-reveal').value;
-            const overlay = document.getElementById('reveal-overlay');
-            const targetWord = document.getElementById('reveal-word');
-            
-            targetWord.className = ""; 
-            targetWord.innerText = winner;
-            
-            if (mode === 'exciting') {
-                targetWord.classList.add('anim-exciting');
-                triggerBurstExplosion();
-            } else if (mode === 'threatening') {
-                targetWord.classList.add('anim-threatening');
-            } else {
-                targetWord.classList.add('anim-relaxing');
-            }
+        // Tab Switching Router
+        function switchTab(target) {
+            const viewApp = document.getElementById('view-app');
+            const viewSettings = document.getElementById('view-settings');
+            const tabApp = document.getElementById('tab-app');
+            const tabSettings = document.getElementById('tab-settings');
 
-            playSoundNotification('reveal');
-            overlay.classList.add('active');
-
-            const sessionTime = new Date().toLocaleTimeString();
-            historyLog.push({ name: winner, time: sessionTime });
-            
-            if (document.getElementById('chk-remove-selected').checked) {
-                participants.splice(index, 1);
-                document.getElementById('participants-input').value = participants.join('\n');
-            }
-            
-            refreshHistoryPanelMarkup();
-        }
-
-        function closeReveal() {
-            document.getElementById('reveal-overlay').classList.remove('active');
-            document.getElementById('live-ticker').innerText = "Ready to Spin";
-            renderWheel();
-        }
-
-        function refreshHistoryPanelMarkup() {
-            document.getElementById('history-box').innerHTML = historyLog.map(item => `
-                <div class="item-log"><strong>[${item.time}]</strong> ${item.name}</div>
-            `).join('');
-        }
-
-        function processGroupModeWinner(winner, index) {
-            let targetGroupIndex = 0;
-            let minLength = Infinity;
-            
-            for(let i=0; i<groupsArray.length; i++) {
-                if(groupsArray[i].length < minLength) {
-                    minLength = groupsArray[i].length;
-                    targetGroupIndex = i;
-                }
-            }
-
-            groupsArray[targetGroupIndex].push(winner);
-            participants.splice(index, 1);
-            
-            const displayOverlay = document.getElementById('reveal-overlay');
-            const targetWord = document.getElementById('reveal-word');
-            targetWord.className = "anim-exciting";
-            targetWord.innerText = `${winner} ➔ Group ${targetGroupIndex + 1}`;
-            
-            playSoundNotification('reveal');
-            displayOverlay.classList.add('active');
-
-            const sessionTime = new Date().toLocaleTimeString();
-            historyLog.push({ name: `${winner} assigned to Group ${targetGroupIndex + 1}`, time: sessionTime });
-            refreshHistoryPanelMarkup();
-
-            if (participants.length === 0) {
+            if (target === 'app') {
+                viewApp.classList.remove('hidden');
+                viewSettings.classList.add('hidden');
+                tabApp.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm";
+                tabSettings.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200";
+                
+                // Recalculate dimensions immediately on display reload
                 setTimeout(() => {
-                    displayOverlay.classList.remove('active');
-                    renderGroupCompletionsView();
-                }, 1800);
+                    resizeCanvasRig();
+                    drawWheel();
+                }, 50);
             } else {
-                renderWheel();
+                viewApp.classList.add('hidden');
+                viewSettings.classList.remove('hidden');
+                tabApp.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200";
+                tabSettings.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm";
             }
         }
 
-        function renderGroupCompletionsView() {
-            document.getElementById('wheel-container').style.display = 'none';
-            document.getElementById('live-ticker').innerText = "Results";
+        // Data Storage Modifications
+        function saveRoster() {
+            const rawInput = document.getElementById('rosterInput').value;
+            items = rawInput.split('\n')
+                            .map(item => item.trim())
+                            .filter(item => item.length > 0);
             
-            const layoutGrid = document.getElementById('group-mode-layout');
-            layoutGrid.innerHTML = "";
-            
-            groupsArray.forEach((group, idx) => {
-                const card = document.createElement('div');
-                card.className = "group-card";
-                card.onclick = () => launchGroupFocusOverlay(idx);
-                
-                let html = `<h4>Group ${idx + 1}</h4>`;
-                group.forEach(m => {
-                    html += `<div class="group-member-item">${m}</div>`;
-                });
-                
-                card.innerHTML = html;
-                layoutGrid.appendChild(card);
-            });
-
-            // Append actionable return/save configurations layout card at footer tail end
-            const actionCard = document.createElement('div');
-            actionCard.className = "group-card";
-            actionCard.style.border = "3px dashed var(--accent)";
-            actionCard.innerHTML = `
-                <h4>Actions</h4>
-                <button class="btn-action" style="width:100%; margin-top:5px; margin-bottom:12px;" onclick="exportGroupFormationsTxt()">Save Formations (.txt)</button>
-                <button class="btn-action" style="width:100%; background:var(--text); color:var(--bg);" onclick="resetTypePostGrouping()">Return Home</button>
-            `;
-            layoutGrid.appendChild(actionCard);
-            layoutGrid.style.display = 'block';
+            localStorage.setItem('aghamos_roster', JSON.stringify(items));
+            updateStatusTrackers();
+            switchTab('app');
         }
 
-        function launchGroupFocusOverlay(idx) {
-            const overlay = document.getElementById('group-focus-overlay');
-            document.getElementById('group-focus-title').innerText = `Group ${idx + 1}`;
-            const itemsMarkup = groupsArray[idx].map(m => `<div>${m}</div>`).join('');
-            document.getElementById('group-focus-list').innerHTML = itemsMarkup;
-            overlay.style.display = 'flex';
+        function clearRoster() {
+            document.getElementById('rosterInput').value = '';
+            items = [];
+            localStorage.setItem('aghamos_roster', JSON.stringify(items));
+            updateStatusTrackers();
         }
 
-        function dismissGroupFocus() {
-            document.getElementById('group-focus-overlay').style.display = 'none';
-        }
-
-        function exportGroupFormationsTxt() {
-            let text = `ROULETTE GROUP CONFIGURATION EXPORT SUMMARY\n`;
-            text += `Setup Triggered: ${sessionStartTimeString}\n`;
-            text += `File Processed: ${new Date().toLocaleString()}\n`;
-            text += `========================================================\n\n`;
-            
-            groupsArray.forEach((group, idx) => {
-                text += `[GROUP ${idx + 1}]\n`;
-                group.forEach((m, i) => {
-                    text += `  - Position ${i + 1}: ${m}\n`;
-                });
-                text += `\n`;
-            });
-            triggerBlobDownload(text, 'group-allocations.txt');
-        }
-
-        function resetTypePostGrouping() {
-            document.getElementById('cfg-type').value = 'normal';
-            adjustRouletteType('normal');
-            loadFromInput();
-        }
-
-        // Ambient Background Particle Canvas System
-        class DesignParticle {
-            constructor(x, y, isBurst = false) {
-                this.x = x; this.y = y;
-                this.size = Math.random() * 2 + (isBurst ? 5 : 1);
-                this.speedX = isBurst ? (Math.random() - 0.5) * 15 : (Math.random() - 0.5) * 1;
-                this.speedY = isBurst ? (Math.random() - 0.5) * 15 : (Math.random() - 0.5) * 1;
-                this.color = varAccent();
-                this.alpha = 1;
-                this.decay = isBurst ? 0.016 : 0.006;
+        function updateStatusTrackers() {
+            document.getElementById('poolCount').innerText = `Roster: ${items.length} loaded`;
+            if (items.length === 0) {
+                document.getElementById('winnerDisplay').innerText = "EMPTY POOL";
+            } else if (document.getElementById('winnerDisplay').innerText === "EMPTY POOL" || document.getElementById('winnerDisplay').innerText === "READY") {
+                document.getElementById('winnerDisplay').innerText = "READY";
             }
-            update() {
-                this.x += this.speedX; this.y += this.speedY;
-                this.alpha -= this.decay;
-            }
-            draw() {
-                bgCtx.save();
-                bgCtx.globalAlpha = this.alpha;
-                bgCtx.fillStyle = this.color;
-                bgCtx.beginPath();
-                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                bgCtx.fill();
-                bgCtx.restore();
-            }
-        }
-
-        function initAmbientParticles() {
-            particlesArray = [];
-            const activePoolCount = window.innerWidth < 768 ? 20 : 45;
-            for(let i=0; i<activePoolCount; i++) {
-                particlesArray.push(new DesignParticle(Math.random()*window.innerWidth, Math.random()*window.innerHeight));
-            }
-        }
-
-        function triggerBurstExplosion() {
-            const cx = window.innerWidth / 2;
-            const cy = window.innerHeight / 2;
-            for(let i=0; i<90; i++) {
-                particlesArray.push(new DesignParticle(cx, cy, true));
-            }
-        }
-
-        function runParticleEngine() {
-            const mode = document.getElementById('cfg-lighting').value;
-            if (document.getElementById('cfg-theme').value === 'glass') {
-                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-            } else {
-                bgCtx.fillStyle = mode === 'light' ? 'rgba(245,240,230,0.25)' : 'rgba(7,9,14,0.25)';
-                bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
-            }
-
-            for(let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-                if(particlesArray[i].alpha <= 0) {
-                    particlesArray.splice(i, 1);
-                    i--;
-                }
-            }
-            
-            const limits = window.innerWidth < 768 ? 15 : 35;
-            if(particlesArray.length < limits) {
-                particlesArray.push(new DesignParticle(Math.random()*window.innerWidth, Math.random()*window.innerHeight));
-            }
-            requestAnimationFrame(runParticleEngine);
         }
     </script>
 </body>
