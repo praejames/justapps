@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Roulette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .dark-theme {
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+        .wheel-clip {
+            mask-image: radial-gradient(circle, black 35%, transparent 35%);
+            -webkit-mask-image: radial-gradient(circle, black 35%, transparent 35%);
+        }
+    </style>
+</head>
+<body class="dark-theme min-h-screen flex flex-col justify-between p-4 md:p-8 overflow-x-hidden">
+
+    <!-- TOP BAR: Clean & Minimal -->
+    <header class="w-full max-w-6xl mx-auto flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <h1 class="text-lg font-semibold tracking-tight uppercase opacity-90">SIMPLE ROULETTE by James Prae</h1>
+        </div>
+        
+        <!-- Tab Navigation Toggle -->
+        <nav class="flex bg-zinc-900/80 p-1 rounded-xl border border-zinc-850" id="nav-tabs">
+            <button onclick="switchTab('app')" id="tab-app" class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm">
+                App
+            </button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200">
+                Settings
+            </button>
+        </nav>
+    </header>
+
+    <!-- MAIN VIEWPORT (Responsive Flex Framework) -->
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center items-center">
+        
+        <!-- SECTION 1: THE RUNTIME INTERFACE -->
+        <section id="view-app" class="w-full flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 transition-all duration-300">
+            
+            <!-- Dynamic Scalable Canvas Rig -->
+            <div class="relative w-full max-w-[320px] sm:max-w-[420px] md:max-w-[480px] aspect-square flex items-center justify-center">
+                <!-- Selector Needle -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-emerald-500 drop-shadow-[0_4px_6px_rgba(16,185,129,0.4)]"></div>
+                
+                <!-- Core Canvas Engine -->
+                <canvas id="wheelCanvas" class="w-full h-full transform transition-transform duration-[4000ms] cubic-bezier(0.1, 0.8, 0.1, 1) drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]"></canvas>
+                
+                <!-- Center Physical Hub Trigger -->
+                <button onclick="spinWheel()" class="absolute w-20 h-20 bg-zinc-900 border-4 border-zinc-800 rounded-full flex items-center justify-center font-bold text-white tracking-wider text-sm active:scale-95 transition-transform shadow-2xl focus:outline-none group hover:border-emerald-500">
+                    <span class="group-hover:scale-105 transition-transform text-xs uppercase tracking-widest">SPIN</span>
+                </button>
+            </div>
+
+            <!-- Context Output Panel -->
+            <div class="w-full lg:w-96 flex flex-col items-center lg:items-start text-center lg:text-left gap-6">
+                <div class="space-y-1">
+                    <p class="text-xs tracking-widest text-zinc-500 uppercase font-bold">Selected Result</p>
+                    <h2 id="winnerDisplay" class="text-3xl md:text-5xl font-black tracking-tight text-white line-clamp-2">READY</h2>
+                </div>
+                
+                <div class="w-full p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400">
+                    <span id="poolCount">Roster: 0 loaded</span>
+                    <span class="px-2 py-0.5 bg-zinc-800 rounded text-zinc-500 font-mono">[SPACEBAR]</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SETTINGS (Isolated Architecture) -->
+        <section id="view-settings" class="w-full max-w-2xl hidden transition-all duration-300">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl">
+                <div>
+                    <h3 class="text-lg font-semibold text-white tracking-tight">Roster Setup</h3>
+                    <p class="text-xs text-zinc-500 mt-0.5">Input names or data points below, one entry per row.</p>
+                </div>
+
+                <textarea id="rosterInput" rows="8" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm font-mono text-zinc-300 focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700 transition-all resize-none" placeholder="Enter list items here..."></textarea>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button onclick="saveRoster()" class="flex-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold tracking-wider uppercase py-3 rounded-xl transition-all shadow-md active:scale-[0.99]">
+                        Apply Changes
+                    </button>
+                    <button onclick="clearRoster()" class="px-5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium py-3 rounded-xl transition-all active:scale-[0.99]">
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER STATUS STRIP -->
+    <footer class="w-full max-w-6xl mx-auto mt-6 pt-4 border-t border-zinc-900 text-[10px] tracking-widest text-zinc-600 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div>SIMPLE ROULETTE // LOCAL STORAGE ACTIVE</div>
+        <div>OFFLINE COMPATIBLE BUILD</div>
+    </footer>
+
+    <!-- RUNTIME APPARATUS MOTOR -->
+    <script>
+        // System Core State Array
+        let items = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"];
+        let isSpinning = false;
+        let currentAngle = 0;
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Color Arrays (High Contrast, Accessible Minimalist UI palette)
+        const colors = [
+            '#18181b', '#27272a', '#3f3f46', '#52525b',
+            '#09090b', '#1c1917', '#2e2a24', '#1e1b4b'
+        ];
+
+        // System Lifecycle Init
+        window.addEventListener('DOMContentLoaded', () => {
+            initLocalStorage();
+            resizeCanvasRig();
+            drawWheel();
+            
+            // Physical Hotkey Hook
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && document.activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    if (document.getElementById('view-app').classList.contains('hidden')) {
+                        switchTab('app');
+                    }
+                    spinWheel();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                resizeCanvasRig();
+                drawWheel();
+            });
+        });
+
+        // Initialize Local Roster Engine
+        function initLocalStorage() {
+            const stored = localStorage.getItem('simple_roster');
+            if (stored) {
+                items = JSON.parse(stored);
+            } else {
+                localStorage.setItem('simple_roster', JSON.stringify(items));
+            }
+            document.getElementById('rosterInput').value = items.join('\n');
+            updateStatusTrackers();
+        }
+
+        // Adaptive Canvas Scaler Matrix
+        function resizeCanvasRig() {
+            const container = canvas.parentElement;
+            const size = container.clientWidth;
+            canvas.width = size * window.devicePixelRatio;
+            canvas.height = size * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        // Render Canvas Wheel Segments
+        function drawWheel() {
+            const size = canvas.width / window.devicePixelRatio;
+            const center = size / 2;
+            const radius = center - 10;
+            
+            ctx.clearRect(0, 0, size, size);
+            
+            if (items.length === 0) {
+                ctx.beginPath();
+                ctx.arc(center, center, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#18181b';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#27272a';
+                ctx.stroke();
+                return;
+            }
+
+            const arcSize = (2 * Math.PI) / items.length;
+
+            items.forEach((item, i) => {
+                const angle = currentAngle + (i * arcSize);
+                
+                // Draw Slices
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, angle, angle + arcSize);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                
+                // Radial Divider Lines
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#09090b';
+                ctx.stroke();
+
+                // Typography Plotting
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#f4f4f5';
+                
+                // Adaptive text sizing based on container width
+                const fontSize = Math.max(11, Math.min(15, size / 28));
+                ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`;
+                
+                // Avoid rendering long text overflows out of wheel limits
+                const maxLength = radius * 0.55;
+                let text = item;
+                if (ctx.measureText(text).width > maxLength) {
+                    while (ctx.measureText(text + '...').width > maxLength && text.length > 0) {
+                        text = text.slice(0, -1);
+                    }
+                    text += '...';
+                }
+
+                ctx.fillText(text, radius - 25, fontSize / 3);
+                ctx.restore();
+            });
+
+            // Outer Structural Ring
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#27272a';
+            ctx.stroke();
+        }
+
+        // Kinetic Spin Core Loop
+        function spinWheel() {
+            if (isSpinning || items.length === 0) return;
+            isSpinning = true;
+
+            document.getElementById('winnerDisplay').innerText = "SPINNING...";
+            document.getElementById('winnerDisplay').classList.add('opacity-50');
+
+            const spinRotations = 5 + Math.floor(Math.random() * 5); 
+            const targetAdditionalAngle = Math.random() * 2 * Math.PI;
+            const totalTargetRotation = (spinRotations * 2 * Math.PI) + targetAdditionalAngle;
+            
+            const startAngle = currentAngle;
+            const startTime = performance.now();
+            const duration = 4000; // Time in milliseconds
+
+            function animateSpin(currentTime) {
+                const elapsed = currentTime - startTime;
+                if (elapsed >= duration) {
+                    currentAngle = (startAngle + totalTargetRotation) % (2 * Math.PI);
+                    drawWheel();
+                    evaluateWinner();
+                    isSpinning = false;
+                    document.getElementById('winnerDisplay').classList.remove('opacity-50');
+                } else {
+                    // Cubic Bezier Ease-Out Approximation
+                    const t = elapsed / duration;
+                    const easeOut = 1 - Math.pow(1 - t, 4); 
+                    currentAngle = startAngle + (easeOut * totalTargetRotation);
+                    drawWheel();
+                    requestAnimationFrame(animateSpin);
+                }
+            }
+            requestAnimationFrame(animateSpin);
+        }
+
+        // Calculate Pointer Collision Index
+        function evaluateWinner() {
+            if (items.length === 0) return;
+            
+            // Standardizing angles to range [0, 2*PI]
+            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            const arcSize = (2 * Math.PI) / items.length;
+            
+            // Top pointer sits at 1.5 * PI radians inside standard canvas coordinate maps
+            const pointerAngle = (1.5 * Math.PI);
+            let absoluteTarget = pointerAngle - normalizedAngle;
+            if (absoluteTarget < 0) absoluteTarget += 2 * Math.PI;
+
+            const winningIndex = Math.floor(absoluteTarget / arcSize) % items.length;
+            document.getElementById('winnerDisplay').innerText = items[winningIndex];
+        }
+
+        // Tab Switching Router
+        function switchTab(target) {
+            const viewApp = document.getElementById('view-app');
+            const viewSettings = document.getElementById('view-settings');
+            const tabApp = document.getElementById('tab-app');
+            const tabSettings = document.getElementById('tab-settings');
+
+            if (target === 'app') {
+                viewApp.classList.remove('hidden');
+                viewSettings.classList.add('hidden');
+                tabApp.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm";
+                tabSettings.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200";
+                
+                // Recalculate dimensions immediately on display reload
+                setTimeout(() => {
+                    resizeCanvasRig();
+                    drawWheel();
+                }, 50);
+            } else {
+                viewApp.classList.add('hidden');
+                viewSettings.classList.remove('hidden');
+                tabApp.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-zinc-400 hover:text-zinc-200";
+                tabSettings.className = "px-4 py-1.5 text-sm font-medium rounded-lg transition-all bg-zinc-800 text-white shadow-sm";
+            }
+        }
+
+        // Data Storage Modifications
+        function saveRoster() {
+            const rawInput = document.getElementById('rosterInput').value;
+            items = rawInput.split('\n')
+                            .map(item => item.trim())
+                            .filter(item => item.length > 0);
+            
+            localStorage.setItem('simple_roster', JSON.stringify(items));
+            updateStatusTrackers();
+            switchTab('app');
+        }
+
+        function clearRoster() {
+            document.getElementById('rosterInput').value = '';
+            items = [];
+            localStorage.setItem('simple_roster', JSON.stringify(items));
+            updateStatusTrackers();
+        }
+
+        function updateStatusTrackers() {
+            document.getElementById('poolCount').innerText = `Roster: ${items.length} loaded`;
+            if (items.length === 0) {
+                document.getElementById('winnerDisplay').innerText = "EMPTY POOL";
+            } else if (document.getElementById('winnerDisplay').innerText === "EMPTY POOL" || document.getElementById('winnerDisplay').innerText === "READY") {
+                document.getElementById('winnerDisplay').innerText = "READY";
+            }
+        }
+    </script>
+</body>
+</html>
