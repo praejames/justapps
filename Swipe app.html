@@ -3,853 +3,829 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Swipe App by James Prae</title>
+    <title>SWIPE APP by James Prae - Cap or Trap By Educator to Educators</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Inter:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Mono&family=Cinzel:wght@700&display=swap');
-        
+        :root {
+            --bg-workspace: #FAF8F5;
+            --surface-card: #FFFFFF;
+            --text-primary: #1C1A17;
+            --text-secondary: #6B6965;
+            --accent-tint: #C27829;
+            --accent-bg-subtle: #FDF4E9;
+            --border-workspace: rgba(0, 0, 0, 0.08);
+            --input-bg: #FFFFFF;
+            --radius-factor: 1.25rem;
+            --font-stack: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --theme-card-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            --backdrop-setting: blur(16px);
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: var(--font-stack);
+            color: var(--text-primary);
+            background-color: var(--bg-workspace);
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* 1. Liquid Glass Theme */
-        .theme-glass { 
-            background: linear-gradient(135deg, #1a1c29 0%, #0d0e15 100%); 
-            --card-bg: rgba(255, 255, 255, 0.06);
-            --card-border: rgba(255, 255, 255, 0.15);
-            --card-text: #ffffff;
-            --accent: #6366f1;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+        /* TEXTURE WALLPAPER OVERRIDE - NO DISTRACTING GREYS */
+        body.has-wallpaper-override {
+            background-image: var(--wp-channel-url) !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
         }
-        
-        /* 2. Expressive Theme */
-        .theme-expressive { 
-            background: linear-gradient(135deg, #ff0055 0%, #7a00ff 100%); 
-            --card-bg: rgba(0, 0, 0, 0.4);
-            --card-border: #ffff00;
-            --card-text: #ffffff;
-            --accent: #ffff00;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+        body.has-wallpaper-override::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1;
+            pointer-events: none;
         }
-
-        /* 3. Nostalgic Theme */
-        .theme-nostalgic { 
-            background: #121212; 
-            --card-bg: #1e1e1e;
-            --card-border: #00ff00;
-            --card-text: #00ff00;
-            --accent: #00ff00;
-            --font-main: 'Space Mono', monospace;
+        body.mode-dark.has-wallpaper-override::before {
+            background: rgba(0, 0, 0, 0.5);
         }
 
-        .app-bg { transition: background 0.5s ease; }
-        
-        /* Dynamic Card System CSS */
-        .card-stack { position: relative; width: 100%; max-width: 350px; height: 420px; }
-        .swipe-card {
-            position: absolute; width: 100%; height: 100%;
-            border-radius: 1.5rem; 
-            background: var(--card-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 2px solid var(--card-border);
-            color: var(--card-text);
-            font-family: var(--font-main);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            cursor: grab; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, border-color 0.2s;
-            transform-origin: center bottom;
-        }
-        .swipe-card:active { cursor: grabbing; }
-
-        /* Dynamic Auto-Scaling Text Rules */
-        .scale-text-container {
+        .app-container-scaffold {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* CLEAN GLASS TEXTURE SYSTEM Panels */
+        .workspace-panel {
+            background: var(--surface-card);
+            border: 1px solid var(--border-workspace);
+            border-radius: var(--radius-factor);
+            color: var(--text-primary);
+            box-shadow: var(--theme-card-shadow);
+            backdrop-filter: var(--backdrop-setting);
+            -webkit-backdrop-filter: var(--backdrop-setting);
+            transition: all 0.4s ease;
+        }
+
+        .high-contrast-title {
+            color: var(--text-primary) !important;
+        }
+
+        .interactive-node {
+            background: var(--surface-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-workspace);
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+        .interactive-node:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .interactive-node.node-highlighted {
+            background: var(--text-primary) !important;
+            color: var(--bg-workspace) !important;
+        }
+
+        /* LIGHT MODE IS PURE WHITE, DARK MODE ADPTS NATURAL CONTEXT */
+        .framework-input {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-workspace);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .framework-input:focus {
+            border-color: var(--accent-tint);
+            box-shadow: 0 0 0 2px var(--accent-bg-subtle);
+        }
+
+        /* DECK CARD COMPONENT WITH BUMPED TEXT */
+        .fluid-deck-card {
+            position: absolute;
             width: 100%;
             height: 100%;
-            padding: 1rem;
-            text-align: center;
+            padding: 2.5rem 2rem;
+            background: var(--surface-card);
+            border: 1px solid var(--border-workspace);
+            border-radius: var(--radius-factor);
+            box-shadow: var(--theme-card-shadow);
+            backdrop-filter: var(--backdrop-setting);
+            -webkit-backdrop-filter: var(--backdrop-setting);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transform-origin: center bottom;
+            z-index: 10;
+            cursor: grab;
+            transition: transform 0.1s ease, background-color 0.4s ease;
         }
-        .scaled-text {
-            font-size: calc(1.2rem + 1vw);
-            line-height: 1.3;
-            font-weight: 800;
-            word-wrap: break-word;
+        .fluid-deck-card:active { cursor: grabbing; }
+
+        .status-badge {
+            padding: 6px 14px;
+            background: var(--accent-bg-subtle);
+            color: var(--accent-tint);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid var(--border-workspace);
         }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .accent-text { color: var(--accent); }
-        .accent-border { border-color: var(--accent); }
-        .accent-bg { background-color: var(--accent); }
+        .clean-scroll::-webkit-scrollbar { width: 6px; }
+        .clean-scroll::-webkit-scrollbar-thumb { background: var(--border-workspace); border-radius: 10px; }
+        .theme-classic-border { border: 3px double var(--text-primary) !important; }
     </style>
 </head>
-<body class="theme-glass app-bg flex flex-col items-center justify-between min-h-screen p-4 text-slate-100 relative">
+<body class="mode-light">
 
-    <canvas id="fxCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
+    <canvas id="fxEngineCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-10 opacity-70 mix-blend-multiply dark:mix-blend-screen"></canvas>
 
-    <div id="startScreen" class="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-        <div class="max-w-md w-full space-y-6">
-            <div class="space-y-1">
-                <span class="text-xs font-mono tracking-[0.3em] text-slate-500 uppercase block">Swipe App by James Prae</span>
-                <h1 id="splashTitleDisplay" class="text-5xl font-black tracking-tight text-white py-1">Cap or Trap</h1>
-                <p class="text-xs text-slate-400 max-w-xs mx-auto">Pass the device around. Answering quickly awards more points. Skipping gives zero points. Queueing deducts penalty points.</p>
-            </div>
-            
-            <div class="bg-slate-900 border border-white/5 p-4 rounded-2xl space-y-2">
-                <span class="text-xs font-bold text-slate-500 block uppercase tracking-wider">Deck Rules</span>
-                <div class="grid grid-cols-2 gap-2 text-xs font-mono text-left bg-slate-950 p-3 rounded-xl border border-white/5">
-                    <div>Questions: <span id="startQuestCount" class="text-indigo-400 font-bold">0</span></div>
-                    <div>Time Allocated: <span id="startTimerVal" class="text-indigo-400 font-bold">0s</span></div>
-                    <div class="col-span-2 mt-1 pt-1 border-t border-white/5">Speed Bonus: <span id="startMultVal" class="text-amber-400 font-bold">0x</span></div>
+    <div class="app-container-scaffold">
+        <div id="startView" class="fixed inset-0 z-30 flex items-center justify-center p-4">
+            <div class="workspace-panel w-full max-w-xl p-8 text-center space-y-8">
+                <div class="space-y-3">
+                    <span class="text-xs font-bold tracking-widest uppercase opacity-40">Classroom Space</span>
+                    <h1 id="lblSplashTitle" class="high-contrast-title text-5xl font-bold tracking-tight">Cap or Trap</h1>
+                    <p id="lblSplashDesc" class="text-base text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto leading-relaxed">A simple, calm environment to review questions and test your knowledge without pressure.</p>
                 </div>
-            </div>
-
-            <div class="space-y-3">
-                <button onclick="startSession()" class="w-full bg-white text-black font-extrabold py-4 px-8 rounded-xl text-md tracking-wider transition-all transform active:scale-95 shadow-lg">
-                    Begin Challenge
-                </button>
-                <button onclick="openSettings()" class="text-xs text-slate-500 hover:text-white underline font-mono block mx-auto py-1">
-                    Open Teacher Settings Workspace
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="gameScreen" class="absolute inset-0 z-10 flex flex-col items-center justify-between p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        
-        <header class="w-full max-w-md flex flex-col items-center z-10 pt-2 space-y-2">
-            <div class="w-full flex justify-between items-center px-1">
-                <div>
-                    <h1 id="gameTitleDisplay" class="text-lg font-black tracking-wide text-white uppercase opacity-70">Cap or Trap</h1>
-                    <div class="text-[10px] font-mono opacity-50" id="multiplierDisplay">Speed Multiplier: 1.00x</div>
-                </div>
-                <button onclick="openSettings()" class="bg-white/5 hover:bg-white/10 text-white font-mono px-3 py-1 rounded-xl border border-white/10 transition text-xs">Settings</button>
-            </div>
-
-            <div class="w-full bg-black/60 border-2 border-red-500/30 rounded-2xl py-3 px-6 text-center shadow-inner">
-                <span class="text-[10px] font-mono tracking-[0.2em] text-red-400 uppercase block mb-0.5 font-bold">Time Remaining</span>
-                <div id="gameTimer" class="text-5xl font-mono font-black text-red-500 tracking-wider">00:00</div>
-            </div>
-        </header>
-
-        <div id="statBar" class="z-10 bg-slate-900/90 border border-white/5 px-5 py-2 rounded-full text-xs font-mono flex gap-6 shadow-md my-1">
-            <span>Deck: <strong id="deckProgress" class="text-slate-300">0/0</strong></span>
-            <span>Score: <strong id="runningScore" class="text-indigo-400">0</strong></span>
-        </div>
-
-        <main class="relative flex-1 flex items-center justify-center w-full z-10 my-1">
-            <div id="cardDeckContainer" class="card-stack"></div>
-        </main>
-
-        <footer class="w-full max-w-md grid grid-cols-4 gap-1.5 text-[9px] text-center opacity-60 z-10 font-mono pb-2">
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">Swipe Up<br>Queue</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">Swipe Down<br>Skip</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-emerald-400 font-bold border-emerald-500/20">Swipe Right<br>Agree (Y)</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-rose-400 font-bold border-rose-500/20">Swipe Left<br>Disagree (N)</div>
-        </footer>
-    </div>
-
-
-    <div id="summaryScreen" class="absolute inset-0 z-20 bg-slate-950/95 flex flex-col items-center p-6 overflow-y-auto no-scrollbar opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="w-full max-w-md my-auto space-y-6 pt-4">
-            <div class="text-center">
-                <span class="text-xs uppercase font-mono tracking-[0.2em] text-slate-500">Session Finished</span>
-                <h2 class="text-3xl font-black mt-0.5 tracking-tight text-white">Performance Overview</h2>
-            </div>
-
-            <div class="bg-slate-900 border border-white/5 p-6 rounded-3xl text-center space-y-1 shadow-2xl relative overflow-hidden">
-                <span class="text-xs text-slate-400 font-mono block uppercase tracking-wider">Total Points Earned</span>
-                <div id="dramaticScore" class="text-6xl font-black tracking-tighter text-amber-400 py-1">0</div>
-                <p id="summaryTimerMsg" class="text-[11px] text-slate-500 font-mono"></p>
-            </div>
-
-            <div id="submitBtnBlock" class="space-y-2">
-                <button onclick="submitToTeacher()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-4 rounded-xl text-md tracking-wider transition-all shadow-lg active:scale-95">
-                    Submit Data to Teacher
-                </button>
-                <p class="text-[10px] text-slate-500 text-center font-mono">Downloads full session report logs back to system disk space immediately.</p>
-            </div>
-
-            <div id="analyticsBlock" class="hidden space-y-5">
-                <div class="text-center opacity-40 text-[10px] font-mono">Scroll up or down to examine sorted item performance cards</div>
-                <hr class="border-white/5">
                 
-                <div class="space-y-5 pb-12">
-                    <div>
-                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>Fastest Responses</span>
-                            <span class="text-[9px] opacity-50 font-mono">(Correct / Queued)</span>
-                        </h4>
-                        <div id="analyticsFastest" class="space-y-1.5"></div>
+                <div class="border border-neutral-200/60 dark:border-neutral-800/60 p-5 rounded-xl bg-white/40 dark:bg-black/20 text-left text-sm space-y-3">
+                    <div class="flex justify-between border-b border-neutral-200/60 dark:border-neutral-800/60 pb-2.5 font-bold opacity-60">
+                        <span>GAME PREPARATION</span>
+                        <span class="text-emerald-600 dark:text-emerald-400">READY</span>
                     </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-rose-400 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>Wrong Responses</span>
-                            <span class="text-[9px] opacity-50 font-mono">(Fastest to Slowest)</span>
-                        </h4>
-                        <div id="analyticsWrong" class="space-y-1.5"></div>
+                    <div class="flex justify-between">
+                        <span class="opacity-70">Total Questions:</span>
+                        <span id="lblCountAllocated" class="font-semibold text-base">0 Cards</span>
                     </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>Most Skipped Questions</span>
-                            <span class="text-[9px] opacity-50 font-mono">(Slowest Action Linger)</span>
-                        </h4>
-                        <div id="analyticsSkipped" class="space-y-1.5"></div>
+                    <div class="flex justify-between">
+                        <span class="opacity-70">Game Time Allotted:</span>
+                        <span id="lblQuantumAllocated" class="font-semibold text-base">0s</span>
                     </div>
+                </div>
 
-                    <button onclick="restartChallenge()" class="w-full bg-slate-900 hover:bg-slate-800 border border-white/5 text-slate-300 font-bold py-3 rounded-xl text-xs tracking-wider transition-all">
-                        Restart Fresh Session Challenge
-                    </button>
+                <div class="space-y-4 flex flex-col items-center pt-2">
+                    <button id="btnLaunchDiagnostic" class="interactive-node w-full max-w-xs py-4 text-base rounded-xl font-bold bg-neutral-900 text-white dark:bg-white dark:text-black hover:opacity-90 active:scale-95">Start Game</button>
+                    <button id="btnTriggerSettingsSplash" class="text-sm font-semibold opacity-50 hover:opacity-100 transition-opacity underline decoration-dotted">Game Settings</button>
                 </div>
             </div>
         </div>
-    </div>
 
+        <div id="runtimeView" class="absolute inset-0 z-20 flex flex-col items-center justify-between p-6 opacity-0 pointer-events-none transition-all duration-400">
+            <header class="w-full max-w-md flex flex-col items-center z-20 space-y-4">
+                <div class="w-full flex justify-between items-center border-b border-neutral-200/40 dark:border-neutral-800/40 pb-3">
+                    <div>
+                        <h1 id="lblRuntimeTitle" class="high-contrast-title text-2xl font-bold">Cap or Trap</h1>
+                        <div class="text-xs font-semibold opacity-50 mt-0.5" id="lblScalarTracking">Speed Bonus: 1.00x</div>
+                    </div>
+                    <button id="btnTriggerSettingsRuntime" class="interactive-node text-xs px-3 py-2 rounded-lg">Settings</button>
+                </div>
 
-    <div id="settingsModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-white/10 w-full max-w-xl rounded-2xl max-h-[88vh] flex flex-col text-sm text-slate-200 shadow-2xl overflow-hidden">
-            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-950">
-                <h3 class="font-bold text-white tracking-widest uppercase text-xs">Teacher Dashboard Settings</h3>
-                <button onclick="closeSettings()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+                <div class="w-full workspace-panel py-3 px-6 text-center bg-white/30 dark:bg-black/20 border-neutral-200/40 dark:border-neutral-800/40">
+                    <span class="text-[10px] tracking-widest uppercase font-bold block opacity-40 mb-0.5">Time Remaining</span>
+                    <div id="lblClockFace" class="text-4xl font-light tracking-wide font-mono">00:00</div>
+                </div>
+
+                <div id="dockQueueWrapper" class="w-full max-w-[360px] flex flex-wrap gap-1.5 min-h-[42px] p-2 items-center justify-center border border-dashed border-neutral-300 dark:border-neutral-700 rounded-xl bg-white/5"></div>
+            </header>
+
+            <div id="runtimeProgressMetrics" class="z-20 workspace-panel px-6 py-3 text-sm font-bold flex gap-8">
+                <span class="opacity-70">Progress: <strong id="lblMetricProgress">0/0</strong></span>
+                <span class="opacity-70">Score: <strong id="lblMetricScore">0</strong></span>
             </div>
-            
-            <div class="p-5 overflow-y-auto space-y-5 flex-1 no-scrollbar">
+
+            <main class="relative flex-1 flex items-center justify-center w-full z-10 my-4">
+                <div id="surfaceCardWrapper" class="relative w-full max-w-[360px] h-[350px]"></div>
+            </main>
+
+            <footer class="w-full max-w-md grid grid-cols-4 gap-2 text-[11px] text-center z-20 font-bold pb-2">
+                <div class="border border-neutral-200 dark:border-neutral-800 p-3 rounded-xl bg-white/60 dark:bg-black/40">[Swipe Up]<br><span class="opacity-50 font-medium">Postpone</span></div>
+                <div class="border border-neutral-200 dark:border-neutral-800 p-3 rounded-xl bg-white/60 dark:bg-black/40">[Swipe Down]<br><span class="opacity-50 font-medium">Skip</span></div>
+                <div class="border border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 p-3 rounded-xl bg-emerald-50/40 dark:bg-emerald-950/20">[Swipe Right]<br>True</div>
+                <div class="border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 p-3 rounded-xl bg-rose-50/40 dark:bg-rose-950/20">[Swipe Left]<br>False</div>
+            </footer>
+        </div>
+
+        <div id="reportView" class="fixed inset-0 z-30 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-400">
+            <div class="workspace-panel w-full max-w-xl p-8 flex flex-col max-h-[85vh] overflow-y-auto clean-scroll space-y-6">
+                <div class="text-center border-b border-neutral-200/40 dark:border-neutral-800/40 pb-4">
+                    <span class="text-xs font-bold tracking-widest opacity-40 uppercase">Game Completed</span>
+                    <h2 class="high-contrast-title text-4xl font-bold tracking-tight mt-1">Final Scorecard</h2>
+                </div>
+
+                <div class="border border-neutral-200 dark:border-neutral-800 p-6 text-center rounded-2xl bg-white/30 dark:bg-black/20">
+                    <span class="text-xs block uppercase tracking-wider opacity-40 font-bold">Total Points Earned</span>
+                    <div id="lblAggregatedScoreDisplay" class="text-6xl font-bold py-2 tracking-tight font-mono">0</div>
+                    <p id="lblContextualReportMsg" class="text-sm opacity-70 border-t border-neutral-200/40 dark:border-neutral-800/40 pt-3 mt-2 leading-relaxed"></p>
+                </div>
+
+                <div id="controlPanelSubmission" class="flex flex-col items-center w-full">
+                    <button id="btnCommitTelemetry" class="interactive-node w-full max-w-xs py-3.5 text-base rounded-xl font-bold bg-neutral-950 text-white dark:bg-white dark:text-black">Review Answers</button>
+                </div>
+
+                <div id="analyticsReportBreakdown" class="hidden space-y-6 pb-2">
+                    <div class="border-t border-neutral-200/40 dark:border-neutral-800/40 pt-4">
+                        <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">✓ Correct Decisions</h4>
+                        <div id="wellTrackedList" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-2">✗ Wrong Decisions</h4>
+                        <div id="clashedList" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">~ Postponed or Skipped</h4>
+                        <div id="deferredList" class="space-y-2"></div>
+                    </div>
+                    <div class="flex justify-center w-full pt-4 border-t border-neutral-200/40 dark:border-neutral-800/40">
+                        <button id="btnResetSessionState" class="interactive-node py-2 px-6 text-xs rounded-xl font-semibold">Back to Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="managementOverlay" class="fixed inset-0 bg-black/10 dark:bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-md">
+            <div class="workspace-panel w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border-neutral-200 dark:border-neutral-800">
+                <div class="p-4 border-b border-neutral-200/60 dark:border-neutral-800/60 flex justify-between items-center bg-white/20 dark:bg-black/20">
+                    <h3 class="high-contrast-title font-bold text-base uppercase tracking-wide">Game Settings</h3>
+                    <button id="btnCloseManagement" class="text-sm font-semibold opacity-50 hover:opacity-100 transition-opacity">[ Close ]</button>
+                </div>
                 
-                <div class="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-white/5">
-                    <div class="col-span-2">
-                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Customizable Game App Title Text</label>
-                        <input type="text" id="cfgTitle" value="Cap or Trap" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs">
+                <div class="p-6 overflow-y-auto space-y-6 flex-1 clean-scroll text-sm">
+                    <div class="grid grid-cols-2 gap-4 border border-neutral-200/40 dark:border-neutral-800/40 p-4 rounded-xl bg-white/10 dark:bg-black/10">
+                        <div class="col-span-2 flex flex-col space-y-1.5">
+                            <label class="text-xs uppercase font-bold tracking-wider opacity-50">Custom Title</label>
+                            <input type="text" id="txtInputTitle" class="framework-input">
+                        </div>
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-xs uppercase font-bold tracking-wider opacity-50">Game Timer (Seconds)</label>
+                            <input type="number" id="txtInputDuration" class="framework-input">
+                        </div>
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-xs uppercase font-bold tracking-wider opacity-50">Max Speed Bonus Scale</label>
+                            <input type="number" id="txtInputScalar" step="0.1" class="framework-input">
+                        </div>
                     </div>
+
+                    <div class="space-y-4 border border-neutral-200/40 dark:border-neutral-800/40 p-4 rounded-xl bg-white/10 dark:bg-black/10">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs uppercase font-bold tracking-wider opacity-50 mb-1.5">Theme Mode</label>
+                                <div class="flex gap-1.5">
+                                    <button id="btnSwitchLight" class="interactive-node flex-1 py-2 text-xs rounded-lg">Light</button>
+                                    <button id="btnSwitchDark" class="interactive-node flex-1 py-2 text-xs rounded-lg">Dark</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase font-bold tracking-wider opacity-50 mb-1.5">Accent Color Swatch</label>
+                                <div class="grid grid-cols-4 gap-1.5" id="accentDynamicWrapper"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-xs uppercase font-bold tracking-wider opacity-50 mb-1.5">Visual Layout Preset</label>
+                            <div class="grid grid-cols-4 gap-1.5" id="themeLanguageSelectorHost">
+                                <button data-theme="1" class="interactive-node py-2 text-xs rounded-lg">Glass</button>
+                                <button data-theme="2" class="interactive-node py-2 text-xs rounded-lg">Modern</button>
+                                <button data-theme="3" class="interactive-node py-2 text-xs rounded-lg">Dynamic</button>
+                                <button data-theme="4" class="interactive-node py-2 text-xs rounded-lg">Retro</button>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-neutral-200/40 dark:border-neutral-800/40">
+                            <label class="block text-xs uppercase font-bold tracking-wider opacity-50 mb-1.5">Custom Background Image Upload</label>
+                            <div class="flex gap-3 items-center">
+                                <input type="file" id="uploadFileStream" accept="image/*" class="hidden">
+                                <button id="btnTriggerFileStream" type="button" class="interactive-node px-4 py-2 text-xs rounded-lg">Choose Image</button>
+                                <button id="btnPurgeFileStream" type="button" class="text-rose-500 font-bold text-xs hover:underline hidden">Remove Image</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Duration Timer Limits (Seconds)</label>
-                        <input type="number" id="cfgDuration" value="60" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs uppercase font-bold tracking-wider opacity-50">Manage Questions</label>
+                            <button id="btnInsertNewRow" class="text-amber-700 dark:text-amber-400 font-bold hover:underline text-xs">+ Add Question</button>
+                        </div>
+                        <div id="crudInterfaceHost" class="space-y-3 max-h-[180px] overflow-y-auto pr-1 clean-scroll"></div>
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Max Speed Bonus Scale Multiplier</label>
-                        <input type="number" id="cfgMultiplier" value="2.0" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
+
+                    <div class="grid grid-cols-3 gap-2 border-t border-neutral-200/40 dark:border-neutral-800/40 pt-4">
+                        <input type="file" id="uploadTxtPayloadStream" accept=".txt" class="hidden">
+                        <button id="btnTriggerTxtUpload" type="button" class="interactive-node py-2.5 text-xs rounded-lg">Import (.txt)</button>
+                        <button id="btnTriggerSchemaDownload" type="button" class="interactive-node py-2.5 text-xs rounded-lg">Export Template</button>
+                        <button id="btnTriggerTelemetryDownload" type="button" class="interactive-node py-2.5 text-xs rounded-lg">Save Scores</button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-mono uppercase tracking-wider mb-2 text-slate-400">Environment Active Aesthetic Theme</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="changeTheme('glass')" class="bg-slate-800 border border-slate-700 h-9 rounded-lg font-bold text-xs text-white hover:bg-slate-700">Liquid Glass</button>
-                        <button onclick="changeTheme('expressive')" class="bg-purple-600 border border-purple-500 h-9 rounded-lg font-bold text-xs text-white hover:bg-purple-500">Expressive</button>
-                        <button onclick="changeTheme('nostalgic')" class="bg-neutral-900 border border-green-500 h-9 rounded-lg font-mono font-bold text-xs text-green-500 hover:bg-neutral-800">Nostalgic</button>
-                    </div>
+                <div class="p-4 border-t border-neutral-200/60 dark:border-neutral-800/60 bg-white/20 dark:bg-black/20 flex justify-between items-center">
+                    <button id="btnFlushEcosystemCache" class="text-rose-500 font-bold hover:underline text-xs">Clear Local Cache</button>
+                    <button id="btnCommitOverlayModifications" class="interactive-node px-6 py-2.5 text-xs rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-bold">Apply & Close</button>
                 </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="text-xs font-mono uppercase tracking-wider text-slate-400">Live Workspace Deck Editor Table</label>
-                        <button onclick="addBlankQuestionRow()" class="text-[11px] text-indigo-400 hover:underline font-bold">+ Append Question Row</button>
-                    </div>
-                    <div id="crudEditorContainer" class="space-y-2 max-h-[190px] overflow-y-auto pr-1"></div>
-                </div>
-
-                <div class="space-y-2 border-t border-white/5 pt-4">
-                    <label class="block text-[10px] font-mono text-slate-400 uppercase">File Configurations Operations Hub</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="file" id="txtInput" accept=".txt" class="hidden" onchange="processTxtUpload(this)">
-                        <button onclick="document.getElementById('txtInput').click()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Upload Template</button>
-                        <button onclick="downloadTemplate()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Save Template</button>
-                        <button onclick="downloadLogs()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Export Session Logs</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-3 border-t border-white/5 bg-slate-950 flex justify-between">
-                <button onclick="clearSessionCache()" class="text-xs text-rose-400 hover:underline px-2">Reset App Data</button>
-                <button onclick="applyTeacherModifications()" class="bg-white text-black font-extrabold text-xs px-5 py-2 rounded-xl shadow hover:bg-slate-200 transition">Save and Apply Changes</button>
             </div>
         </div>
     </div>
-
 
     <script>
-        // Default Local Model Target State Arrays Match Matrix Configurations
-        let questions = [
-            { id: 1, text: "Is water composed of two hydrogen atoms and one oxygen atom?", key: "Y", pts: 10, penalty: 2 },
-            { id: 2, text: "Does light travel significantly slower than sound waves?", key: "N", pts: 15, penalty: 4 },
-            { id: 3, text: "Is the powerhouse of the biological cell a Ribosome?", key: "N", pts: 20, penalty: 5 }
+        let matrixSourceArray = [
+            { id: 1, text: "Is the mitochondria predominantly known as the energetic powerhouse of the cell?", key: "Y", pts: 10, penalty: 2 },
+            { id: 2, text: "Does mechanical sound pass through vacuum barriers at high speeds?", key: "N", pts: 15, penalty: 4 },
+            { id: 3, text: "Is chemical standard pH acceleration maximized inside rich alkaline frameworks?", key: "Y", pts: 20, penalty: 5 }
         ];
 
-        let logs = [];
-        let currentCardIndex = 0;
-        let runningScore = 0;
-        let activeTheme = 'glass';
-        let appTitle = 'Cap or Trap';
+        let internalActiveQueue = [], deferredMemoryBuffer = [], telemetryRegistry = [], accumulatedPointsAccumulator = 0;
+        let systemActiveMode = 'light', designSelectedAccent = '#C27829', dynamicTitleText = 'Cap or Trap', selectedSkinLanguage = '1';
+        let customTemporalDuration = 60, internalCountdownTracker = null, tickingSecondsRemaining = 60, currentVelocityLimit = 1.5, individualItemStartTime = null;
+        
+        let globalPointerX = 0, globalPointerY = 0, trackingShapeX = 0, trackingShapeY = 0;
+        let clickCoordX = 0, clickCoordY = 0, deltaCoordX = 0, deltaCoordY = 0, statusPointerDragging = false; 
+        const executionSwipeLimit = 80;
 
-        // Timing Constraints Property Variables Trackers
-        let globalTimerDuration = 60; 
-        let timerInterval = null;
-        let timeRemaining = 60;
-        let maxMultiplier = 2.0;
-        let itemStartTime = null;
-
-        // Vector Physics Navigation Properties Coordinate Values Maps
-        let startX = 0, startY = 0, moveX = 0, moveY = 0;
-        let isDragging = false;
-        const swipeThreshold = 80;
-
-        // Particles System Arrays Storage Target
-        let particles = [];
+        const dynamicAccentSwatches = [
+            { hex: '#C27829', subtleBg: '#FDF4E9' }, { hex: '#2E61B2', subtleBg: '#EEF4FC' }, 
+            { hex: '#217A54', subtleBg: '#EBF6F0' }, { hex: '#6D3AA8', subtleBg: '#F5EFFC' }
+        ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
-            syncEditorViewRows();
-            initFxCanvasEngine();
-            refreshStateRouting('START');
+            fetchCachedEcosystemMetadata(); 
+            generateSwatchesDOM(); 
+            setupThemeLanguageTriggers();
+            regenerateInterfaceCrudRows();
+            bindFunctionalHardwareSignals(); 
+            initiateHardwareCanvasLoop();
+            routingVisualStates('START');
         });
 
-        function loadFromLocalStorage() {
-            if(localStorage.getItem('prae_swipe_q')) questions = JSON.parse(localStorage.getItem('prae_swipe_q'));
-            if(localStorage.getItem('prae_swipe_theme')) changeTheme(localStorage.getItem('prae_swipe_theme'));
-            if(localStorage.getItem('prae_swipe_duration')) globalTimerDuration = parseInt(localStorage.getItem('prae_swipe_duration'));
-            if(localStorage.getItem('prae_swipe_mult')) maxMultiplier = parseFloat(localStorage.getItem('prae_swipe_mult'));
-            if(localStorage.getItem('prae_swipe_title')) appTitle = localStorage.getItem('prae_swipe_title');
+        function updateGlobalPointerCoordinates(e) {
+            if (e.touches && e.touches.length > 0) {
+                globalPointerX = e.touches[0].clientX;
+                globalPointerY = e.touches[0].clientY;
+            } else {
+                globalPointerX = e.clientX;
+                globalPointerY = e.clientY;
+            }
+        }
+        window.addEventListener('mousemove', updateGlobalPointerCoordinates);
+        window.addEventListener('touchmove', updateGlobalPointerCoordinates, { passive: true });
+
+        // DOMINANT INTENTIONAL INTERACTIVE GLOW RING MOUSE TRAILING
+        function initiateHardwareCanvasLoop() {
+            const cvs = document.getElementById('fxEngineCanvas');
+            const ctx = cvs.getContext('2d');
             
-            document.getElementById('cfgDuration').value = globalTimerDuration;
-            document.getElementById('cfgMultiplier').value = maxMultiplier;
-            document.getElementById('cfgTitle').value = appTitle;
-            
-            updateTitleDisplays();
+            function resize() {
+                cvs.width = window.innerWidth;
+                cvs.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            let classicYScanline = 0;
+
+            function processFrameUpdate() {
+                ctx.clearRect(0, 0, cvs.width, cvs.height);
+                
+                trackingShapeX += (globalPointerX - trackingShapeX) * 0.15;
+                trackingShapeY += (globalPointerY - trackingShapeY) * 0.15;
+                
+                // Dominant, visible soft interactive canvas flare tracker
+                let radGrad = ctx.createRadialGradient(trackingShapeX, trackingShapeY, 0, trackingShapeX, trackingShapeY, 240);
+                radGrad.addColorStop(0, designSelectedAccent + '35');
+                radGrad.addColorStop(0.5, designSelectedAccent + '10');
+                radGrad.addColorStop(1, 'transparent');
+                ctx.fillStyle = radGrad;
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+                if (selectedSkinLanguage === '4') {
+                    ctx.strokeStyle = systemActiveMode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
+                    ctx.lineWidth = 1;
+                    classicYScanline += 1.5;
+                    if (classicYScanline > cvs.height) classicYScanline = 0;
+                    ctx.beginPath();
+                    ctx.moveTo(0, classicYScanline);
+                    ctx.lineTo(cvs.width, classicYScanline);
+                    ctx.stroke();
+                }
+                requestAnimationFrame(processFrameUpdate);
+            }
+            requestAnimationFrame(processFrameUpdate);
         }
 
-        function updateTitleDisplays() {
-            document.getElementById('splashTitleDisplay').innerText = appTitle;
-            document.getElementById('gameTitleDisplay').innerText = appTitle;
+        function generateSwatchesDOM() {
+            const container = document.getElementById('accentDynamicWrapper'); container.innerHTML = '';
+            dynamicAccentSwatches.forEach(swatch => {
+                const b = document.createElement('button'); b.type = 'button';
+                b.className = 'h-5 w-full rounded border border-neutral-300 dark:border-neutral-700 transition-transform active:scale-95';
+                b.style.backgroundColor = swatch.hex;
+                b.onclick = (e) => { e.preventDefault(); adjustSystemAccentWave(swatch.hex, swatch.subtleBg); };
+                container.appendChild(b);
+            });
         }
 
-        function refreshStateRouting(targetState) {
-            const start = document.getElementById('startScreen');
-            const game = document.getElementById('gameScreen');
-            const summary = document.getElementById('summaryScreen');
+        function setupThemeLanguageTriggers() {
+            const targets = document.querySelectorAll('#themeLanguageSelectorHost button');
+            targets.forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    enforceThemeLanguageSkin(btn.getAttribute('data-theme'));
+                };
+            });
+        }
 
-            [start, game, summary].forEach(el => {
-                el.classList.add('opacity-0', 'pointer-events-none');
-                el.style.zIndex = "5";
+        function enforceThemeLanguageSkin(themeId) {
+            selectedSkinLanguage = themeId;
+            localStorage.setItem('aghamos_cache_skin', themeId);
+            
+            const roots = document.documentElement.style;
+            const targets = document.querySelectorAll('#themeLanguageSelectorHost button');
+            targets.forEach(btn => {
+                if(btn.getAttribute('data-theme') === themeId) btn.classList.add('node-highlighted');
+                else btn.classList.remove('node-highlighted');
             });
 
-            if(targetState === 'START') {
-                start.classList.remove('opacity-0', 'pointer-events-none');
-                start.style.zIndex = "40";
+            document.querySelectorAll('.workspace-panel, .fluid-deck-card').forEach(el => {
+                el.classList.remove('theme-classic-border');
+            });
+
+            if (themeId === '1') { 
+                roots.setProperty('--radius-factor', '1.25rem');
+                roots.setProperty('--font-stack', "'Plus Jakarta Sans', sans-serif");
+                roots.setProperty('--backdrop-setting', 'blur(20px) saturate(180%)');
+                roots.setProperty('--theme-card-shadow', '0 20px 50px rgba(0,0,0,0.06)');
+            } else if (themeId === '2') { 
+                roots.setProperty('--radius-factor', '0.5rem');
+                roots.setProperty('--font-stack', "'Inter', sans-serif");
+                roots.setProperty('--backdrop-setting', 'blur(0px)');
+                roots.setProperty('--theme-card-shadow', 'none');
+            } else if (themeId === '3') { 
+                roots.setProperty('--radius-factor', '2rem');
+                roots.setProperty('--font-stack', "'Plus Jakarta Sans', sans-serif");
+                roots.setProperty('--backdrop-setting', 'blur(0px)');
+                roots.setProperty('--theme-card-shadow', '0 25px 60px rgba(0,0,0,0.08)');
+            } else if (themeId === '4') { 
+                roots.setProperty('--radius-factor', '0px');
+                roots.setProperty('--font-stack', "'Courier Prime', monospace");
+                roots.setProperty('--backdrop-setting', 'blur(0px)');
+                roots.setProperty('--theme-card-shadow', '4px 4px 0px #000000');
                 
-                document.getElementById('startQuestCount').innerText = questions.length;
-                document.getElementById('startTimerVal').innerText = globalTimerDuration + 's';
-                document.getElementById('startMultVal').innerText = maxMultiplier.toFixed(1) + 'x';
-                updateTitleDisplays();
-            } 
-            else if(targetState === 'GAME') {
-                game.classList.remove('opacity-0', 'pointer-events-none');
-                game.style.zIndex = "30";
-            } 
-            else if(targetState === 'SUMMARY') {
-                summary.classList.remove('opacity-0', 'pointer-events-none');
-                summary.style.zIndex = "40";
+                document.querySelectorAll('.workspace-panel, .fluid-deck-card').forEach(el => {
+                    el.classList.add('theme-classic-border');
+                });
             }
         }
 
-        // ================= CONTEXTUAL LIFECYCLE CONTROLLERS =================
-        function startSession() {
-            currentCardIndex = 0;
-            runningScore = 0;
-            logs = [];
-            timeRemaining = globalTimerDuration;
-            
-            refreshStateRouting('GAME');
-            renderDeckStack();
-            startCountdownTimer();
-            trackItemPerformanceDelta();
+        function bindFunctionalHardwareSignals() {
+            document.getElementById('btnLaunchDiagnostic').onclick = executeMatrixSession;
+            document.getElementById('btnTriggerSettingsSplash').onclick = launchManagementConsole;
+            document.getElementById('btnTriggerSettingsRuntime').onclick = launchManagementConsole;
+            document.getElementById('btnCommitTelemetry').onclick = showEndAnalyticsReport;
+            document.getElementById('btnResetSessionState').onclick = () => routingVisualStates('START');
+            document.getElementById('btnCloseManagement').onclick = deactivateManagementConsole;
+            document.getElementById('btnInsertNewRow').onclick = appendNewRowDataBlock;
+            document.getElementById('btnCommitOverlayModifications').onclick = finalizeOverlayConfigurations;
+            document.getElementById('btnTriggerSchemaDownload').onclick = downloadSystemSchemaTemplate;
+            document.getElementById('btnTriggerTelemetryDownload').onclick = downloadCurrentTelemetryReport;
+            document.getElementById('btnFlushEcosystemCache').onclick = () => { localStorage.clear(); location.reload(); };
+            document.getElementById('btnSwitchLight').onclick = () => switchLuminanceProfile('light');
+            document.getElementById('btnSwitchDark').onclick = () => switchLuminanceProfile('dark');
+            document.getElementById('btnTriggerFileStream').onclick = () => document.getElementById('uploadFileStream').click();
+            document.getElementById('btnPurgeFileStream').onclick = purgeBackgroundGraphicOverride;
+            document.getElementById('uploadFileStream').onchange = digestCustomGraphicStream;
+            document.getElementById('btnTriggerTxtUpload').onclick = () => document.getElementById('uploadTxtPayloadStream').click();
+            document.getElementById('uploadTxtPayloadStream').onchange = function() { processIncomingTxtStream(this); };
+
+            window.onkeydown = (e) => {
+                if(document.getElementById('runtimeView').classList.contains('opacity-0')) return;
+                if(e.key === 'ArrowRight') commitEvaluationResolution("Y");
+                if(e.key === 'ArrowLeft') commitEvaluationResolution("N");
+                if(e.key === 'ArrowUp') commitEvaluationResolution("QUEUE");
+                if(e.key === 'ArrowDown') commitEvaluationResolution("SKIP");
+            };
         }
 
-        function startCountdownTimer() {
-            clearInterval(timerInterval);
-            updateTimerDisplay();
+        function fetchCachedEcosystemMetadata() {
+            if(localStorage.getItem('aghamos_cache_matrix')) matrixSourceArray = JSON.parse(localStorage.getItem('aghamos_cache_matrix'));
+            if(localStorage.getItem('aghamos_cache_mode')) systemActiveMode = localStorage.getItem('aghamos_cache_mode');
+            if(localStorage.getItem('aghamos_cache_accent')) designSelectedAccent = localStorage.getItem('aghamos_cache_accent');
+            if(localStorage.getItem('aghamos_cache_duration')) customTemporalDuration = parseInt(localStorage.getItem('aghamos_cache_duration'));
+            if(localStorage.getItem('aghamos_cache_scalar')) currentVelocityLimit = parseFloat(localStorage.getItem('aghamos_cache_scalar'));
+            if(localStorage.getItem('aghamos_cache_title')) dynamicTitleText = localStorage.getItem('aghamos_cache_title');
+            if(localStorage.getItem('aghamos_cache_skin')) selectedSkinLanguage = localStorage.getItem('aghamos_cache_skin');
+            if(localStorage.getItem('aghamos_cache_wp')) injectCustomBackgroundStyle(localStorage.getItem('aghamos_cache_wp'));
             
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                updateTimerDisplay();
-                
-                if(timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    terminateDeckSession(true);
-                }
+            document.getElementById('txtInputDuration').value = customTemporalDuration;
+            document.getElementById('txtInputScalar').value = currentVelocityLimit;
+            document.getElementById('txtInputTitle').value = dynamicTitleText;
+            
+            switchLuminanceProfile(systemActiveMode);
+            enforceThemeLanguageSkin(selectedSkinLanguage);
+            const verifiedSwatch = dynamicAccentSwatches.find(s => s.hex === designSelectedAccent) || dynamicAccentSwatches[0];
+            adjustSystemAccentWave(verifiedSwatch.hex, verifiedSwatch.subtleBg);
+            refreshHeaderStrings();
+        }
+
+        function refreshHeaderStrings() {
+            document.getElementById('lblSplashTitle').innerText = dynamicTitleText;
+            document.getElementById('lblRuntimeTitle').innerText = dynamicTitleText;
+        }
+
+        function switchLuminanceProfile(targetModeKey) {
+            document.body.classList.remove('mode-light', 'mode-dark');
+            document.body.classList.add(`mode-${targetModeKey}`); systemActiveMode = targetModeKey;
+            localStorage.setItem('aghamos_cache_mode', targetModeKey);
+            
+            const roots = document.documentElement.style;
+            if(targetModeKey === 'light') {
+                roots.setProperty('--bg-workspace', '#FAF8F5');
+                roots.setProperty('--surface-card', 'rgba(255, 255, 255, 0.85)');
+                roots.setProperty('--text-primary', '#1C1A17');
+                roots.setProperty('--border-workspace', 'rgba(0, 0, 0, 0.08)');
+                roots.setProperty('--input-bg', '#FFFFFF'); // Pure clean white text boxes
+            } else {
+                roots.setProperty('--bg-workspace', '#0F0E0D');
+                roots.setProperty('--surface-card', 'rgba(24, 22, 21, 0.85)');
+                roots.setProperty('--text-primary', '#F5F2ED');
+                roots.setProperty('--border-workspace', 'rgba(255, 255, 255, 0.08)');
+                roots.setProperty('--input-bg', '#1E1C1A'); // Adaptive dark text boxes
+            }
+            refreshModalButtonHighlights();
+        }
+
+        function adjustSystemAccentWave(hexColor, backgroundSubtleColor) {
+            designSelectedAccent = hexColor; 
+            document.documentElement.style.setProperty('--accent-tint', hexColor);
+            document.documentElement.style.setProperty('--accent-bg-subtle', backgroundSubtleColor);
+            localStorage.setItem('aghamos_cache_accent', hexColor);
+            refreshModalButtonHighlights();
+        }
+
+        function digestCustomGraphicStream(event) {
+            const file = event.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    localStorage.setItem('aghamos_cache_wp', evt.target.result);
+                    injectCustomBackgroundStyle(evt.target.result);
+                } catch(e) { alert("Image size is too large for local cache."); }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function injectCustomBackgroundStyle(targetUrl) {
+            document.body.classList.add('has-wallpaper-override');
+            document.body.style.setProperty('--wp-channel-url', `url(${targetUrl})`);
+            document.getElementById('btnPurgeFileStream').classList.remove('hidden');
+        }
+
+        function purgeBackgroundGraphicOverride() {
+            localStorage.removeItem('aghamos_cache_wp');
+            document.body.classList.remove('has-wallpaper-override');
+            document.body.style.removeProperty('--wp-channel-url');
+            document.getElementById('btnPurgeFileStream').classList.add('hidden');
+            document.getElementById('uploadFileStream').value = '';
+        }
+
+        function refreshModalButtonHighlights() {
+            document.getElementById('btnSwitchLight').className = `interactive-node flex-1 py-1.5 text-xs rounded-lg ${systemActiveMode=='light'?'node-highlighted':''}`;
+            document.getElementById('btnSwitchDark').className = `interactive-node flex-1 py-1.5 text-xs rounded-lg ${systemActiveMode=='dark'?'node-highlighted':''}`;
+        }
+
+        function routingVisualStates(targetStateKey) {
+            ['startView', 'runtimeView', 'reportView'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.add('opacity-0', 'pointer-events-none');
+                if(id === 'startView' || id === 'reportView') el.classList.add('hidden');
+            });
+            
+            const targetId = targetStateKey === 'START' ? 'startView' : targetStateKey === 'GAME' ? 'runtimeView' : 'reportView';
+            const element = document.getElementById(targetId);
+            element.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
+            
+            if(targetStateKey === 'START') {
+                document.getElementById('lblCountAllocated').innerText = `${matrixSourceArray.length} Cards`;
+                document.getElementById('lblQuantumAllocated').innerText = customTemporalDuration + 's';
+                refreshHeaderStrings();
+                enforceThemeLanguageSkin(selectedSkinLanguage);
+            }
+        }
+
+        function executeMatrixSession() {
+            internalActiveQueue = JSON.parse(JSON.stringify(matrixSourceArray)); deferredMemoryBuffer = []; telemetryRegistry = []; accumulatedPointsAccumulator = 0;
+            tickingSecondsRemaining = customTemporalDuration; document.getElementById('dockQueueWrapper').innerHTML = '';
+            routingVisualStates('GAME'); evaluateAndRenderActiveLayers(); initiateChronometerClock(); engageScalarTrackingLoop();
+        }
+
+        function initiateChronometerClock() {
+            clearInterval(internalCountdownTracker); refreshClockFaceDisplay();
+            internalCountdownTracker = setInterval(() => {
+                tickingSecondsRemaining--; refreshClockFaceDisplay();
+                if(tickingSecondsRemaining <= 0) { clearInterval(internalCountdownTracker); terminateAssessmentSession(true); }
             }, 1000);
         }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            document.getElementById('gameTimer').innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        function refreshClockFaceDisplay() {
+            const m = Math.floor(tickingSecondsRemaining / 60), s = tickingSecondsRemaining % 60;
+            document.getElementById('lblClockFace').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
-        function trackItemPerformanceDelta() {
-            itemStartTime = Date.now();
-            
-            if(window.multiplierLoop) cancelAnimationFrame(window.multiplierLoop);
-            
-            function step() {
-                const gameActive = !document.getElementById('gameScreen').classList.contains('opacity-0');
-                if(gameActive) {
-                    const elapsed = (Date.now() - itemStartTime) / 1000;
-                    let currentMult = maxMultiplier - (elapsed * (maxMultiplier - 1.0) / 6.0);
-                    if(currentMult < 1.0) currentMult = 1.0;
-                    document.getElementById('multiplierDisplay').innerText = `Speed Multiplier: ${currentMult.toFixed(2)}x`;
-                    window.multiplierLoop = requestAnimationFrame(step);
+        function engageScalarTrackingLoop() {
+            individualItemStartTime = Date.now();
+            if(window.engineScalarLoop) cancelAnimationFrame(window.engineScalarLoop);
+            function executeFrame() {
+                if(!document.getElementById('runtimeView').classList.contains('opacity-0')) {
+                    let diff = (Date.now() - individualItemStartTime) / 1000;
+                    let targetScale = Math.max(1.0, currentVelocityLimit - (diff * (currentVelocityLimit - 1.0) / 6.0));
+                    document.getElementById('lblScalarTracking').innerText = `Speed Bonus: ${targetScale.toFixed(2)}x`;
+                    window.engineScalarLoop = requestAnimationFrame(executeFrame);
                 }
             }
-            window.multiplierLoop = requestAnimationFrame(step);
+            window.engineScalarLoop = requestAnimationFrame(executeFrame);
         }
 
-        function renderDeckStack() {
-            const container = document.getElementById('cardDeckContainer');
-            container.innerHTML = '';
+        function evaluateAndRenderActiveLayers() {
+            const wrapper = document.getElementById('surfaceCardWrapper'); wrapper.innerHTML = '';
+            const dock = document.getElementById('dockQueueWrapper'); dock.innerHTML = '';
             
-            document.getElementById('deckProgress').innerText = `${currentCardIndex}/${questions.length}`;
-            document.getElementById('runningScore').innerText = Math.round(runningScore);
+            deferredMemoryBuffer.forEach(item => {
+                const token = document.createElement('div'); token.className = 'status-badge'; token.innerText = `#${item.id}`;
+                if(selectedSkinLanguage === '4') token.classList.add('theme-classic-border');
+                dock.appendChild(token);
+            });
 
-            if(currentCardIndex >= questions.length) {
-                clearInterval(timerInterval);
-                terminateDeckSession(false);
-                return;
+            document.getElementById('lblMetricProgress').innerText = `${telemetryRegistry.length}/${matrixSourceArray.length}`;
+            document.getElementById('lblMetricScore').innerText = Math.round(accumulatedPointsAccumulator);
+
+            if(internalActiveQueue.length === 0) {
+                if(deferredMemoryBuffer.length > 0) { 
+                    internalActiveQueue = deferredMemoryBuffer; deferredMemoryBuffer = []; evaluateAndRenderActiveLayers(); engageScalarTrackingLoop(); return; 
+                } else { clearInterval(internalCountdownTracker); terminateAssessmentSession(false); return; }
             }
 
-            for (let i = Math.min(questions.length - 1, currentCardIndex + 1); i >= currentCardIndex; i--) {
-                const cardData = questions[i];
-                const card = document.createElement('div');
-                card.className = `swipe-card flex flex-col justify-between p-6 select-none`;
+            for (let i = Math.min(internalActiveQueue.length - 1, 0); i >= 0; i--) {
+                const data = internalActiveQueue[i]; const card = document.createElement('div');
+                card.className = `fluid-deck-card`; 
+                if(selectedSkinLanguage === '4') card.classList.add('theme-classic-border');
+                bindCardInteractivityVectors(card);
                 
-                if(i === currentCardIndex) {
-                    card.style.transform = `translate3d(0,0,0) scale(1)`;
-                    card.style.zIndex = "20";
-                    bindCardPhysicsListeners(card);
-                } else {
-                    card.style.transform = `translate3d(0, 15px, 0) scale(0.94)`;
-                    card.style.zIndex = "10";
-                    card.style.opacity = "0.3";
-                }
-
                 card.innerHTML = `
-                    <div class="flex justify-between items-center opacity-40 text-[10px] font-mono">
-                        <span>Card #${cardData.id}</span>
-                        <span>Value: ${cardData.pts} Pts</span>
+                    <div class="flex justify-between items-center opacity-40 text-xs font-bold uppercase tracking-wider border-b border-neutral-200/40 dark:border-neutral-800/40 pb-2">
+                        <span>Question #${data.id}</span><span>Value: ${data.pts} pts</span>
                     </div>
-                    <div class="flex-1 scale-text-container">
-                        <p class="scaled-text">${cardData.text}</p>
+                    <div class="flex-1 flex items-center justify-center py-4 text-center">
+                        <p class="high-contrast-title text-2xl font-semibold leading-relaxed">${data.text}</p>
                     </div>
-                    <div class="text-[9px] opacity-40 font-mono text-center border-t border-white/5 pt-2">
-                        Queue Penalty: -${cardData.penalty || 0} Pts
-                    </div>
-                `;
-                container.appendChild(card);
+                    <div class="text-xs font-semibold tracking-wide text-center opacity-40 border-t border-neutral-200/40 dark:border-neutral-800/40 pt-2">
+                        Penalty Deficit: -${data.penalty || 0}
+                    </div>`;
+                wrapper.appendChild(card);
             }
         }
 
-        // ================= GESTURE MECHANICS MAPPINGS =================
-        function bindCardPhysicsListeners(card) {
-            card.addEventListener('mousedown', gestureStart);
-            card.addEventListener('mousemove', gestureMove);
-            card.addEventListener('mouseup', gestureEnd);
-            card.addEventListener('mouseleave', gestureEnd);
-
-            card.addEventListener('touchstart', gestureStart, { passive: true });
-            card.addEventListener('touchmove', gestureMove, { passive: true });
-            card.addEventListener('touchend', gestureEnd);
-        }
-
-        function gestureStart(e) {
-            isDragging = true;
-            startX = e.clientX || e.touches[0].clientX;
-            startY = e.clientY || e.touches[0].clientY;
-            this.style.transition = 'none';
-        }
-
-        function gestureMove(e) {
-            if (!isDragging) return;
-            const currentX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-            const currentY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            moveX = currentX - startX;
-            moveY = currentY - startY;
-
-            if(moveX > 40) this.style.borderColor = '#10b981';
-            else if(moveX < -40) this.style.borderColor = '#f43f5e';
-            else if(moveY < -40) this.style.borderColor = '#8b5cf6';
-            else if(moveY > 40) this.style.borderColor = '#f59e0b';
-            else this.style.borderColor = 'var(--card-border)';
-
-            this.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) rotate(${moveX * 0.04}deg)`;
-        }
-
-        function gestureEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            this.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s';
-
-            if (moveX > swipeThreshold) executeSwipeResolution("Y");
-            else if (moveX < -swipeThreshold) executeSwipeResolution("N");
-            else if (moveY < -swipeThreshold) executeSwipeResolution("QUEUE");
-            else if (moveY > swipeThreshold) executeSwipeResolution("SKIP");
-            else {
-                this.style.transform = `translate3d(0,0,0) scale(1)`;
-                this.style.borderColor = 'var(--card-border)';
-            }
-            moveX = 0; moveY = 0;
-        }
-
-        function executeSwipeResolution(action) {
-            const currentQuestion = questions[currentCardIndex];
-            const reactionTimeSec = (Date.now() - itemStartTime) / 1000;
-            
-            let computedMultiplier = maxMultiplier - (reactionTimeSec * (maxMultiplier - 1.0) / 6.0);
-            if(computedMultiplier < 1.0) computedMultiplier = 1.0;
-
-            let pointsAwarded = 0;
-            let statusOutcome = "WRONG";
-
-            if (action === "QUEUE") {
-                pointsAwarded = -Math.abs(currentQuestion.penalty || 0);
-                statusOutcome = "QUEUED";
-            } else if (action === "SKIP") {
-                pointsAwarded = 0;
-                statusOutcome = "SKIPPED";
-            } else if (action === currentQuestion.key) {
-                pointsAwarded = Math.round(parseInt(currentQuestion.pts) * computedMultiplier);
-                statusOutcome = "CORRECT";
-            }
-
-            runningScore += pointsAwarded;
-
-            logs.push({
-                id: currentQuestion.id,
-                text: currentQuestion.text,
-                action: action,
-                key: currentQuestion.key,
-                points: pointsAwarded,
-                time: parseFloat(reactionTimeSec.toFixed(2)),
-                outcome: statusOutcome
-            });
-
-            currentCardIndex++;
-            renderDeckStack();
-            if(currentCardIndex < questions.length) trackItemPerformanceDelta();
-        }
-
-        // ================= WRAP UP EVALUATION INTERFACES =================
-        function terminateDeckSession(didTimeout = false) {
-            refreshStateRouting('SUMMARY');
-            document.getElementById('submitBtnBlock').classList.remove('hidden');
-            document.getElementById('analyticsBlock').classList.add('hidden');
-            
-            document.getElementById('summaryTimerMsg').innerText = didTimeout 
-                ? "Time limit expired before completion." 
-                : `Deck fully swiped with ${timeRemaining}s left!`;
-
-            dramaticNumberRollEffect(Math.round(runningScore));
-            triggerConfettiExplosion();
-        }
-
-        function dramaticNumberRollEffect(targetScore) {
-            const element = document.getElementById('dramaticScore');
-            let currentVal = 0;
-            const duration = 1200; 
-            const frameRate = 1000 / 60;
-            const steps = duration / frameRate;
-            const increment = targetScore / steps;
-
-            clearInterval(window.rollInterval);
-            window.rollInterval = setInterval(() => {
-                currentVal += increment;
-                if ((increment >= 0 && currentVal >= targetScore) || (increment < 0 && currentVal <= targetScore)) {
-                    clearInterval(window.rollInterval);
-                    element.innerText = targetScore;
-                } else {
-                    element.innerText = Math.floor(currentVal);
-                }
-            }, frameRate);
-        }
-
-        function submitToTeacher() {
-            downloadLogs();
-            
-            document.getElementById('submitBtnBlock').classList.add('hidden');
-            document.getElementById('analyticsBlock').classList.remove('hidden');
-            
-            generateDiagnosticAnalyticsData();
-        }
-
-        function generateDiagnosticAnalyticsData() {
-            const fastest = [...logs]
-                .filter(l => l.outcome === "CORRECT" || l.outcome === "QUEUED")
-                .sort((a, b) => a.time - b.time);
-
-            const wrong = [...logs]
-                .filter(l => l.outcome === "WRONG")
-                .sort((a, b) => a.time - b.time);
-
-            const skipped = [...logs]
-                .filter(l => l.outcome === "SKIPPED")
-                .sort((a, b) => b.time - a.time);
-
-            const mapTemplateHtml = item => `
-                <div class="bg-slate-900 border border-white/5 p-3 rounded-xl text-xs flex justify-between items-center">
-                    <div class="max-w-[70%] space-y-0.5">
-                        <p class="font-bold text-slate-200 truncate">${item.text}</p>
-                        <span class="text-[10px] text-slate-500 font-mono block">Swiped: ${item.action} | Key: ${item.key}</span>
-                    </div>
-                    <div class="text-right font-mono">
-                        <div class="${item.points >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${item.points >= 0 ? '+' : ''}${item.points} Pts</div>
-                        <div class="text-[10px] text-slate-400">${item.time}s</div>
-                    </div>
-                </div>`;
-
-            document.getElementById('analyticsFastest').innerHTML = fastest.length ? fastest.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No items recorded.</p>';
-            document.getElementById('analyticsWrong').innerHTML = wrong.length ? wrong.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No wrong items recorded.</p>';
-            document.getElementById('analyticsSkipped').innerHTML = skipped.length ? skipped.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No skipped items recorded.</p>';
-        }
-
-        function restartChallenge() {
-            refreshStateRouting('START');
-        }
-
-        // ================= CRUD LIVE DATA WORKSPACE INTERFACE =================
-        function syncEditorViewRows() {
-            const container = document.getElementById('crudEditorContainer');
-            container.innerHTML = '';
-            
-            questions.forEach((q, idx) => {
-                const row = document.createElement('div');
-                row.className = "bg-slate-950 p-3 rounded-xl border border-white/5 space-y-2 relative text-xs";
-                row.innerHTML = `
-                    <div class="flex gap-2 items-center">
-                        <span class="font-mono text-[10px] text-slate-500 font-bold">#${q.id}</span>
-                        <input type="text" value="${q.text}" onchange="updateQuestData(${idx}, 'text', this.value)" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white">
-                        <button onclick="removeQuestionRow(${idx})" class="text-rose-400 hover:text-rose-600 font-bold px-1 text-base">&times;</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 font-mono text-[11px]">
-                        <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Correct Answer</label>
-                            <select onchange="updateQuestData(${idx}, 'key', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
-                                <option value="Y" ${q.key === 'Y' ? 'selected' : ''}>Y (Agree)</option>
-                                <option value="N" ${q.key === 'N' ? 'selected' : ''}>N (Disagree)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Base Points</label>
-                            <input type="number" value="${q.pts}" onchange="updateQuestData(${idx}, 'pts', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
-                        </div>
-                        <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Queue Penalty</label>
-                            <input type="number" value="${q.penalty || 0}" onchange="updateQuestData(${idx}, 'penalty', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
-                        </div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function updateQuestData(index, field, value) {
-            questions[index][field] = (field === 'pts' || field === 'penalty') ? parseInt(value) : value;
-        }
-
-        function addBlankQuestionRow() {
-            const nextId = questions.length ? Math.max(...questions.map(q => parseInt(q.id))) + 1 : 1;
-            questions.push({ id: nextId, text: "Sample Question Context Prompt?", key: "Y", pts: 10, penalty: 2 });
-            syncEditorViewRows();
-        }
-
-        function removeQuestionRow(index) {
-            questions.splice(index, 1);
-            syncEditorViewRows();
-        }
-
-        function applyTeacherModifications() {
-            globalTimerDuration = parseInt(document.getElementById('cfgDuration').value) || 60;
-            maxMultiplier = parseFloat(document.getElementById('cfgMultiplier').value) || 1.0;
-            appTitle = document.getElementById('cfgTitle').value || 'Cap or Trap';
-            
-            localStorage.setItem('prae_swipe_q', JSON.stringify(questions));
-            localStorage.setItem('prae_swipe_duration', globalTimerDuration);
-            localStorage.setItem('prae_swipe_mult', maxMultiplier);
-            localStorage.setItem('prae_swipe_title', appTitle);
-            
-            closeSettings();
-            refreshStateRouting('START');
-        }
-
-        // ================= TEXT CONFIGURATIONS PARSER LOGICS =================
-        function downloadTemplate() {
-            const content = `// Simplified Template Format Profile\n// Pattern: Question Statement Input=AnswerKey(Y/N)+BasePoints-QueuePenalty\nAn atom is larger than a virus structure element.=N+10-2\nPhotosynthesis loops occur within chloroplasts units.=Y+15-3\nGold scales represent nonreactive elemental transition metal blocks.=Y+20-5`;
-            dispatchFileSystemTrigger(content, 'swipe_deck_template.txt');
-        }
-
-        function processTxtUpload(fileInput) {
-            if (!fileInput.files[0]) return;
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                const textLines = e.target.result.split('\n');
-                let newlyParsedSet = [];
-                let counterIndex = 1;
+        function bindCardInteractivityVectors(node) {
+            const start = (e) => { 
+                statusPointerDragging = true; 
+                clickCoordX = e.clientX || e.touches[0].clientX; 
+                clickCoordY = e.clientY || e.touches[0].clientY; 
+                node.style.transition = 'none'; 
+            };
+            const move = (e) => {
+                if (!statusPointerDragging) return;
+                const curX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const curY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+                deltaCoordX = curX - clickCoordX; deltaCoordY = curY - clickCoordY;
                 
-                textLines.forEach(line => {
-                    if(line.trim().startsWith('//') || line.trim() === '') return;
-                    
-                    // Parsing layout syntax mechanics profile: "Question statement.=Y+10-5"
-                    const mainSplit = line.split('=');
-                    if(mainSplit.length === 2) {
-                        const promptText = mainSplit[0].trim();
-                        const restData = mainSplit[1].trim(); // Form: "Y+10-5"
-                        
-                        const keyMatch = restData.charAt(0).toUpperCase();
-                        const plusIndex = restData.indexOf('+');
-                        const minusIndex = restData.indexOf('-');
-                        
-                        if((keyMatch === 'Y' || keyMatch === 'N') && plusIndex !== -1 && minusIndex !== -1) {
-                            const ptsVal = parseInt(restData.substring(plusIndex + 1, minusIndex));
-                            const penaltyVal = parseInt(restData.substring(minusIndex + 1));
-                            
-                            newlyParsedSet.push({
-                                id: counterIndex++,
-                                text: promptText,
-                                key: keyMatch,
-                                pts: ptsVal,
-                                penalty: penaltyVal
-                            });
+                if (selectedSkinLanguage === '3') {
+                    node.style.transform = `translate3d(${deltaCoordX * 1.1}px, ${deltaCoordY * 1.1}px, 0) scale(1.01) rotate(${deltaCoordX * 0.04}deg)`;
+                } else {
+                    node.style.transform = `translate3d(${deltaCoordX}px, ${deltaCoordY}px, 0) rotate(${deltaCoordX * 0.03}deg)`;
+                }
+            };
+            const end = () => {
+                if (!statusPointerDragging) return; statusPointerDragging = false; 
+                node.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                if (deltaCoordX > executionSwipeLimit) commitEvaluationResolution("Y");
+                else if (deltaCoordX < -executionSwipeLimit) commitEvaluationResolution("N");
+                else if (deltaCoordY < -executionSwipeLimit) commitEvaluationResolution("QUEUE");
+                else if (deltaCoordY > executionSwipeLimit) commitEvaluationResolution("SKIP");
+                else node.style.transform = `translate3d(0,0,0)`;
+                deltaCoordX = 0; deltaCoordY = 0;
+            };
+            node.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+            node.addEventListener('touchstart', start, {passive:true}); window.addEventListener('touchmove', move, {passive:true}); window.addEventListener('touchend', end);
+        }
+
+        function commitEvaluationResolution(vector) {
+            if(internalActiveQueue.length === 0) return;
+            const node = internalActiveQueue.shift(); let diff = (Date.now() - individualItemStartTime) / 1000;
+            let scale = Math.max(1.0, currentVelocityLimit - (diff * (currentVelocityLimit - 1.0) / 6.0));
+            if(vector === "QUEUE") {
+                deferredMemoryBuffer.push(node); telemetryRegistry.push({ id: node.id, text: node.text, action: "QUEUE", key: node.key, points: 0, time: parseFloat(diff.toFixed(2)), outcome: "DEFERRED" });
+                evaluateAndRenderActiveLayers(); if(internalActiveQueue.length > 0) engageScalarTrackingLoop(); return;
+            }
+            let pts = 0, outcome = "WRONG";
+            if(vector === "SKIP") { pts = 0; outcome = "SKIPPED"; }
+            else if(vector === node.key) { pts = Math.round(parseInt(node.pts) * scale); outcome = "CORRECT"; }
+            else { pts = -Math.abs(node.penalty || 0); outcome = "WRONG"; }
+            accumulatedPointsAccumulator += pts;
+            telemetryRegistry.push({ id: node.id, text: node.text, action: vector, key: node.key, points: pts, time: parseFloat(diff.toFixed(2)), outcome: outcome });
+            evaluateAndRenderActiveLayers(); if(internalActiveQueue.length > 0) engageScalarTrackingLoop();
+        }
+
+        function terminateAssessmentSession(timeout) {
+            routingVisualStates('REPORT'); document.getElementById('controlPanelSubmission').classList.remove('hidden'); document.getElementById('analyticsReportBreakdown').classList.add('hidden');
+            document.getElementById('lblContextualReportMsg').innerText = timeout ? "Time ran out before all questions were finished." : `All items completed cleanly with ${tickingSecondsRemaining} seconds remaining.`;
+            document.getElementById('lblAggregatedScoreDisplay').innerText = Math.round(accumulatedPointsAccumulator);
+        }
+
+        function showEndAnalyticsReport() {
+            document.getElementById('controlPanelSubmission').classList.add('hidden'); document.getElementById('analyticsReportBreakdown').classList.remove('hidden');
+            const row = item => `<div class="border border-neutral-200 dark:border-neutral-800 p-3.5 rounded-xl bg-white/20 dark:bg-black/20 flex justify-between items-center text-sm"><div class="pr-2"><strong class="font-semibold text-neutral-900 dark:text-neutral-100">${item.text}</strong><br><span class="text-xs opacity-50">Your Answer: ${item.action === 'Y' ? 'True' : item.action === 'N' ? 'False' : item.action} | Correct: ${item.key === 'Y' ? 'True' : 'False'}</span></div><div class="font-bold text-right text-base ${item.points >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${item.points >= 0 ? '+' : ''}${item.points}</div></div>`;
+            document.getElementById('wellTrackedList').innerHTML = telemetryRegistry.filter(l=>l.outcome==="CORRECT").map(row).join('') || '<p class="italic opacity-30 text-center py-2 text-xs">No questions answered correctly.</p>';
+            document.getElementById('clashedList').innerHTML = telemetryRegistry.filter(l=>l.outcome==="WRONG").map(row).join('') || '<p class="italic opacity-30 text-center py-2 text-xs">No answers were wrong.</p>';
+            document.getElementById('deferredList').innerHTML = telemetryRegistry.filter(l=>l.outcome==="SKIPPED"||l.outcome==="DEFERRED").map(row).join('') || '<p class="italic opacity-30 text-center py-2 text-xs">No questions skipped.</p>';
+            enforceThemeLanguageSkin(selectedSkinLanguage);
+        }
+
+        function regenerateInterfaceCrudRows() {
+            const host = document.getElementById('crudInterfaceHost'); host.innerHTML = '';
+            matrixSourceArray.forEach((item, idx) => {
+                const r = document.createElement('div'); r.className = "bg-white/10 dark:bg-black/10 p-3.5 border border-neutral-200/60 dark:border-neutral-800/60 rounded-xl space-y-2";
+                r.innerHTML = `
+                    <div class="flex gap-2 items-center">
+                        <input type="text" value="${item.text}" onchange="matrixSourceArray[${idx}].text=this.value" class="flex-1 framework-input text-xs py-2">
+                        <button type="button" onclick="matrixSourceArray.splice(${idx},1); regenerateInterfaceCrudRows();" class="text-rose-500 font-bold px-1.5 hover:underline text-xs">[Delete]</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <select onchange="matrixSourceArray[${idx}].key=this.value" class="framework-input py-1.5"><option value="Y" ${item.key==='Y'?'selected':''}>True</option><option value="N" ${item.key==='N'?'selected':''}>False</option></select>
+                        <input type="number" value="${item.pts}" onchange="matrixSourceArray[${idx}].pts=parseInt(this.value)" class="framework-input text-center py-1.5" placeholder="Points">
+                        <input type="number" value="${item.penalty}" onchange="matrixSourceArray[${idx}].penalty=parseInt(this.value)" class="framework-input text-center py-1.5" placeholder="Penalty">
+                    </div>`;
+                host.appendChild(r);
+            });
+        }
+
+        function appendNewRowDataBlock() { 
+            matrixSourceArray.push({ id: matrixSourceArray.length?Math.max(...matrixSourceArray.map(m=>m.id))+1:1, text: "New classroom question goes here...", key: "Y", pts: 10, penalty: 5 }); 
+            regenerateInterfaceCrudRows(); 
+        }
+
+        function finalizeOverlayConfigurations() {
+            customTemporalDuration = parseInt(document.getElementById('txtInputDuration').value) || 60; 
+            currentVelocityLimit = parseFloat(document.getElementById('txtInputScalar').value) || 1.5; 
+            dynamicTitleText = document.getElementById('txtInputTitle').value || 'Cap or Trap';
+            localStorage.setItem('aghamos_cache_matrix', JSON.stringify(matrixSourceArray)); 
+            localStorage.setItem('aghamos_cache_duration', customTemporalDuration); 
+            localStorage.setItem('aghamos_cache_scalar', currentVelocityLimit); 
+            localStorage.setItem('aghamos_cache_title', dynamicTitleText);
+            deactivateManagementConsole(); fetchCachedEcosystemMetadata(); routingVisualStates('START');
+        }
+
+        function downloadSystemSchemaTemplate() { executeSystemFileDispatch(`// QUESTION TEMPLATE PAYLOAD\nIs the earth flat?=N+10-5`, 'game_questions.txt'); }
+        
+        function downloadCurrentTelemetryReport() {
+            let out = `=== AGHAMOS QUIZ SCORES ===\nTimestamp: ${new Date().toLocaleString()}\nGame Title: ${dynamicTitleText}\nFinal Score: ${accumulatedPointsAccumulator} pts\n===========================\n\n`;
+            telemetryRegistry.forEach((l, i) => { out += `[Question ${i+1}] ${l.text}\nAnswer: ${l.action} | Status: ${l.outcome} | Points: ${l.points} | Time: ${l.time}s\n\n`; });
+            executeSystemFileDispatch(out, `quiz_report_${Date.now()}.txt`);
+        }
+
+        function processIncomingTxtStream(ctx) {
+            if (!ctx.files[0]) return; const r = new FileReader();
+            r.onload = function(e) {
+                let lines = e.target.result.split('\n'), buf = [], count = 1;
+                lines.forEach(l => {
+                    if (l.trim().startsWith('//') || l.trim() === '') return;
+                    let arr = l.split('=');
+                    if(arr.length === 2) {
+                        let txt = arr[0].trim(), right = arr[1].trim(), key = right.charAt(0).toUpperCase(), pos = right.indexOf('+'), neg = right.indexOf('-');
+                        if((key==='Y'||key==='N') && pos!==-1 && neg!==-1) {
+                            buf.push({ id: count++, text: txt, key: key, pts: parseInt(right.substring(pos+1, neg)), penalty: parseInt(right.substring(neg+1)) });
                         }
                     }
                 });
-                
-                if(newlyParsedSet.length) {
-                    questions = newlyParsedSet;
-                    syncEditorViewRows();
-                    alert(`Successfully imported ${newlyParsedSet.length} questions. Click Save and Apply Changes to deploy.`);
-                } else {
-                    alert("Invalid file structure. Make sure format exactly follows Question=Y+10-5 standard.");
-                }
-            };
-            fileReader.readAsText(fileInput.files[0]);
+                if(buf.length) { matrixSourceArray = buf; regenerateInterfaceCrudRows(); alert(`Imported [${buf.length}] questions successfully.`); }
+            }; r.readAsText(ctx.files[0]);
         }
 
-        function downloadLogs() {
-            let backupDump = `=== SWIPE EVALUATION SESSION LOG REPORT ===\nJames Prae Swipe App System Module\nCaptured: ${new Date().toLocaleString()}\nGame Profile: ${appTitle}\nFinal Accumulated Score: ${Math.round(runningScore)} Pts\n===========================================\n\n`;
-            logs.forEach((log, index) => {
-                backupDump += `[${index + 1}] Item ID: #${log.id}\nQuestion String: ${log.text}\nStudent Swipe: ${log.action} (Answer Key Target: ${log.key})\nStatus State: ${log.outcome} | Delta Score: ${log.points} Pts | Duration: ${log.time}s\n-------------------------------------------\n`;
-            });
-            dispatchFileSystemTrigger(backupDump, `swipe_session_output_report_${Date.now()}.txt`);
-        }
-
-        function dispatchFileSystemTrigger(textData, targetedFilename) {
-            const dataBlob = new Blob([textData], { type: 'text/plain' });
-            const temporaryUrl = URL.createObjectURL(dataBlob);
-            const anchorElement = document.createElement('a');
-            anchorElement.href = temporaryUrl; anchorElement.download = targetedFilename;
-            anchorElement.click(); URL.revokeObjectURL(temporaryUrl);
-        }
-
-        function changeTheme(themeKey) {
-            document.body.classList.remove('theme-glass', 'theme-expressive', 'theme-nostalgic');
-            document.body.classList.add(`theme-${themeKey}`);
-            activeTheme = themeKey;
-            localStorage.setItem('prae_swipe_theme', themeKey);
-            renderDeckStack();
-        }
-
-        function triggerConfettiExplosion() {
-            // Generate temporary burst particles array map coordinates points
-            const canvas = document.getElementById('fxCanvas');
-            for (let i = 0; i < 75; i++) {
-                particles.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    r: Math.random() * 4 + 2,
-                    color: `hsl(${Math.random() * 360}, 90%, 60%)`,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8 - 3,
-                    alpha: 1
-                });
-            }
-        }
-
-        function clearSessionCache() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
-
-        // ================= BACKGROUND ANIMATION CANVAS ENGINE =================
-        function initFxCanvasEngine() {
-            const canvas = document.getElementById('fxCanvas');
-            const ctx = canvas.getContext('2d');
-            let w = canvas.width = window.innerWidth;
-            let h = canvas.height = window.innerHeight;
-
-            window.addEventListener('resize', () => {
-                w = canvas.width = window.innerWidth;
-                h = canvas.height = window.innerHeight;
-            });
-
-            // Ambient background nodes array
-            let nodes = Array.from({ length: 15 }, () => ({
-                x: Math.random() * w, y: Math.random() * h,
-                r: Math.random() * 3 + 1,
-                vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3
-            }));
-
-            function frameLoop() {
-                ctx.clearRect(0, 0, w, h);
-                
-                // 1. Render Ambient Background Effects based on Active Theme Profile
-                let accentHex = '#6366f1';
-                if(activeTheme === 'expressive') accentHex = '#ffff00';
-                if(activeTheme === 'nostalgic') accentHex = '#00ff00';
-
-                nodes.forEach(n => {
-                    n.x += n.vx; n.y += n.vy;
-                    if(n.x < 0 || n.x > w) n.vx *= -1;
-                    if(n.y < 0 || n.y > h) n.vy *= -1;
-                    
-                    ctx.beginPath();
-                    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-                    ctx.fillStyle = accentHex;
-                    ctx.globalAlpha = activeTheme === 'expressive' ? 0.15 : 0.25;
-                    ctx.fill();
-                });
-
-                // 2. Render Active Confetti System Explosion Engine Loops
-                particles.forEach((p, idx) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.1; // gravity acceleration line
-                    p.alpha -= 0.01;
-                    
-                    if(p.alpha <= 0) {
-                        particles.splice(idx, 1);
-                        return;
-                    }
-                    
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = p.alpha;
-                    ctx.fill();
-                });
-
-                ctx.globalAlpha = 1.0;
-                requestAnimationFrame(frameLoop);
-            }
-            frameLoop();
-        }
+        function executeSystemFileDispatch(txt, file) { const b = new Blob([txt], {type:'text/plain'}), url = URL.createObjectURL(b), a = document.createElement('a'); a.href = url; a.download = file; a.click(); URL.revokeObjectURL(url); }
+        function launchManagementConsole() { regenerateInterfaceCrudRows(); document.getElementById('managementOverlay').classList.remove('hidden'); enforceThemeLanguageSkin(selectedSkinLanguage); }
+        function deactivateManagementConsole() { document.getElementById('managementOverlay').classList.add('hidden'); }
     </script>
 </body>
 </html>
