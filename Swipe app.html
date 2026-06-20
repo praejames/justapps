@@ -2,475 +2,740 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cap or Trap</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Swipe App - Master Class Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-color: #1f2937;
-            --text-muted: #4b5563;
-            --border-color: #e5e7eb;
-            --primary: #4f46e5;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8f9fa;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            user-select: none;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');
+        
         body {
-            background-color: var(--bg-color);
-            background-size: cover;
-            background-position: center;
-            color: var(--text-color);
-            min-height: 100vh;
-            padding: 24px;
-            transition: background 0.3s, color 0.3s;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
         }
 
-        .header-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto 24px auto;
+        /* Color Accents Themes */
+        .accent-purple { --primary: #8b5cf6; --primary-glow: rgba(139, 92, 246, 0.4); --bg-grad: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); }
+        .accent-emerald { --primary: #10b981; --primary-glow: rgba(16, 185, 129, 0.4); --bg-grad: linear-gradient(135deg, #022c22 0%, #0f172a 100%); }
+        .accent-amber { --primary: #f59e0b; --primary-glow: rgba(245, 158, 11, 0.4); --bg-grad: linear-gradient(135deg, #451a03 0%, #0f172a 100%); }
+        .accent-rose { --primary: #f43f5e; --primary-glow: rgba(244, 63, 94, 0.4); --bg-grad: linear-gradient(135deg, #4c0519 0%, #0f172a 100%); }
+
+        .app-bg { background: var(--bg-grad); transition: background 0.5s ease; }
+        .theme-border { border-color: var(--primary); }
+        .theme-text { color: var(--primary); }
+        .theme-btn { background-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .theme-btn:hover { opacity: 0.9; box-shadow: 0 0 25px var(--primary); }
+
+        /* Structural Deck Layerings */
+        .card-stack { position: relative; width: 100%; max-width: 340px; height: 420px; }
+        .swipe-card {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 1.5rem; background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            cursor: grab; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, border-color 0.2s;
+            transform-origin: center bottom;
         }
+        .swipe-card:active { cursor: grabbing; }
 
-        .brand-logo {
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; }
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 32px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-        }
-
-        .centered-panel { max-width: 480px; margin: 40px auto 0 auto; }
-        .role-selector { display: flex; gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 12px; }
-        .role-tab { flex: 1; padding: 12px; text-align: center; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        .role-tab.active { background: var(--card-bg); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: var(--primary); }
-        .form-element { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: var(--text-muted); }
-        input, textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--card-bg); color: var(--text-color); font-size: 15px; outline: none; }
-        button { padding: 12px 24px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        button.action-btn { background: var(--primary); color: white; border: none; width: 100%; }
-        .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-        .grid-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
-        .quad-fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-        .banner-alert { background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger); color: var(--danger); padding: 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-        th { font-weight: 700; color: var(--text-muted); }
-
-        .card-deck-viewport { position: relative; width: 100%; max-width: 340px; height: 380px; margin: 32px auto; }
-        .gesture-card { position: absolute; width: 100%; height: 100%; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 24px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); transform-origin: center bottom; cursor: grab; transition: transform 0.1s ease-out, opacity 0.2s; }
-        .tag-overlay { position: absolute; top: 20px; font-size: 12px; font-weight: 900; padding: 6px 12px; border-radius: 6px; opacity: 0; text-transform: uppercase; }
-        .tag-cap { right: 20px; border: 2px solid var(--success); color: var(--success); }
-        .tag-trap { left: 20px; border: 2px solid var(--danger); color: var(--danger); }
-        .spinner { width: 48px; height: 48px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; margin: 32px auto; animation: turn 0.8s linear infinite; }
-        @keyframes turn { to { transform: rotate(360deg); } }
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
+        /* Elegant Hide Scrollbars */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="accent-purple app-bg flex flex-col items-center justify-between min-h-screen p-4 text-slate-100 relative">
 
-    <div class="header-nav">
-        <div class="brand-logo" onclick="location.reload()">Cap or Trap</div>
-        <button onclick="toggleThemeMode()">Toggle Mode</button>
-    </div>
+    <canvas id="bgCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
 
-    <div class="container">
-        <div id="entranceStep" class="card centered-panel">
-            <h2 class="text-center" style="margin-bottom: 24px;">Welcome Pilot</h2>
-            <div class="role-selector">
-                <div class="role-tab active" id="tabPart" onclick="switchRoleView('participant')">Participant</div>
-                <div class="role-tab" id="tabFac" onclick="switchRoleView('facilitator')">Facilitator</div>
+    <div id="startScreen" class="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md w-full space-y-6">
+            <div class="space-y-2">
+                <span class="text-xs font-mono tracking-[0.3em] text-slate-400 uppercase">Welcome to</span>
+                <h1 class="text-6xl font-black tracking-tight theme-text drop-shadow-[0_0_15px_var(--primary-glow)]">SWIPE APP</h1>
+                <p class="text-xs text-slate-400 font-mono max-w-xs mx-auto">Pass the device around. Quick responses scale multipliers higher; skips yield zero; queues deduct safety points.</p>
+            </div>
+            
+            <div class="bg-slate-900/80 border border-white/5 p-4 rounded-2xl space-y-3">
+                <span class="text-xs font-bold text-slate-500 block uppercase tracking-widest">Deck Constraints</span>
+                <div class="grid grid-cols-2 gap-2 text-sm font-mono text-left bg-slate-950/50 p-3 rounded-xl border border-white/5">
+                    <div>Questions: <span id="startQuestCount" class="theme-text font-bold">0</span></div>
+                    <div>Allocated Time: <span id="startTimerVal" class="theme-text font-bold">0s</span></div>
+                    <div class="col-span-2 mt-1 pt-1 border-t border-white/5">Max Speed Bonus: <span id="startMultVal" class="text-amber-400 font-bold">0x</span></div>
+                </div>
             </div>
 
-            <div id="formPart">
-                <div class="form-element">
-                    <label>Player Nickname</label>
-                    <input type="text" id="joinName" placeholder="Enter Call Sign">
-                </div>
-                <div class="form-element">
-                    <label>Access Token</label>
-                    <input type="text" id="joinCode" placeholder="4-Digit Secure Key">
-                </div>
-                <button class="action-btn" onclick="initiateParticipantSession()">Connect to Engine</button>
-            </div>
-
-            <div id="formFac" class="hidden">
-                <div class="form-element">
-                    <label>Establish Administration Key</label>
-                    <input type="text" id="facCode" value="1234" maxlength="6">
-                </div>
-                <button class="action-btn" onclick="initiateFacilitatorDashboard()">Initialize Panel</button>
+            <div class="space-y-3">
+                <button onclick="startSession()" class="theme-btn w-full text-black font-extrabold py-4 px-8 rounded-xl text-lg tracking-wider transition-all transform active:scale-95 shadow-lg">
+                    BEGIN CHALLENGE ⚡
+                </button>
+                <button onclick="openSettings()" class="text-xs text-slate-400 hover:text-white underline font-mono block mx-auto py-1">
+                    ⚙️ Teacher Panel / Edit Questions
+                </button>
             </div>
         </div>
+    </div>
 
-        <div id="facilitatorDashboard" class="card hidden">
-            <div class="dashboard-layout">
+
+    <div id="gameScreen" class="absolute inset-0 z-10 flex flex-col items-center justify-between p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <header class="w-full max-w-md flex justify-between items-center z-10 pt-2">
+            <div>
+                <h1 class="text-lg font-black tracking-wider opacity-50">SWIPE GAME</h1>
+                <div class="text-[11px] font-mono theme-text font-bold" id="multiplierDisplay">Multiplier: 1.00x</div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-black/40 border border-white/10 px-3 py-1.5 rounded-full font-mono text-sm font-bold flex items-center gap-1.5 shadow-inner">
+                    ⏳ <span id="gameTimer" class="text-rose-400">00:00</span>
+                </div>
+                <button onclick="openSettings()" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition text-xs">⚙️</button>
+            </div>
+        </header>
+
+        <div id="statBar" class="z-10 bg-slate-900/90 border border-white/5 px-5 py-2 rounded-full text-xs font-mono flex gap-6 shadow-md my-2">
+            <span>Deck Progress: <strong id="deckProgress" class="text-slate-300">0/0</strong></span>
+            <span>Running Tally: <strong id="runningScore" class="theme-text">0</strong></span>
+        </div>
+
+        <main class="relative flex-1 flex items-center justify-center w-full z-10 my-2">
+            <div id="cardDeckContainer" class="card-stack"></div>
+        </main>
+
+        <footer class="w-full max-w-md grid grid-cols-4 gap-1.5 text-[9px] text-center opacity-70 z-10 font-mono pb-2">
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">⬆️ QUEUE<br>(-Penalty)</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">⬇️ SKIP<br>(0 Pts)</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-emerald-400 font-bold border-emerald-500/20">➡️ AGREE<br>(True)</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-rose-400 font-bold border-rose-500/20">⬅️ DISAGREE<br>(False)</div>
+        </footer>
+    </div>
+
+
+    <div id="summaryScreen" class="absolute inset-0 z-20 bg-slate-950/95 flex flex-col items-center p-6 overflow-y-auto no-scrollbar opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="w-full max-w-md my-auto space-y-6 pt-4">
+            <div class="text-center">
+                <span class="text-xs uppercase font-mono tracking-[0.2em] text-slate-500">Session Concluded</span>
+                <h2 class="text-3xl font-black mt-0.5 tracking-tight">CHALLENGE LOG OVERVIEW</h2>
+            </div>
+
+            <div class="bg-slate-900 border border-white/5 p-6 rounded-3xl text-center space-y-1 shadow-2xl relative overflow-hidden">
+                <span class="text-xs text-slate-400 font-mono block uppercase tracking-wider">Final Points Garnered</span>
+                <div id="dramaticScore" class="text-6xl font-black tracking-tighter text-amber-400 py-1">0</div>
+                <p id="summaryTimerMsg" class="text-[11px] text-slate-500 font-mono"></p>
+            </div>
+
+            <div id="submitBtnBlock" class="space-y-2">
+                <button onclick="submitToTeacher()" class="theme-btn w-full text-black font-extrabold py-4 rounded-xl text-md tracking-wider transition-all shadow-lg active:scale-95">
+                    📤 SUBMIT TO TEACHER
+                </button>
+                <p class="text-[10px] text-slate-500 text-center font-mono">Triggers zero-delay file downloads and charts item analytical breakdowns below.</p>
+            </div>
+
+            <div id="analyticsBlock" class="hidden space-y-5">
+                <div class="text-center opacity-40 text-[11px] font-mono animate-bounce">⬇️ Swipe up / scroll to evaluate item metrics ⬇️</div>
+                <hr class="border-white/5">
+                
+                <div class="space-y-5 pb-12">
+                    <div>
+                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex justify-between">
+                            <span>⚡ Velocity Breakdown</span>
+                            <span class="text-[9px] opacity-60 font-mono">(Fastest Correct/Queued)</span>
+                        </h4>
+                        <div id="analyticsFastest" class="space-y-1.5"></div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-bold text-rose-400 uppercase tracking-widest mb-2 flex justify-between">
+                            <span>❌ Missed Target Failures</span>
+                            <span class="text-[9px] opacity-60 font-mono">(Fastest to Slowest)</span>
+                        </h4>
+                        <div id="analyticsWrong" class="space-y-1.5"></div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2 flex justify-between">
+                            <span>💤 Blind Spots / Skips</span>
+                            <span class="text-[9px] opacity-60 font-mono">(Most Retries Left Open)</span>
+                        </h4>
+                        <div id="analyticsSkipped" class="space-y-1.5"></div>
+                    </div>
+
+                    <button onclick="restartChallenge()" class="w-full bg-slate-900 hover:bg-slate-800 border border-white/5 text-slate-300 font-bold py-3 rounded-xl text-xs tracking-wider transition-all">
+                        🔄 Restart Fresh Challenge Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="settingsModal" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-white/10 w-full max-w-xl rounded-2xl max-h-[85vh] flex flex-col text-sm text-slate-200 shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-950">
+                <h3 class="font-bold text-white tracking-widest uppercase text-xs">Instructor Control Board</h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+            </div>
+            
+            <div class="p-5 overflow-y-auto space-y-5 flex-1 no-scrollbar">
                 <div>
-                    <div class="grid-fields">
-                        <div class="form-element">
-                            <label>Review Session Title</label>
-                            <input type="text" id="sessionTitle" value="Cap or Trap Physics Review">
-                        </div>
-                        <div class="form-element">
-                            <label>Session Key</label>
-                            <input type="text" id="sessionKeyDisplay" readonly style="font-weight: 800; color: var(--primary);">
-                        </div>
+                    <label class="block text-xs font-mono uppercase tracking-wider mb-2 text-slate-400">Accent Environment Color Profile</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setAccent('purple')" class="bg-purple-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Purple</button>
+                        <button onclick="setAccent('emerald')" class="bg-emerald-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Emerald</button>
+                        <button onclick="setAccent('amber')" class="bg-amber-500 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Amber</button>
+                        <button onclick="setAccent('rose')" class="bg-rose-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Rose</button>
                     </div>
-
-                    <div class="banner-alert">
-                        Sessions auto-expire 24 hours post-creation. Re-entering code within window will restore state.
-                    </div>
-
-                    <div class="grid-fields" style="margin-bottom: 24px;">
-                        <button onclick="fetchTextTemplate()">Get Template (.txt)</button>
-                        <button onclick="triggerFileImport()">Import Session (.txt)</button>
-                        <input type="file" id="uploadGate" class="hidden" accept=".txt" onchange="parseDeckUpload(event)">
-                    </div>
-
-                    <h3 style="margin-bottom: 16px;">Settings Control</h3>
-                    <div class="quad-fields">
-                        <div><label style="color:var(--success);">Right Swipe</label><input type="text" id="lblRight" value="CAP"></div>
-                        <div><label style="color:var(--danger);">Left Swipe</label><input type="text" id="lblLeft" value="TRAP"></div>
-                        <div><label style="color:var(--warning);">Up Swipe</label><input type="text" id="lblUp" value="SKIP"></div>
-                        <div><label style="color:var(--text-muted);">Down Swipe</label><input type="text" id="lblDown" value="TRASH"></div>
-                    </div>
-
-                    <div class="grid-fields">
-                        <div><label>Time per question (seconds)</label><input type="number" id="limitTime" value="15"></div>
-                        <div><label>Points per question</label><input type="number" id="valPoints" value="10"></div>
-                    </div>
-
-                    <div class="form-element">
-                        <label>Review Questions Matrix Bank</label>
-                        <textarea id="deckRawSource" rows="6">Photosynthesis takes place primarily within the structural boundaries of the cellular mitochondria. | false
-Light vectors propagate with higher scalar velocities inside complete vacuums than glass structures. | true
-The atomic identity number of any given elemental structure is determined exclusively via neutron counting metrics. | false</textarea>
-                    </div>
-
-                    <div class="form-element">
-                        <label>Open-Ended Analytical Final Question</label>
-                        <input type="text" id="lastPromptText" value="Analyze the core conceptual dependencies that contributed to processing errors on flagged cards.">
-                    </div>
-
-                    <button class="action-btn" style="background:var(--success); padding: 16px;" onclick="deployProductionLiveEngine()">LAUNCH PRODUCTION ENGINE</button>
                 </div>
 
-                <div style="border-left: 1px solid var(--border-color); padding-left: 24px;">
-                    <div class="form-element text-center">
-                        <label>Room Target QR</label>
-                        <div id="canvasQR" style="margin: 12px auto; display: inline-block;"></div>
+                <div class="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-white/5">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Total Timer Duration (Seconds)</label>
+                        <input type="number" id="cfgDuration" value="60" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
                     </div>
-                    
-                    <div style="margin-top: 32px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h3>Realtime Leaderboard</h3>
-                            <span id="clientCount" style="font-weight:800; color:var(--success);">0 Live</span>
-                        </div>
-                        <table id="rosterTable">
-                            <thead><tr><th>Pilot</th><th>Metrics</th></tr></thead>
-                            <tbody><tr><td colspan="2" style="color:var(--text-muted); text-align:center;">Awaiting database synchronization...</td></tr></tbody>
-                        </table>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Max Score Speed Multiplier Scaling</label>
+                        <input type="number" id="cfgMultiplier" value="2.0" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
                     </div>
-                    <button class="action-btn" style="margin-top: 32px; background: var(--primary);" onclick="dispatchNextMatrixCard()">DISPATCH NEXT CARD</button>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-mono uppercase tracking-wider text-slate-400">In-App Live Question Workspace Grid</label>
+                        <button onclick="addBlankQuestionRow()" class="text-[11px] theme-text hover:underline font-bold">+ Add New Card</button>
+                    </div>
+                    <div id="crudEditorContainer" class="space-y-2 max-h-[220px] overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="space-y-2 border-t border-white/5 pt-4">
+                    <label class="block text-[10px] font-mono text-slate-400 uppercase">Mass File Configuration File System IO</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="file" id="txtInput" accept=".txt" class="hidden" onchange="processTxtUpload(this)">
+                        <button onclick="document.getElementById('txtInput').click()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📂 Upload .TXT</button>
+                        <button onclick="downloadTemplate()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📥 Save Template</button>
+                        <button onclick="downloadLogs()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📊 Export Last Logs</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="participantDashboard" class="card centered-panel hidden text-center">
-            <div id="stageWait">
-                <h3>Connected to Cloud Engine</h3>
-                <p id="channelEcho" style="font-weight: 700; color: var(--primary); margin-top: 8px;"></p>
-                <div class="spinner"></div>
-                <p style="color:var(--text-muted); font-size:14px;">Awaiting card transmission payload from host...</p>
-            </div>
-
-            <div id="stageAction" class="hidden">
-                <div style="display:flex; justify-content:space-between; font-weight:700; font-size:14px; margin-bottom: 16px;">
-                    <div id="liveScoreCounter">Score: 0 pts</div>
-                    <div id="liveClockDisplay" style="color:var(--danger);">Time Left: --s</div>
-                </div>
-
-                <div class="card-deck-viewport">
-                    <div class="tag-overlay tag-cap" id="capIndicator">CAP</div>
-                    <div class="tag-overlay tag-trap" id="trapIndicator">TRAP</div>
-                    <div class="gesture-card" id="swipeCardAnchor">Syncing Active Card Frame...</div>
-                </div>
-                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">Swipe Right (CAP) • Swipe Left (TRAP)<br>Swipe Up (SKIP) • Swipe Down (TRASH)</p>
+            <div class="p-3 border-t border-white/5 bg-slate-950 flex justify-between">
+                <button onclick="clearSessionCache()" class="text-xs text-rose-400 hover:underline px-2">Reset App To Defaults</button>
+                <button onclick="applyTeacherModifications()" class="theme-btn text-black font-extrabold text-xs px-5 py-2 rounded-xl shadow">Deploy Changes</button>
             </div>
         </div>
     </div>
+
 
     <script>
-        let currentRole = 'participant';
-        let globalRoomCode = "";
-        let globalNickname = "";
+        // Core Volatile Array Objects Matrix State Setup
+        let questions = [
+            { id: 1, text: "Is water composed of two hydrogen atoms and one oxygen atom?", key: "AGREE", pts: 10, penalty: 2 },
+            { id: 2, text: "Does light travel significantly slower than sound waves?", key: "DISAGREE", pts: 15, penalty: 4 },
+            { id: 3, text: "Is the powerhouse of the biological cell structure a Ribosome?", key: "DISAGREE", pts: 20, penalty: 5 }
+        ];
+
+        let logs = [];
+        let currentCardIndex = 0;
         let runningScore = 0;
-        let parsedDeckMatrix = [];
-        let activeCardIndex = -1;
-        let cardCountdownTimer;
-        let activeSessionRef = null;
+        let currentAccent = 'purple';
 
-        // Injected User Config with Reconstructed Database Route URL Mapping
-        const firebaseConfig = {
-            apiKey: "AIzaSyA7oPt9Wtxaz2-u7RNgCQIehBs026XWTvA",
-            authDomain: "swipe-app-176c2.firebaseapp.com",
-            databaseURL: "https://swipe-app-176c2-default-rtdb.firebaseio.com",
-            projectId: "swipe-app-176c2",
-            storageBucket: "swipe-app-176c2.firebasestorage.app",
-            messagingSenderId: "833930289142",
-            appId: "1:833930289142:web:e867cf6ffb49df5bd8f1d7"
-        };
-        
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const database = firebase.database();
+        // Configuration Boundary Trackers
+        let globalTimerDuration = 60; 
+        let timerInterval = null;
+        let timeRemaining = 60;
+        let maxMultiplier = 2.0;
+        let itemStartTime = null;
 
-        function toggleThemeMode() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        // Vector Physics Coords Offset Maps 
+        let startX = 0, startY = 0, moveX = 0, moveY = 0;
+        let isDragging = false;
+        const swipeThreshold = 80;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            syncEditorViewRows();
+            initFxCanvasEngine();
+            refreshStateScreens('START');
+        });
+
+        function loadFromLocalStorage() {
+            if(localStorage.getItem('swipe_q_v3')) questions = JSON.parse(localStorage.getItem('swipe_q_v3'));
+            if(localStorage.getItem('swipe_accent_v3')) setAccent(localStorage.getItem('swipe_accent_v3'));
+            if(localStorage.getItem('swipe_duration_v3')) globalTimerDuration = parseInt(localStorage.getItem('swipe_duration_v3'));
+            if(localStorage.getItem('swipe_mult_v3')) maxMultiplier = parseFloat(localStorage.getItem('swipe_mult_v3'));
+            
+            document.getElementById('cfgDuration').value = globalTimerDuration;
+            document.getElementById('cfgMultiplier').value = maxMultiplier;
         }
 
-        function switchRoleView(selectedRole) {
-            currentRole = selectedRole;
-            document.getElementById('tabPart').classList.toggle('active', selectedRole === 'participant');
-            document.getElementById('tabFac').classList.toggle('active', selectedRole === 'facilitator');
-            document.getElementById('formPart').classList.toggle('hidden', selectedRole !== 'participant');
-            document.getElementById('formFac').classList.toggle('hidden', selectedRole !== 'facilitator');
-        }
+        // Rigid Functional State Navigation Router
+        function refreshStateScreens(targetState) {
+            const start = document.getElementById('startScreen');
+            const game = document.getElementById('gameScreen');
+            const summary = document.getElementById('summaryScreen');
 
-        function initiateFacilitatorDashboard() {
-            const secretKey = document.getElementById('facCode').value.trim();
-            if(!secretKey) return alert("Room verification code mandatory.");
-
-            globalRoomCode = secretKey;
-            activeSessionRef = database.ref('sessions/' + secretKey);
-
-            activeSessionRef.once('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    if (Date.now() - data.createdAt > 86400000) {
-                        activeSessionRef.remove(); 
-                        createNewSessionNode();
-                    } else {
-                        document.getElementById('sessionTitle').value = data.title || "";
-                        alert("Prior active session state within 24hr parameter successfully recovered.");
-                    }
-                } else {
-                    createNewSessionNode();
-                }
+            // Deactivate and mask all layers safely
+            [start, game, summary].forEach(el => {
+                el.classList.add('opacity-0', 'pointer-events-none');
+                el.style.zIndex = "5";
             });
 
-            document.getElementById('sessionKeyDisplay').value = secretKey;
-            document.getElementById('entranceStep').classList.add('hidden');
-            document.getElementById('facilitatorDashboard').classList.remove('hidden');
-
-            activeSessionRef.child('roster').on('value', (snapshot) => {
-                const roster = snapshot.val() || {};
-                refreshLeaderboardDOM(roster);
-            });
-        }
-
-        function createNewSessionNode() {
-            activeSessionRef.set({
-                createdAt: Date.now(),
-                title: document.getElementById('sessionTitle').value,
-                activeCard: null
-            });
-        }
-
-        function initiateParticipantSession() {
-            globalNickname = document.getElementById('joinName').value.trim();
-            globalRoomCode = document.getElementById('joinCode').value.trim();
-            if(!globalNickname || !globalRoomCode) return alert("Credentials mandatory.");
-
-            document.getElementById('entranceStep').classList.add('hidden');
-            document.getElementById('participantDashboard').classList.remove('hidden');
-            document.getElementById('channelEcho').innerText = `ROOM KEY: ${globalRoomCode}`;
-
-            activeSessionRef = database.ref('sessions/' + globalRoomCode);
-            activeSessionRef.child('roster/' + globalNickname).set({ points: 0 });
-
-            activeSessionRef.child('activeCard').on('value', (snapshot) => {
-                const cardData = snapshot.val();
-                if (cardData) {
-                    document.getElementById('stageWait').classList.add('hidden');
-                    document.getElementById('stageAction').classList.remove('hidden');
-                    bindIncomingCardMatrix(cardData);
-                }
-            });
-        }
-
-        function deployProductionLiveEngine() {
-            const lines = document.getElementById('deckRawSource').value.split('\n').filter(l => l.includes('|'));
-            parsedDeckMatrix = lines.map(line => {
-                const chunks = line.split('|');
-                return { query: chunks[0].trim(), verification: chunks[1].trim() };
-            });
-            parsedDeckMatrix.push({ query: document.getElementById('lastPromptText').value, verification: 'OPEN' });
-
-            activeSessionRef.update({ title: document.getElementById('sessionTitle').value });
-
-            const qrBox = document.getElementById('canvasQR');
-            qrBox.innerHTML = "";
-            new QRCode(qrBox, { text: window.location.href, width: 140, height: 140 });
-            alert("Database linked game board live.");
-        }
-
-        function dispatchNextMatrixCard() {
-            activeCardIndex++;
-            if(activeCardIndex < parsedDeckMatrix.length) {
-                activeSessionRef.child('activeCard').set({
-                    prompt: parsedDeckMatrix[activeCardIndex].query,
-                    truth: parsedDeckMatrix[activeCardIndex].verification,
-                    countdown: parseInt(document.getElementById('limitTime').value) || 15,
-                    pointsValue: parseInt(document.getElementById('valPoints').value) || 10,
-                    lexicon: {
-                        cap: document.getElementById('lblRight').value,
-                        trap: document.getElementById('lblLeft').value
-                    },
-                    timestamp: Date.now()
-                });
-            } else {
-                alert("Matrix bank sequence completed.");
+            if(targetState === 'START') {
+                start.classList.remove('opacity-0', 'pointer-events-none');
+                start.style.zIndex = "40";
+                
+                document.getElementById('startQuestCount').innerText = questions.length;
+                document.getElementById('startTimerVal').innerText = globalTimerDuration + 's';
+                document.getElementById('startMultVal').innerText = maxMultiplier.toFixed(1) + 'x';
+            } 
+            else if(targetState === 'GAME') {
+                game.classList.remove('opacity-0', 'pointer-events-none');
+                game.style.zIndex = "30";
+            } 
+            else if(targetState === 'SUMMARY') {
+                summary.classList.remove('opacity-0', 'pointer-events-none');
+                summary.style.zIndex = "40";
             }
         }
 
-        function refreshLeaderboardDOM(roster) {
-            const tbody = document.getElementById('rosterTable').querySelector('tbody');
-            tbody.innerHTML = "";
-            const keys = Object.keys(roster).sort((a,b) => roster[b].points - roster[a].points);
-            document.getElementById('clientCount').innerText = `${keys.length} Live`;
-
-            if(keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Awaiting synchronization...</td></tr>`;
-                return;
-            }
-            keys.forEach(k => {
-                tbody.innerHTML += `<tr><td><strong>${k}</strong></td><td>${roster[k].points} pts</td></tr>`;
-            });
+        // ================= SESSION RUNTIME LIFE CYCLES =================
+        function startSession() {
+            currentCardIndex = 0;
+            runningScore = 0;
+            logs = [];
+            timeRemaining = globalTimerDuration;
+            
+            refreshStateScreens('GAME');
+            renderDeckStack();
+            startCountdownTimer();
+            trackItemPerformanceDelta();
         }
 
-        let focusedCardPayload = null;
-        function bindIncomingCardMatrix(data) {
-            focusedCardPayload = data;
-            const targetElement = document.getElementById('swipeCardAnchor');
-            targetElement.style.transform = "none";
-            targetElement.style.opacity = "1";
-            targetElement.innerText = data.prompt;
-
-            document.getElementById('capIndicator').innerText = data.lexicon.cap;
-            document.getElementById('trapIndicator').innerText = data.lexicon.trap;
-
-            let ticks = data.countdown;
-            document.getElementById('liveClockDisplay').innerText = `Time Left: ${ticks}s`;
-            clearInterval(cardCountdownTimer);
-            cardCountdownTimer = setInterval(() => {
-                ticks--;
-                document.getElementById('liveClockDisplay').innerText = `Time Left: ${ticks}s`;
-                if(ticks <= 0) {
-                    clearInterval(cardCountdownTimer);
-                    processMatrixResolution('TIMEOUT');
+        function startCountdownTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if(timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    terminateDeckSession(true);
                 }
             }, 1000);
-
-            bindMobileTouchMechanics(targetElement);
         }
 
-        function bindMobileTouchMechanics(el) {
-            let initialX = 0, initialY = 0, deltaX = 0, deltaY = 0;
-            const cInd = document.getElementById('capIndicator');
-            const tInd = document.getElementById('trapIndicator');
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('gameTimer').innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
 
-            el.ontouchstart = (e) => {
-                initialX = e.touches[0].clientX;
-                initialY = e.touches[0].clientY;
-            };
+        function trackItemPerformanceDelta() {
+            itemStartTime = Date.now();
+            
+            if(window.multiplierLoop) cancelAnimationFrame(window.multiplierLoop);
+            
+            function step() {
+                const gameActive = !document.getElementById('gameScreen').classList.contains('opacity-0');
+                if(gameActive) {
+                    const elapsed = (Date.now() - itemStartTime) / 1000;
+                    // Decay multiplier smoothly down to a flat 1.00x baseline floor within 6.0 seconds flat
+                    let currentMult = maxMultiplier - (elapsed * (maxMultiplier - 1.0) / 6.0);
+                    if(currentMult < 1.0) currentMult = 1.0;
+                    document.getElementById('multiplierDisplay').innerText = `Multiplier: ${currentMult.toFixed(2)}x`;
+                    window.multiplierLoop = requestAnimationFrame(step);
+                }
+            }
+            window.multiplierLoop = requestAnimationFrame(step);
+        }
 
-            el.ontouchmove = (e) => {
-                deltaX = e.touches[0].clientX - initialX;
-                deltaY = e.touches[0].clientY - initialY;
-                el.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${deltaX / 12}deg)`;
+        function renderDeckStack() {
+            const container = document.getElementById('cardDeckContainer');
+            container.innerHTML = '';
+            
+            document.getElementById('deckProgress').innerText = `${currentCardIndex}/${questions.length}`;
+            document.getElementById('runningScore').innerText = Math.round(runningScore);
+
+            if(currentCardIndex >= questions.length) {
+                clearInterval(timerInterval);
+                terminateDeckSession(false);
+                return;
+            }
+
+            // Standard dual layered stacking depth assignments
+            for (let i = Math.min(questions.length - 1, currentCardIndex + 1); i >= currentCardIndex; i--) {
+                const cardData = questions[i];
+                const card = document.createElement('div');
+                card.className = `swipe-card flex flex-col justify-between p-6 select-none theme-border`;
                 
-                if(deltaX > 40) { cInd.style.opacity = Math.min(deltaX/120, 1); tInd.style.opacity = 0; }
-                else if(deltaX < -40) { tInd.style.opacity = Math.min(Math.abs(deltaX)/120, 1); cInd.style.opacity = 0; }
-                else { cInd.style.opacity = 0; tInd.style.opacity = 0; }
-            };
+                if(i === currentCardIndex) {
+                    card.style.transform = `translate3d(0,0,0) scale(1)`;
+                    card.style.zIndex = "20";
+                    bindCardPhysicsListeners(card);
+                } else {
+                    card.style.transform = `translate3d(0, 14px, 0) scale(0.95)`;
+                    card.style.zIndex = "10";
+                    card.style.opacity = "0.35";
+                }
 
-            el.ontouchend = () => {
-                cInd.style.opacity = 0;
-                tInd.style.opacity = 0;
-
-                if (deltaX > 140) processMatrixResolution('true'); 
-                else if (deltaX < -140) processMatrixResolution('false');
-                else if (deltaY < -140) processMatrixResolution('skip');
-                else if (deltaY > 140) processMatrixResolution('trash');
-                else { el.style.transform = "translate(0px, 0px) rotate(0deg)"; }
-            };
-        }
-
-        function processMatrixResolution(evalChoice) {
-            clearInterval(cardCountdownTimer);
-            const targetElement = document.getElementById('swipeCardAnchor');
-            targetElement.style.opacity = "0";
-            targetElement.innerText = "Transmitting response data...";
-
-            if(focusedCardPayload && focusedCardPayload.truth !== 'OPEN') {
-                if(evalChoice === focusedCardPayload.truth) { runningScore += focusedCardPayload.pointsValue; }
-            }
-            document.getElementById('liveScoreCounter').innerText = `Score: ${runningScore} pts`;
-
-            if (activeSessionRef) {
-                activeSessionRef.child('roster/' + globalNickname).set({ points: runningScore });
+                card.innerHTML = `
+                    <div class="flex justify-between items-center opacity-40 text-[10px] font-mono">
+                        <span>MODULE CARD: #${cardData.id}</span>
+                        <span class="theme-text font-bold">BASE MARKS: ${cardData.pts} Pts</span>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center my-4 text-center">
+                        <p class="text-lg font-bold tracking-wide leading-relaxed">${cardData.text}</p>
+                    </div>
+                    <div class="text-[10px] opacity-40 font-mono text-center border-t border-white/5 pt-3">
+                        Queue Penalty Deduction: -${cardData.penalty || 0} Pts
+                    </div>
+                `;
+                container.appendChild(card);
             }
         }
 
-        function fetchTextTemplate() {
-            const raw = "Sample Core Question Prompt Matrix | true\nAlternative Conceptual Prompt Fact | false";
-            blobAssetDownload(raw, "matrix_template.txt");
+        // ================= DRAG MECHANICS IMPLEMENTATION =================
+        function bindCardPhysicsListeners(card) {
+            card.addEventListener('mousedown', gestureStart);
+            card.addEventListener('mousemove', gestureMove);
+            card.addEventListener('mouseup', gestureEnd);
+            card.addEventListener('mouseleave', gestureEnd);
+
+            card.addEventListener('touchstart', gestureStart, { passive: true });
+            card.addEventListener('touchmove', gestureMove, { passive: true });
+            card.addEventListener('touchend', gestureEnd);
         }
-        function triggerFileImport() { document.getElementById('uploadGate').click(); }
-        function parseDeckUpload(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) { document.getElementById('deckRawSource').value = evt.target.result; };
-            reader.readAsText(file);
+
+        function gestureStart(e) {
+            isDragging = true;
+            startX = e.clientX || e.touches[0].clientX;
+            startY = e.clientY || e.touches[0].clientY;
+            this.style.transition = 'none';
         }
-        function blobAssetDownload(text, name) {
-            const b = new Blob([text], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.download = name; a.href = window.URL.createObjectURL(b); a.click();
+
+        function gestureMove(e) {
+            if (!isDragging) return;
+            const currentX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const currentY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            moveX = currentX - startX;
+            moveY = currentY - startY;
+
+            // Direct interactive responsive color bounds update maps
+            if(moveX > 40) this.style.borderColor = '#10b981';
+            else if(moveX < -40) this.style.borderColor = '#f43f5e';
+            else if(moveY < -40) this.style.borderColor = '#8b5cf6';
+            else if(moveY > 40) this.style.borderColor = '#f59e0b';
+            else this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+            this.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) rotate(${moveX * 0.04}deg)`;
+        }
+
+        function gestureEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            this.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s';
+
+            if (moveX > swipeThreshold) executeSwipeResolution("AGREE");
+            else if (moveX < -swipeThreshold) executeSwipeResolution("DISAGREE");
+            else if (moveY < -swipeThreshold) executeSwipeResolution("QUEUE");
+            else if (moveY > swipeThreshold) executeSwipeResolution("SKIP");
+            else {
+                this.style.transform = `translate3d(0,0,0) scale(1)`;
+                this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            }
+            moveX = 0; moveY = 0;
+        }
+
+        function executeSwipeResolution(action) {
+            const currentQuestion = questions[currentCardIndex];
+            const reactionTimeSec = (Date.now() - itemStartTime) / 1000;
+            
+            let computedMultiplier = maxMultiplier - (reactionTimeSec * (maxMultiplier - 1.0) / 6.0);
+            if(computedMultiplier < 1.0) computedMultiplier = 1.0;
+
+            let pointsAwarded = 0;
+            let statusOutcome = "WRONG";
+
+            if (action === "QUEUE") {
+                pointsAwarded = -Math.abs(currentQuestion.penalty || 0);
+                statusOutcome = "QUEUED";
+            } else if (action === "SKIP") {
+                pointsAwarded = 0;
+                statusOutcome = "SKIPPED";
+            } else if (action === currentQuestion.key) {
+                pointsAwarded = Math.round(parseInt(currentQuestion.pts) * computedMultiplier);
+                statusOutcome = "CORRECT";
+            }
+
+            runningScore += pointsAwarded;
+
+            logs.push({
+                id: currentQuestion.id,
+                text: currentQuestion.text,
+                action: action,
+                key: currentQuestion.key,
+                points: pointsAwarded,
+                time: parseFloat(reactionTimeSec.toFixed(2)),
+                outcome: statusOutcome
+            });
+
+            currentCardIndex++;
+            renderDeckStack();
+            if(currentCardIndex < questions.length) trackItemPerformanceDelta();
+        }
+
+        // ================= CONCLUDING SESSION CLOSING PROCEDURES =================
+        function terminateDeckSession(didTimeout = false) {
+            refreshStateScreens('SUMMARY');
+            document.getElementById('submitBtnBlock').classList.remove('hidden');
+            document.getElementById('analyticsBlock').classList.add('hidden');
+            
+            document.getElementById('summaryTimerMsg').innerText = didTimeout 
+                ? "Allocated time window ran dry before card clearing." 
+                : `Deck completely solved with ${timeRemaining}s left to spare!`;
+
+            dramaticNumberRollEffect(Math.round(runningScore));
+        }
+
+        function dramaticNumberRollEffect(targetScore) {
+            const element = document.getElementById('dramaticScore');
+            let currentVal = 0;
+            const duration = 1200; 
+            const frameRate = 1000 / 60;
+            const steps = duration / frameRate;
+            const increment = targetScore / steps;
+
+            clearInterval(window.rollInterval);
+            window.rollInterval = setInterval(() => {
+                currentVal += increment;
+                if ((increment >= 0 && currentVal >= targetScore) || (increment < 0 && currentVal <= targetScore)) {
+                    clearInterval(window.rollInterval);
+                    element.innerText = targetScore;
+                } else {
+                    element.innerText = Math.floor(currentVal);
+                }
+            }, frameRate);
+        }
+
+        function submitToTeacher() {
+            downloadLogs(); // Triggers automated text file download back to system log disk
+            
+            document.getElementById('submitBtnBlock').classList.add('hidden');
+            document.getElementById('analyticsBlock').classList.remove('hidden');
+            
+            generateDiagnosticAnalyticsData();
+        }
+
+        function generateDiagnosticAnalyticsData() {
+            // Priority Analytical Sorting Conditions Match Criteria:
+            // 1. Fastest Items (Correct or Queued paths)
+            const fastest = [...logs]
+                .filter(l => l.outcome === "CORRECT" || l.outcome === "QUEUED")
+                .sort((a, b) => a.time - b.time);
+
+            // 2. Erroneous selections sorted fastest to slowest
+            const wrong = [...logs]
+                .filter(l => l.outcome === "WRONG")
+                .sort((a, b) => a.time - b.time);
+
+            // 3. Absolute Skips items sorted longest time lingering first
+            const skipped = [...logs]
+                .filter(l => l.outcome === "SKIPPED")
+                .sort((a, b) => b.time - a.time);
+
+            const mapTemplateHtml = item => `
+                <div class="bg-slate-900 border border-white/5 p-3 rounded-xl text-xs flex justify-between items-center shadow-inner">
+                    <div class="max-w-[70%] space-y-0.5">
+                        <p class="font-bold text-slate-200 truncate">${item.text}</p>
+                        <span class="text-[10px] text-slate-500 font-mono block">Swiped: ${item.action} | Ans Key: ${item.key}</span>
+                    </div>
+                    <div class="text-right font-mono">
+                        <div class="${item.points >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${item.points >= 0 ? '+' : ''}${item.points} Pts</div>
+                        <div class="text-[10px] text-slate-400 font-bold">${item.time}s</div>
+                    </div>
+                </div>`;
+
+            document.getElementById('analyticsFastest').innerHTML = fastest.length ? fastest.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No items match constraints.</p>';
+            document.getElementById('analyticsWrong').innerHTML = wrong.length ? wrong.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No missed targets logged! ✨</p>';
+            document.getElementById('analyticsSkipped').innerHTML = skipped.length ? skipped.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No skips logged.</p>';
+        }
+
+        function restartChallenge() {
+            refreshStateScreens('START');
+        }
+
+        // ================= CRUD INLINE DATA COMPONENT MANAGEMENT =================
+        function syncEditorViewRows() {
+            const container = document.getElementById('crudEditorContainer');
+            container.innerHTML = '';
+            
+            questions.forEach((q, idx) => {
+                const row = document.createElement('div');
+                row.className = "bg-slate-950 p-3 rounded-xl border border-white/5 space-y-2 relative text-xs animate-fade-in";
+                row.innerHTML = `
+                    <div class="flex gap-2 items-center">
+                        <span class="font-mono text-[10px] text-slate-500 font-bold">#${q.id}</span>
+                        <input type="text" value="${q.text}" onchange="updateQuestData(${idx}, 'text', this.value)" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white">
+                        <button onclick="removeQuestionRow(${idx})" class="text-rose-400 hover:text-rose-600 font-bold px-1 text-base">&times;</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 font-mono text-[11px]">
+                        <div>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">TARGET ANSWER</label>
+                            <select onchange="updateQuestData(${idx}, 'key', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
+                                <option value="AGREE" ${q.key === 'AGREE' ? 'selected' : ''}>AGREE</option>
+                                <option value="DISAGREE" ${q.key === 'DISAGREE' ? 'selected' : ''}>DISAGREE</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">BASE VALUE</label>
+                            <input type="number" value="${q.pts}" onchange="updateQuestData(${idx}, 'pts', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">QUEUE PENALTY</label>
+                            <input type="number" value="${q.penalty || 0}" onchange="updateQuestData(${idx}, 'penalty', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateQuestData(index, field, value) {
+            questions[index][field] = (field === 'pts' || field === 'penalty') ? parseInt(value) : value;
+        }
+
+        function addBlankQuestionRow() {
+            const nextId = questions.length ? Math.max(...questions.map(q => parseInt(q.id))) + 1 : 1;
+            questions.push({ id: nextId, text: "New Custom Question Context Prompt Entry?", key: "AGREE", pts: 10, penalty: 2 });
+            syncEditorViewRows();
+        }
+
+        function removeQuestionRow(index) {
+            questions.splice(index, 1);
+            syncEditorViewRows();
+        }
+
+        function applyTeacherModifications() {
+            globalTimerDuration = parseInt(document.getElementById('cfgDuration').value) || 60;
+            maxMultiplier = parseFloat(document.getElementById('cfgMultiplier').value) || 1.0;
+            
+            localStorage.setItem('swipe_q_v3', JSON.stringify(questions));
+            localStorage.setItem('swipe_duration_v3', globalTimerDuration);
+            localStorage.setItem('swipe_mult_v3', maxMultiplier);
+            
+            closeSettings();
+            refreshStateScreens('START');
+        }
+
+        // ================= EXTERNAL TXT DECK SYSTEM FILES MANAGEMENTS =================
+        function downloadTemplate() {
+            const textContent = `// Format Array Layout Parameters: ID|Question Prompt String Text|Key(AGREE/DISAGREE)|BasePoints|QueuePenalty\n1|An biological cell structure containing chlorophyll handles photosynthesis routines.|AGREE|10|2\n2|Soundwaves traverse structural atmosphere channels faster than photon light beams.|DISAGREE|15|3\n3|Pure elemental gold scales represent non-reactive metal compound variations.|AGREE|20|5`;
+            dispatchFileSystemTrigger(textContent, 'swipe_app_deck_template.txt');
+        }
+
+        function processTxtUpload(fileInput) {
+            if (!fileInput.files[0]) return;
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                const textLines = e.target.result.split('\n');
+                let newlyParsedSet = [];
+                
+                textLines.forEach(line => {
+                    if(line.trim().startsWith('//') || line.trim() === '') return;
+                    const segments = line.split('|');
+                    if(segments.length >= 4) {
+                        newlyParsedSet.push({
+                            id: segments[0].trim(),
+                            text: segments[1].trim(),
+                            key: segments[2].trim().toUpperCase(),
+                            pts: parseInt(segments[3].trim()),
+                            penalty: segments[4] ? parseInt(segments[4].trim()) : 0
+                        });
+                    }
+                });
+                
+                if(newlyParsedSet.length) {
+                    questions = newlyParsedSet;
+                    syncEditorViewRows();
+                    alert(`Successfully read and queued ${newlyParsedSet.length} cards into temporary buffer memory. Click "Deploy Changes" to lock it in.`);
+                } else {
+                    alert("Parser caught structural anomalies inside input txt configuration parameters map.");
+                }
+            };
+            fileReader.readAsText(fileInput.files[0]);
+        }
+
+        function downloadLogs() {
+            let backupDump = `=== SWIPE EVALUATION DISPATCH SHEET LOG ===\nDate Logged: ${new Date().toLocaleString()}\nAggregated Student Tally Score: ${Math.round(runningScore)} Pts\n===========================================\n\n`;
+            logs.forEach((log, index) => {
+                backupDump += `[${index + 1}] Card ID: #${log.id}\nPrompt Text: ${log.text}\nStudent Swiped: ${log.action} (Answer Key Target Validation: ${log.key})\nOutcome Status: ${log.outcome} | Given Points Awarded: ${log.points} pts | Time Taken: ${log.time}s\n-------------------------------------------\n`;
+            });
+            dispatchFileSystemTrigger(backupDump, `swipe_session_output_report_${Date.now()}.txt`);
+        }
+
+        function dispatchFileSystemTrigger(textData, targetedFilename) {
+            const dataBlob = new Blob([textData], { type: 'text/plain' });
+            const temporaryUrl = URL.createObjectURL(dataBlob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = temporaryUrl; anchorElement.download = targetedFilename;
+            anchorElement.click(); URL.revokeObjectURL(temporaryUrl);
+        }
+
+        function setAccent(color) {
+            document.body.classList.remove('accent-purple', 'accent-emerald', 'accent-amber', 'accent-rose');
+            document.body.classList.add(`accent-${color}`);
+            currentAccent = color;
+            localStorage.setItem('swipe_accent_v3', color);
+        }
+
+        function clearSessionCache() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+        // ================= BACKGROUND HARDWARE RENDER SYSTEMS =================
+        function initFxCanvasEngine() {
+            const canvas = document.getElementById('bgCanvas');
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+
+            let nodes = Array.from({ length: 22 }, () => ({
+                x: Math.random() * w, y: Math.random() * h,
+                r: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35
+            }));
+
+            function loop() {
+                ctx.clearRect(0, 0, w, h);
+                const activeColorHex = currentAccent === 'purple' ? '#8b5cf6' : currentAccent === 'emerald' ? '#10b981' : currentAccent === 'amber' ? '#f59e0b' : '#f43f5e';
+                
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    if(n.x < 0 || n.x > w) n.vx *= -1;
+                    if(n.y < 0 || n.y > h) n.vy *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                    ctx.fillStyle = activeColorHex;
+                    ctx.globalAlpha = 0.22;
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = activeColorHex;
+                    ctx.fill();
+                });
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(loop);
+            }
+            loop();
         }
     </script>
 </body>
