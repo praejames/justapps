@@ -3,76 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Swipe App - Master Class Edition</title>
+    <title>Swipe App by James Prae</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Mono&family=Cinzel:wght@700&display=swap');
         
         body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
         }
 
-        /* Color Accents Themes */
-        .accent-purple { --primary: #8b5cf6; --primary-glow: rgba(139, 92, 246, 0.4); --bg-grad: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); }
-        .accent-emerald { --primary: #10b981; --primary-glow: rgba(16, 185, 129, 0.4); --bg-grad: linear-gradient(135deg, #022c22 0%, #0f172a 100%); }
-        .accent-amber { --primary: #f59e0b; --primary-glow: rgba(245, 158, 11, 0.4); --bg-grad: linear-gradient(135deg, #451a03 0%, #0f172a 100%); }
-        .accent-rose { --primary: #f43f5e; --primary-glow: rgba(244, 63, 94, 0.4); --bg-grad: linear-gradient(135deg, #4c0519 0%, #0f172a 100%); }
+        /* 1. Liquid Glass Theme */
+        .theme-glass { 
+            background: linear-gradient(135deg, #1a1c29 0%, #0d0e15 100%); 
+            --card-bg: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --card-text: #ffffff;
+            --accent: #6366f1;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        /* 2. Expressive Theme */
+        .theme-expressive { 
+            background: linear-gradient(135deg, #ff0055 0%, #7a00ff 100%); 
+            --card-bg: rgba(0, 0, 0, 0.4);
+            --card-border: #ffff00;
+            --card-text: #ffffff;
+            --accent: #ffff00;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+        }
 
-        .app-bg { background: var(--bg-grad); transition: background 0.5s ease; }
-        .theme-border { border-color: var(--primary); }
-        .theme-text { color: var(--primary); }
-        .theme-btn { background-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-        .theme-btn:hover { opacity: 0.9; box-shadow: 0 0 25px var(--primary); }
+        /* 3. Nostalgic Theme */
+        .theme-nostalgic { 
+            background: #121212; 
+            --card-bg: #1e1e1e;
+            --card-border: #00ff00;
+            --card-text: #00ff00;
+            --accent: #00ff00;
+            --font-main: 'Space Mono', monospace;
+        }
 
-        /* Structural Deck Layerings */
-        .card-stack { position: relative; width: 100%; max-width: 340px; height: 420px; }
+        .app-bg { transition: background 0.5s ease; }
+        
+        /* Dynamic Card System CSS */
+        .card-stack { position: relative; width: 100%; max-width: 350px; height: 420px; }
         .swipe-card {
             position: absolute; width: 100%; height: 100%;
-            border-radius: 1.5rem; background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border-radius: 1.5rem; 
+            background: var(--card-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--card-border);
+            color: var(--card-text);
+            font-family: var(--font-main);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             cursor: grab; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, border-color 0.2s;
             transform-origin: center bottom;
         }
         .swipe-card:active { cursor: grabbing; }
 
-        /* Elegant Hide Scrollbars */
+        /* Dynamic Auto-Scaling Text Rules */
+        .scale-text-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            text-align: center;
+        }
+        .scaled-text {
+            font-size: calc(1.2rem + 1vw);
+            line-height: 1.3;
+            font-weight: 800;
+            word-wrap: break-word;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .accent-text { color: var(--accent); }
+        .accent-border { border-color: var(--accent); }
+        .accent-bg { background-color: var(--accent); }
     </style>
 </head>
-<body class="accent-purple app-bg flex flex-col items-center justify-between min-h-screen p-4 text-slate-100 relative">
+<body class="theme-glass app-bg flex flex-col items-center justify-between min-h-screen p-4 text-slate-100 relative">
 
-    <canvas id="bgCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
+    <canvas id="fxCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
 
     <div id="startScreen" class="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
         <div class="max-w-md w-full space-y-6">
-            <div class="space-y-2">
-                <span class="text-xs font-mono tracking-[0.3em] text-slate-400 uppercase">Welcome to</span>
-                <h1 class="text-6xl font-black tracking-tight theme-text drop-shadow-[0_0_15px_var(--primary-glow)]">SWIPE APP</h1>
-                <p class="text-xs text-slate-400 font-mono max-w-xs mx-auto">Pass the device around. Quick responses scale multipliers higher; skips yield zero; queues deduct safety points.</p>
+            <div class="space-y-1">
+                <span class="text-xs font-mono tracking-[0.3em] text-slate-500 uppercase block">Swipe App by James Prae</span>
+                <h1 id="splashTitleDisplay" class="text-5xl font-black tracking-tight text-white py-1">Cap or Trap</h1>
+                <p class="text-xs text-slate-400 max-w-xs mx-auto">Pass the device around. Answering quickly awards more points. Skipping gives zero points. Queueing deducts penalty points.</p>
             </div>
             
-            <div class="bg-slate-900/80 border border-white/5 p-4 rounded-2xl space-y-3">
-                <span class="text-xs font-bold text-slate-500 block uppercase tracking-widest">Deck Constraints</span>
-                <div class="grid grid-cols-2 gap-2 text-sm font-mono text-left bg-slate-950/50 p-3 rounded-xl border border-white/5">
-                    <div>Questions: <span id="startQuestCount" class="theme-text font-bold">0</span></div>
-                    <div>Allocated Time: <span id="startTimerVal" class="theme-text font-bold">0s</span></div>
-                    <div class="col-span-2 mt-1 pt-1 border-t border-white/5">Max Speed Bonus: <span id="startMultVal" class="text-amber-400 font-bold">0x</span></div>
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-2xl space-y-2">
+                <span class="text-xs font-bold text-slate-500 block uppercase tracking-wider">Deck Rules</span>
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono text-left bg-slate-950 p-3 rounded-xl border border-white/5">
+                    <div>Questions: <span id="startQuestCount" class="text-indigo-400 font-bold">0</span></div>
+                    <div>Time Allocated: <span id="startTimerVal" class="text-indigo-400 font-bold">0s</span></div>
+                    <div class="col-span-2 mt-1 pt-1 border-t border-white/5">Speed Bonus: <span id="startMultVal" class="text-amber-400 font-bold">0x</span></div>
                 </div>
             </div>
 
             <div class="space-y-3">
-                <button onclick="startSession()" class="theme-btn w-full text-black font-extrabold py-4 px-8 rounded-xl text-lg tracking-wider transition-all transform active:scale-95 shadow-lg">
-                    BEGIN CHALLENGE ⚡
+                <button onclick="startSession()" class="w-full bg-white text-black font-extrabold py-4 px-8 rounded-xl text-md tracking-wider transition-all transform active:scale-95 shadow-lg">
+                    Begin Challenge
                 </button>
-                <button onclick="openSettings()" class="text-xs text-slate-400 hover:text-white underline font-mono block mx-auto py-1">
-                    ⚙️ Teacher Panel / Edit Questions
+                <button onclick="openSettings()" class="text-xs text-slate-500 hover:text-white underline font-mono block mx-auto py-1">
+                    Open Teacher Settings Workspace
                 </button>
             </div>
         </div>
@@ -80,33 +123,36 @@
 
 
     <div id="gameScreen" class="absolute inset-0 z-10 flex flex-col items-center justify-between p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        <header class="w-full max-w-md flex justify-between items-center z-10 pt-2">
-            <div>
-                <h1 class="text-lg font-black tracking-wider opacity-50">SWIPE GAME</h1>
-                <div class="text-[11px] font-mono theme-text font-bold" id="multiplierDisplay">Multiplier: 1.00x</div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-black/40 border border-white/10 px-3 py-1.5 rounded-full font-mono text-sm font-bold flex items-center gap-1.5 shadow-inner">
-                    ⏳ <span id="gameTimer" class="text-rose-400">00:00</span>
+        
+        <header class="w-full max-w-md flex flex-col items-center z-10 pt-2 space-y-2">
+            <div class="w-full flex justify-between items-center px-1">
+                <div>
+                    <h1 id="gameTitleDisplay" class="text-lg font-black tracking-wide text-white uppercase opacity-70">Cap or Trap</h1>
+                    <div class="text-[10px] font-mono opacity-50" id="multiplierDisplay">Speed Multiplier: 1.00x</div>
                 </div>
-                <button onclick="openSettings()" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition text-xs">⚙️</button>
+                <button onclick="openSettings()" class="bg-white/5 hover:bg-white/10 text-white font-mono px-3 py-1 rounded-xl border border-white/10 transition text-xs">Settings</button>
+            </div>
+
+            <div class="w-full bg-black/60 border-2 border-red-500/30 rounded-2xl py-3 px-6 text-center shadow-inner">
+                <span class="text-[10px] font-mono tracking-[0.2em] text-red-400 uppercase block mb-0.5 font-bold">Time Remaining</span>
+                <div id="gameTimer" class="text-5xl font-mono font-black text-red-500 tracking-wider">00:00</div>
             </div>
         </header>
 
-        <div id="statBar" class="z-10 bg-slate-900/90 border border-white/5 px-5 py-2 rounded-full text-xs font-mono flex gap-6 shadow-md my-2">
-            <span>Deck Progress: <strong id="deckProgress" class="text-slate-300">0/0</strong></span>
-            <span>Running Tally: <strong id="runningScore" class="theme-text">0</strong></span>
+        <div id="statBar" class="z-10 bg-slate-900/90 border border-white/5 px-5 py-2 rounded-full text-xs font-mono flex gap-6 shadow-md my-1">
+            <span>Deck: <strong id="deckProgress" class="text-slate-300">0/0</strong></span>
+            <span>Score: <strong id="runningScore" class="text-indigo-400">0</strong></span>
         </div>
 
-        <main class="relative flex-1 flex items-center justify-center w-full z-10 my-2">
+        <main class="relative flex-1 flex items-center justify-center w-full z-10 my-1">
             <div id="cardDeckContainer" class="card-stack"></div>
         </main>
 
-        <footer class="w-full max-w-md grid grid-cols-4 gap-1.5 text-[9px] text-center opacity-70 z-10 font-mono pb-2">
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">⬆️ QUEUE<br>(-Penalty)</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">⬇️ SKIP<br>(0 Pts)</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-emerald-400 font-bold border-emerald-500/20">➡️ AGREE<br>(True)</div>
-            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-rose-400 font-bold border-rose-500/20">⬅️ DISAGREE<br>(False)</div>
+        <footer class="w-full max-w-md grid grid-cols-4 gap-1.5 text-[9px] text-center opacity-60 z-10 font-mono pb-2">
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">Swipe Up<br>Queue</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30">Swipe Down<br>Skip</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-emerald-400 font-bold border-emerald-500/20">Swipe Right<br>Agree (Y)</div>
+            <div class="border border-white/10 p-1.5 rounded-xl bg-black/30 text-rose-400 font-bold border-rose-500/20">Swipe Left<br>Disagree (N)</div>
         </footer>
     </div>
 
@@ -114,54 +160,54 @@
     <div id="summaryScreen" class="absolute inset-0 z-20 bg-slate-950/95 flex flex-col items-center p-6 overflow-y-auto no-scrollbar opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="w-full max-w-md my-auto space-y-6 pt-4">
             <div class="text-center">
-                <span class="text-xs uppercase font-mono tracking-[0.2em] text-slate-500">Session Concluded</span>
-                <h2 class="text-3xl font-black mt-0.5 tracking-tight">CHALLENGE LOG OVERVIEW</h2>
+                <span class="text-xs uppercase font-mono tracking-[0.2em] text-slate-500">Session Finished</span>
+                <h2 class="text-3xl font-black mt-0.5 tracking-tight text-white">Performance Overview</h2>
             </div>
 
             <div class="bg-slate-900 border border-white/5 p-6 rounded-3xl text-center space-y-1 shadow-2xl relative overflow-hidden">
-                <span class="text-xs text-slate-400 font-mono block uppercase tracking-wider">Final Points Garnered</span>
+                <span class="text-xs text-slate-400 font-mono block uppercase tracking-wider">Total Points Earned</span>
                 <div id="dramaticScore" class="text-6xl font-black tracking-tighter text-amber-400 py-1">0</div>
                 <p id="summaryTimerMsg" class="text-[11px] text-slate-500 font-mono"></p>
             </div>
 
             <div id="submitBtnBlock" class="space-y-2">
-                <button onclick="submitToTeacher()" class="theme-btn w-full text-black font-extrabold py-4 rounded-xl text-md tracking-wider transition-all shadow-lg active:scale-95">
-                    📤 SUBMIT TO TEACHER
+                <button onclick="submitToTeacher()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-4 rounded-xl text-md tracking-wider transition-all shadow-lg active:scale-95">
+                    Submit Data to Teacher
                 </button>
-                <p class="text-[10px] text-slate-500 text-center font-mono">Triggers zero-delay file downloads and charts item analytical breakdowns below.</p>
+                <p class="text-[10px] text-slate-500 text-center font-mono">Downloads full session report logs back to system disk space immediately.</p>
             </div>
 
             <div id="analyticsBlock" class="hidden space-y-5">
-                <div class="text-center opacity-40 text-[11px] font-mono animate-bounce">⬇️ Swipe up / scroll to evaluate item metrics ⬇️</div>
+                <div class="text-center opacity-40 text-[10px] font-mono">Scroll up or down to examine sorted item performance cards</div>
                 <hr class="border-white/5">
                 
                 <div class="space-y-5 pb-12">
                     <div>
                         <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>⚡ Velocity Breakdown</span>
-                            <span class="text-[9px] opacity-60 font-mono">(Fastest Correct/Queued)</span>
+                            <span>Fastest Responses</span>
+                            <span class="text-[9px] opacity-50 font-mono">(Correct / Queued)</span>
                         </h4>
                         <div id="analyticsFastest" class="space-y-1.5"></div>
                     </div>
 
                     <div>
                         <h4 class="text-xs font-bold text-rose-400 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>❌ Missed Target Failures</span>
-                            <span class="text-[9px] opacity-60 font-mono">(Fastest to Slowest)</span>
+                            <span>Wrong Responses</span>
+                            <span class="text-[9px] opacity-50 font-mono">(Fastest to Slowest)</span>
                         </h4>
                         <div id="analyticsWrong" class="space-y-1.5"></div>
                     </div>
 
                     <div>
                         <h4 class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2 flex justify-between">
-                            <span>💤 Blind Spots / Skips</span>
-                            <span class="text-[9px] opacity-60 font-mono">(Most Retries Left Open)</span>
+                            <span>Most Skipped Questions</span>
+                            <span class="text-[9px] opacity-50 font-mono">(Slowest Action Linger)</span>
                         </h4>
                         <div id="analyticsSkipped" class="space-y-1.5"></div>
                     </div>
 
                     <button onclick="restartChallenge()" class="w-full bg-slate-900 hover:bg-slate-800 border border-white/5 text-slate-300 font-bold py-3 rounded-xl text-xs tracking-wider transition-all">
-                        🔄 Restart Fresh Challenge Session
+                        Restart Fresh Session Challenge
                     </button>
                 </div>
             </div>
@@ -169,111 +215,126 @@
     </div>
 
 
-    <div id="settingsModal" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-white/10 w-full max-w-xl rounded-2xl max-h-[85vh] flex flex-col text-sm text-slate-200 shadow-2xl overflow-hidden">
+    <div id="settingsModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-white/10 w-full max-w-xl rounded-2xl max-h-[88vh] flex flex-col text-sm text-slate-200 shadow-2xl overflow-hidden">
             <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-950">
-                <h3 class="font-bold text-white tracking-widest uppercase text-xs">Instructor Control Board</h3>
+                <h3 class="font-bold text-white tracking-widest uppercase text-xs">Teacher Dashboard Settings</h3>
                 <button onclick="closeSettings()" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
             </div>
             
             <div class="p-5 overflow-y-auto space-y-5 flex-1 no-scrollbar">
-                <div>
-                    <label class="block text-xs font-mono uppercase tracking-wider mb-2 text-slate-400">Accent Environment Color Profile</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button onclick="setAccent('purple')" class="bg-purple-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Purple</button>
-                        <button onclick="setAccent('emerald')" class="bg-emerald-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Emerald</button>
-                        <button onclick="setAccent('amber')" class="bg-amber-500 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Amber</button>
-                        <button onclick="setAccent('rose')" class="bg-rose-600 h-8 rounded-lg font-bold text-xs text-black border-2 border-white/10">Rose</button>
-                    </div>
-                </div>
-
+                
                 <div class="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-white/5">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Customizable Game App Title Text</label>
+                        <input type="text" id="cfgTitle" value="Cap or Trap" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs">
+                    </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Total Timer Duration (Seconds)</label>
+                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Duration Timer Limits (Seconds)</label>
                         <input type="number" id="cfgDuration" value="60" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Max Score Speed Multiplier Scaling</label>
+                        <label class="block text-[10px] text-slate-400 font-mono uppercase mb-1">Max Speed Bonus Scale Multiplier</label>
                         <input type="number" id="cfgMultiplier" value="2.0" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-white text-xs font-mono">
                     </div>
                 </div>
 
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-xs font-mono uppercase tracking-wider text-slate-400">In-App Live Question Workspace Grid</label>
-                        <button onclick="addBlankQuestionRow()" class="text-[11px] theme-text hover:underline font-bold">+ Add New Card</button>
+                    <label class="block text-xs font-mono uppercase tracking-wider mb-2 text-slate-400">Environment Active Aesthetic Theme</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="changeTheme('glass')" class="bg-slate-800 border border-slate-700 h-9 rounded-lg font-bold text-xs text-white hover:bg-slate-700">Liquid Glass</button>
+                        <button onclick="changeTheme('expressive')" class="bg-purple-600 border border-purple-500 h-9 rounded-lg font-bold text-xs text-white hover:bg-purple-500">Expressive</button>
+                        <button onclick="changeTheme('nostalgic')" class="bg-neutral-900 border border-green-500 h-9 rounded-lg font-mono font-bold text-xs text-green-500 hover:bg-neutral-800">Nostalgic</button>
                     </div>
-                    <div id="crudEditorContainer" class="space-y-2 max-h-[220px] overflow-y-auto pr-1"></div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="text-xs font-mono uppercase tracking-wider text-slate-400">Live Workspace Deck Editor Table</label>
+                        <button onclick="addBlankQuestionRow()" class="text-[11px] text-indigo-400 hover:underline font-bold">+ Append Question Row</button>
+                    </div>
+                    <div id="crudEditorContainer" class="space-y-2 max-h-[190px] overflow-y-auto pr-1"></div>
                 </div>
 
                 <div class="space-y-2 border-t border-white/5 pt-4">
-                    <label class="block text-[10px] font-mono text-slate-400 uppercase">Mass File Configuration File System IO</label>
+                    <label class="block text-[10px] font-mono text-slate-400 uppercase">File Configurations Operations Hub</label>
                     <div class="grid grid-cols-3 gap-2">
                         <input type="file" id="txtInput" accept=".txt" class="hidden" onchange="processTxtUpload(this)">
-                        <button onclick="document.getElementById('txtInput').click()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📂 Upload .TXT</button>
-                        <button onclick="downloadTemplate()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📥 Save Template</button>
-                        <button onclick="downloadLogs()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">📊 Export Last Logs</button>
+                        <button onclick="document.getElementById('txtInput').click()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Upload Template</button>
+                        <button onclick="downloadTemplate()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Save Template</button>
+                        <button onclick="downloadLogs()" class="bg-slate-800 hover:bg-slate-700 font-bold p-2 text-xs rounded-lg border border-white/5 text-center">Export Session Logs</button>
                     </div>
                 </div>
             </div>
 
             <div class="p-3 border-t border-white/5 bg-slate-950 flex justify-between">
-                <button onclick="clearSessionCache()" class="text-xs text-rose-400 hover:underline px-2">Reset App To Defaults</button>
-                <button onclick="applyTeacherModifications()" class="theme-btn text-black font-extrabold text-xs px-5 py-2 rounded-xl shadow">Deploy Changes</button>
+                <button onclick="clearSessionCache()" class="text-xs text-rose-400 hover:underline px-2">Reset App Data</button>
+                <button onclick="applyTeacherModifications()" class="bg-white text-black font-extrabold text-xs px-5 py-2 rounded-xl shadow hover:bg-slate-200 transition">Save and Apply Changes</button>
             </div>
         </div>
     </div>
 
 
     <script>
-        // Core Volatile Array Objects Matrix State Setup
+        // Default Local Model Target State Arrays Match Matrix Configurations
         let questions = [
-            { id: 1, text: "Is water composed of two hydrogen atoms and one oxygen atom?", key: "AGREE", pts: 10, penalty: 2 },
-            { id: 2, text: "Does light travel significantly slower than sound waves?", key: "DISAGREE", pts: 15, penalty: 4 },
-            { id: 3, text: "Is the powerhouse of the biological cell structure a Ribosome?", key: "DISAGREE", pts: 20, penalty: 5 }
+            { id: 1, text: "Is water composed of two hydrogen atoms and one oxygen atom?", key: "Y", pts: 10, penalty: 2 },
+            { id: 2, text: "Does light travel significantly slower than sound waves?", key: "N", pts: 15, penalty: 4 },
+            { id: 3, text: "Is the powerhouse of the biological cell a Ribosome?", key: "N", pts: 20, penalty: 5 }
         ];
 
         let logs = [];
         let currentCardIndex = 0;
         let runningScore = 0;
-        let currentAccent = 'purple';
+        let activeTheme = 'glass';
+        let appTitle = 'Cap or Trap';
 
-        // Configuration Boundary Trackers
+        // Timing Constraints Property Variables Trackers
         let globalTimerDuration = 60; 
         let timerInterval = null;
         let timeRemaining = 60;
         let maxMultiplier = 2.0;
         let itemStartTime = null;
 
-        // Vector Physics Coords Offset Maps 
+        // Vector Physics Navigation Properties Coordinate Values Maps
         let startX = 0, startY = 0, moveX = 0, moveY = 0;
         let isDragging = false;
         const swipeThreshold = 80;
+
+        // Particles System Arrays Storage Target
+        let particles = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage();
             syncEditorViewRows();
             initFxCanvasEngine();
-            refreshStateScreens('START');
+            refreshStateRouting('START');
         });
 
         function loadFromLocalStorage() {
-            if(localStorage.getItem('swipe_q_v3')) questions = JSON.parse(localStorage.getItem('swipe_q_v3'));
-            if(localStorage.getItem('swipe_accent_v3')) setAccent(localStorage.getItem('swipe_accent_v3'));
-            if(localStorage.getItem('swipe_duration_v3')) globalTimerDuration = parseInt(localStorage.getItem('swipe_duration_v3'));
-            if(localStorage.getItem('swipe_mult_v3')) maxMultiplier = parseFloat(localStorage.getItem('swipe_mult_v3'));
+            if(localStorage.getItem('prae_swipe_q')) questions = JSON.parse(localStorage.getItem('prae_swipe_q'));
+            if(localStorage.getItem('prae_swipe_theme')) changeTheme(localStorage.getItem('prae_swipe_theme'));
+            if(localStorage.getItem('prae_swipe_duration')) globalTimerDuration = parseInt(localStorage.getItem('prae_swipe_duration'));
+            if(localStorage.getItem('prae_swipe_mult')) maxMultiplier = parseFloat(localStorage.getItem('prae_swipe_mult'));
+            if(localStorage.getItem('prae_swipe_title')) appTitle = localStorage.getItem('prae_swipe_title');
             
             document.getElementById('cfgDuration').value = globalTimerDuration;
             document.getElementById('cfgMultiplier').value = maxMultiplier;
+            document.getElementById('cfgTitle').value = appTitle;
+            
+            updateTitleDisplays();
         }
 
-        // Rigid Functional State Navigation Router
-        function refreshStateScreens(targetState) {
+        function updateTitleDisplays() {
+            document.getElementById('splashTitleDisplay').innerText = appTitle;
+            document.getElementById('gameTitleDisplay').innerText = appTitle;
+        }
+
+        function refreshStateRouting(targetState) {
             const start = document.getElementById('startScreen');
             const game = document.getElementById('gameScreen');
             const summary = document.getElementById('summaryScreen');
 
-            // Deactivate and mask all layers safely
             [start, game, summary].forEach(el => {
                 el.classList.add('opacity-0', 'pointer-events-none');
                 el.style.zIndex = "5";
@@ -286,6 +347,7 @@
                 document.getElementById('startQuestCount').innerText = questions.length;
                 document.getElementById('startTimerVal').innerText = globalTimerDuration + 's';
                 document.getElementById('startMultVal').innerText = maxMultiplier.toFixed(1) + 'x';
+                updateTitleDisplays();
             } 
             else if(targetState === 'GAME') {
                 game.classList.remove('opacity-0', 'pointer-events-none');
@@ -297,14 +359,14 @@
             }
         }
 
-        // ================= SESSION RUNTIME LIFE CYCLES =================
+        // ================= CONTEXTUAL LIFECYCLE CONTROLLERS =================
         function startSession() {
             currentCardIndex = 0;
             runningScore = 0;
             logs = [];
             timeRemaining = globalTimerDuration;
             
-            refreshStateScreens('GAME');
+            refreshStateRouting('GAME');
             renderDeckStack();
             startCountdownTimer();
             trackItemPerformanceDelta();
@@ -340,10 +402,9 @@
                 const gameActive = !document.getElementById('gameScreen').classList.contains('opacity-0');
                 if(gameActive) {
                     const elapsed = (Date.now() - itemStartTime) / 1000;
-                    // Decay multiplier smoothly down to a flat 1.00x baseline floor within 6.0 seconds flat
                     let currentMult = maxMultiplier - (elapsed * (maxMultiplier - 1.0) / 6.0);
                     if(currentMult < 1.0) currentMult = 1.0;
-                    document.getElementById('multiplierDisplay').innerText = `Multiplier: ${currentMult.toFixed(2)}x`;
+                    document.getElementById('multiplierDisplay').innerText = `Speed Multiplier: ${currentMult.toFixed(2)}x`;
                     window.multiplierLoop = requestAnimationFrame(step);
                 }
             }
@@ -363,39 +424,38 @@
                 return;
             }
 
-            // Standard dual layered stacking depth assignments
             for (let i = Math.min(questions.length - 1, currentCardIndex + 1); i >= currentCardIndex; i--) {
                 const cardData = questions[i];
                 const card = document.createElement('div');
-                card.className = `swipe-card flex flex-col justify-between p-6 select-none theme-border`;
+                card.className = `swipe-card flex flex-col justify-between p-6 select-none`;
                 
                 if(i === currentCardIndex) {
                     card.style.transform = `translate3d(0,0,0) scale(1)`;
                     card.style.zIndex = "20";
                     bindCardPhysicsListeners(card);
                 } else {
-                    card.style.transform = `translate3d(0, 14px, 0) scale(0.95)`;
+                    card.style.transform = `translate3d(0, 15px, 0) scale(0.94)`;
                     card.style.zIndex = "10";
-                    card.style.opacity = "0.35";
+                    card.style.opacity = "0.3";
                 }
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center opacity-40 text-[10px] font-mono">
-                        <span>MODULE CARD: #${cardData.id}</span>
-                        <span class="theme-text font-bold">BASE MARKS: ${cardData.pts} Pts</span>
+                        <span>Card #${cardData.id}</span>
+                        <span>Value: ${cardData.pts} Pts</span>
                     </div>
-                    <div class="flex-1 flex items-center justify-center my-4 text-center">
-                        <p class="text-lg font-bold tracking-wide leading-relaxed">${cardData.text}</p>
+                    <div class="flex-1 scale-text-container">
+                        <p class="scaled-text">${cardData.text}</p>
                     </div>
-                    <div class="text-[10px] opacity-40 font-mono text-center border-t border-white/5 pt-3">
-                        Queue Penalty Deduction: -${cardData.penalty || 0} Pts
+                    <div class="text-[9px] opacity-40 font-mono text-center border-t border-white/5 pt-2">
+                        Queue Penalty: -${cardData.penalty || 0} Pts
                     </div>
                 `;
                 container.appendChild(card);
             }
         }
 
-        // ================= DRAG MECHANICS IMPLEMENTATION =================
+        // ================= GESTURE MECHANICS MAPPINGS =================
         function bindCardPhysicsListeners(card) {
             card.addEventListener('mousedown', gestureStart);
             card.addEventListener('mousemove', gestureMove);
@@ -421,12 +481,11 @@
             moveX = currentX - startX;
             moveY = currentY - startY;
 
-            // Direct interactive responsive color bounds update maps
             if(moveX > 40) this.style.borderColor = '#10b981';
             else if(moveX < -40) this.style.borderColor = '#f43f5e';
             else if(moveY < -40) this.style.borderColor = '#8b5cf6';
             else if(moveY > 40) this.style.borderColor = '#f59e0b';
-            else this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            else this.style.borderColor = 'var(--card-border)';
 
             this.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) rotate(${moveX * 0.04}deg)`;
         }
@@ -436,13 +495,13 @@
             isDragging = false;
             this.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s';
 
-            if (moveX > swipeThreshold) executeSwipeResolution("AGREE");
-            else if (moveX < -swipeThreshold) executeSwipeResolution("DISAGREE");
+            if (moveX > swipeThreshold) executeSwipeResolution("Y");
+            else if (moveX < -swipeThreshold) executeSwipeResolution("N");
             else if (moveY < -swipeThreshold) executeSwipeResolution("QUEUE");
             else if (moveY > swipeThreshold) executeSwipeResolution("SKIP");
             else {
                 this.style.transform = `translate3d(0,0,0) scale(1)`;
-                this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                this.style.borderColor = 'var(--card-border)';
             }
             moveX = 0; moveY = 0;
         }
@@ -485,17 +544,18 @@
             if(currentCardIndex < questions.length) trackItemPerformanceDelta();
         }
 
-        // ================= CONCLUDING SESSION CLOSING PROCEDURES =================
+        // ================= WRAP UP EVALUATION INTERFACES =================
         function terminateDeckSession(didTimeout = false) {
-            refreshStateScreens('SUMMARY');
+            refreshStateRouting('SUMMARY');
             document.getElementById('submitBtnBlock').classList.remove('hidden');
             document.getElementById('analyticsBlock').classList.add('hidden');
             
             document.getElementById('summaryTimerMsg').innerText = didTimeout 
-                ? "Allocated time window ran dry before card clearing." 
-                : `Deck completely solved with ${timeRemaining}s left to spare!`;
+                ? "Time limit expired before completion." 
+                : `Deck fully swiped with ${timeRemaining}s left!`;
 
             dramaticNumberRollEffect(Math.round(runningScore));
+            triggerConfettiExplosion();
         }
 
         function dramaticNumberRollEffect(targetScore) {
@@ -519,7 +579,7 @@
         }
 
         function submitToTeacher() {
-            downloadLogs(); // Triggers automated text file download back to system log disk
+            downloadLogs();
             
             document.getElementById('submitBtnBlock').classList.add('hidden');
             document.getElementById('analyticsBlock').classList.remove('hidden');
@@ -528,51 +588,47 @@
         }
 
         function generateDiagnosticAnalyticsData() {
-            // Priority Analytical Sorting Conditions Match Criteria:
-            // 1. Fastest Items (Correct or Queued paths)
             const fastest = [...logs]
                 .filter(l => l.outcome === "CORRECT" || l.outcome === "QUEUED")
                 .sort((a, b) => a.time - b.time);
 
-            // 2. Erroneous selections sorted fastest to slowest
             const wrong = [...logs]
                 .filter(l => l.outcome === "WRONG")
                 .sort((a, b) => a.time - b.time);
 
-            // 3. Absolute Skips items sorted longest time lingering first
             const skipped = [...logs]
                 .filter(l => l.outcome === "SKIPPED")
                 .sort((a, b) => b.time - a.time);
 
             const mapTemplateHtml = item => `
-                <div class="bg-slate-900 border border-white/5 p-3 rounded-xl text-xs flex justify-between items-center shadow-inner">
+                <div class="bg-slate-900 border border-white/5 p-3 rounded-xl text-xs flex justify-between items-center">
                     <div class="max-w-[70%] space-y-0.5">
                         <p class="font-bold text-slate-200 truncate">${item.text}</p>
-                        <span class="text-[10px] text-slate-500 font-mono block">Swiped: ${item.action} | Ans Key: ${item.key}</span>
+                        <span class="text-[10px] text-slate-500 font-mono block">Swiped: ${item.action} | Key: ${item.key}</span>
                     </div>
                     <div class="text-right font-mono">
                         <div class="${item.points >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${item.points >= 0 ? '+' : ''}${item.points} Pts</div>
-                        <div class="text-[10px] text-slate-400 font-bold">${item.time}s</div>
+                        <div class="text-[10px] text-slate-400">${item.time}s</div>
                     </div>
                 </div>`;
 
-            document.getElementById('analyticsFastest').innerHTML = fastest.length ? fastest.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No items match constraints.</p>';
-            document.getElementById('analyticsWrong').innerHTML = wrong.length ? wrong.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No missed targets logged! ✨</p>';
-            document.getElementById('analyticsSkipped').innerHTML = skipped.length ? skipped.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No skips logged.</p>';
+            document.getElementById('analyticsFastest').innerHTML = fastest.length ? fastest.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No items recorded.</p>';
+            document.getElementById('analyticsWrong').innerHTML = wrong.length ? wrong.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No wrong items recorded.</p>';
+            document.getElementById('analyticsSkipped').innerHTML = skipped.length ? skipped.map(mapTemplateHtml).join('') : '<p class="text-xs text-slate-600 font-mono italic p-1">No skipped items recorded.</p>';
         }
 
         function restartChallenge() {
-            refreshStateScreens('START');
+            refreshStateRouting('START');
         }
 
-        // ================= CRUD INLINE DATA COMPONENT MANAGEMENT =================
+        // ================= CRUD LIVE DATA WORKSPACE INTERFACE =================
         function syncEditorViewRows() {
             const container = document.getElementById('crudEditorContainer');
             container.innerHTML = '';
             
             questions.forEach((q, idx) => {
                 const row = document.createElement('div');
-                row.className = "bg-slate-950 p-3 rounded-xl border border-white/5 space-y-2 relative text-xs animate-fade-in";
+                row.className = "bg-slate-950 p-3 rounded-xl border border-white/5 space-y-2 relative text-xs";
                 row.innerHTML = `
                     <div class="flex gap-2 items-center">
                         <span class="font-mono text-[10px] text-slate-500 font-bold">#${q.id}</span>
@@ -581,18 +637,18 @@
                     </div>
                     <div class="grid grid-cols-3 gap-2 font-mono text-[11px]">
                         <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">TARGET ANSWER</label>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Correct Answer</label>
                             <select onchange="updateQuestData(${idx}, 'key', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
-                                <option value="AGREE" ${q.key === 'AGREE' ? 'selected' : ''}>AGREE</option>
-                                <option value="DISAGREE" ${q.key === 'DISAGREE' ? 'selected' : ''}>DISAGREE</option>
+                                <option value="Y" ${q.key === 'Y' ? 'selected' : ''}>Y (Agree)</option>
+                                <option value="N" ${q.key === 'N' ? 'selected' : ''}>N (Disagree)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">BASE VALUE</label>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Base Points</label>
                             <input type="number" value="${q.pts}" onchange="updateQuestData(${idx}, 'pts', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
                         </div>
                         <div>
-                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">QUEUE PENALTY</label>
+                            <label class="text-[9px] text-slate-500 block font-bold mb-0.5">Queue Penalty</label>
                             <input type="number" value="${q.penalty || 0}" onchange="updateQuestData(${idx}, 'penalty', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-white">
                         </div>
                     </div>
@@ -607,7 +663,7 @@
 
         function addBlankQuestionRow() {
             const nextId = questions.length ? Math.max(...questions.map(q => parseInt(q.id))) + 1 : 1;
-            questions.push({ id: nextId, text: "New Custom Question Context Prompt Entry?", key: "AGREE", pts: 10, penalty: 2 });
+            questions.push({ id: nextId, text: "Sample Question Context Prompt?", key: "Y", pts: 10, penalty: 2 });
             syncEditorViewRows();
         }
 
@@ -619,19 +675,21 @@
         function applyTeacherModifications() {
             globalTimerDuration = parseInt(document.getElementById('cfgDuration').value) || 60;
             maxMultiplier = parseFloat(document.getElementById('cfgMultiplier').value) || 1.0;
+            appTitle = document.getElementById('cfgTitle').value || 'Cap or Trap';
             
-            localStorage.setItem('swipe_q_v3', JSON.stringify(questions));
-            localStorage.setItem('swipe_duration_v3', globalTimerDuration);
-            localStorage.setItem('swipe_mult_v3', maxMultiplier);
+            localStorage.setItem('prae_swipe_q', JSON.stringify(questions));
+            localStorage.setItem('prae_swipe_duration', globalTimerDuration);
+            localStorage.setItem('prae_swipe_mult', maxMultiplier);
+            localStorage.setItem('prae_swipe_title', appTitle);
             
             closeSettings();
-            refreshStateScreens('START');
+            refreshStateRouting('START');
         }
 
-        // ================= EXTERNAL TXT DECK SYSTEM FILES MANAGEMENTS =================
+        // ================= TEXT CONFIGURATIONS PARSER LOGICS =================
         function downloadTemplate() {
-            const textContent = `// Format Array Layout Parameters: ID|Question Prompt String Text|Key(AGREE/DISAGREE)|BasePoints|QueuePenalty\n1|An biological cell structure containing chlorophyll handles photosynthesis routines.|AGREE|10|2\n2|Soundwaves traverse structural atmosphere channels faster than photon light beams.|DISAGREE|15|3\n3|Pure elemental gold scales represent non-reactive metal compound variations.|AGREE|20|5`;
-            dispatchFileSystemTrigger(textContent, 'swipe_app_deck_template.txt');
+            const content = `// Simplified Template Format Profile\n// Pattern: Question Statement Input=AnswerKey(Y/N)+BasePoints-QueuePenalty\nAn atom is larger than a virus structure element.=N+10-2\nPhotosynthesis loops occur within chloroplasts units.=Y+15-3\nGold scales represent nonreactive elemental transition metal blocks.=Y+20-5`;
+            dispatchFileSystemTrigger(content, 'swipe_deck_template.txt');
         }
 
         function processTxtUpload(fileInput) {
@@ -640,36 +698,51 @@
             fileReader.onload = function(e) {
                 const textLines = e.target.result.split('\n');
                 let newlyParsedSet = [];
+                let counterIndex = 1;
                 
                 textLines.forEach(line => {
                     if(line.trim().startsWith('//') || line.trim() === '') return;
-                    const segments = line.split('|');
-                    if(segments.length >= 4) {
-                        newlyParsedSet.push({
-                            id: segments[0].trim(),
-                            text: segments[1].trim(),
-                            key: segments[2].trim().toUpperCase(),
-                            pts: parseInt(segments[3].trim()),
-                            penalty: segments[4] ? parseInt(segments[4].trim()) : 0
-                        });
+                    
+                    // Parsing layout syntax mechanics profile: "Question statement.=Y+10-5"
+                    const mainSplit = line.split('=');
+                    if(mainSplit.length === 2) {
+                        const promptText = mainSplit[0].trim();
+                        const restData = mainSplit[1].trim(); // Form: "Y+10-5"
+                        
+                        const keyMatch = restData.charAt(0).toUpperCase();
+                        const plusIndex = restData.indexOf('+');
+                        const minusIndex = restData.indexOf('-');
+                        
+                        if((keyMatch === 'Y' || keyMatch === 'N') && plusIndex !== -1 && minusIndex !== -1) {
+                            const ptsVal = parseInt(restData.substring(plusIndex + 1, minusIndex));
+                            const penaltyVal = parseInt(restData.substring(minusIndex + 1));
+                            
+                            newlyParsedSet.push({
+                                id: counterIndex++,
+                                text: promptText,
+                                key: keyMatch,
+                                pts: ptsVal,
+                                penalty: penaltyVal
+                            });
+                        }
                     }
                 });
                 
                 if(newlyParsedSet.length) {
                     questions = newlyParsedSet;
                     syncEditorViewRows();
-                    alert(`Successfully read and queued ${newlyParsedSet.length} cards into temporary buffer memory. Click "Deploy Changes" to lock it in.`);
+                    alert(`Successfully imported ${newlyParsedSet.length} questions. Click Save and Apply Changes to deploy.`);
                 } else {
-                    alert("Parser caught structural anomalies inside input txt configuration parameters map.");
+                    alert("Invalid file structure. Make sure format exactly follows Question=Y+10-5 standard.");
                 }
             };
             fileReader.readAsText(fileInput.files[0]);
         }
 
         function downloadLogs() {
-            let backupDump = `=== SWIPE EVALUATION DISPATCH SHEET LOG ===\nDate Logged: ${new Date().toLocaleString()}\nAggregated Student Tally Score: ${Math.round(runningScore)} Pts\n===========================================\n\n`;
+            let backupDump = `=== SWIPE EVALUATION SESSION LOG REPORT ===\nJames Prae Swipe App System Module\nCaptured: ${new Date().toLocaleString()}\nGame Profile: ${appTitle}\nFinal Accumulated Score: ${Math.round(runningScore)} Pts\n===========================================\n\n`;
             logs.forEach((log, index) => {
-                backupDump += `[${index + 1}] Card ID: #${log.id}\nPrompt Text: ${log.text}\nStudent Swiped: ${log.action} (Answer Key Target Validation: ${log.key})\nOutcome Status: ${log.outcome} | Given Points Awarded: ${log.points} pts | Time Taken: ${log.time}s\n-------------------------------------------\n`;
+                backupDump += `[${index + 1}] Item ID: #${log.id}\nQuestion String: ${log.text}\nStudent Swipe: ${log.action} (Answer Key Target: ${log.key})\nStatus State: ${log.outcome} | Delta Score: ${log.points} Pts | Duration: ${log.time}s\n-------------------------------------------\n`;
             });
             dispatchFileSystemTrigger(backupDump, `swipe_session_output_report_${Date.now()}.txt`);
         }
@@ -682,11 +755,28 @@
             anchorElement.click(); URL.revokeObjectURL(temporaryUrl);
         }
 
-        function setAccent(color) {
-            document.body.classList.remove('accent-purple', 'accent-emerald', 'accent-amber', 'accent-rose');
-            document.body.classList.add(`accent-${color}`);
-            currentAccent = color;
-            localStorage.setItem('swipe_accent_v3', color);
+        function changeTheme(themeKey) {
+            document.body.classList.remove('theme-glass', 'theme-expressive', 'theme-nostalgic');
+            document.body.classList.add(`theme-${themeKey}`);
+            activeTheme = themeKey;
+            localStorage.setItem('prae_swipe_theme', themeKey);
+            renderDeckStack();
+        }
+
+        function triggerConfettiExplosion() {
+            // Generate temporary burst particles array map coordinates points
+            const canvas = document.getElementById('fxCanvas');
+            for (let i = 0; i < 75; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    r: Math.random() * 4 + 2,
+                    color: `hsl(${Math.random() * 360}, 90%, 60%)`,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 3,
+                    alpha: 1
+                });
+            }
         }
 
         function clearSessionCache() {
@@ -697,9 +787,9 @@
         function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
 
-        // ================= BACKGROUND HARDWARE RENDER SYSTEMS =================
+        // ================= BACKGROUND ANIMATION CANVAS ENGINE =================
         function initFxCanvasEngine() {
-            const canvas = document.getElementById('bgCanvas');
+            const canvas = document.getElementById('fxCanvas');
             const ctx = canvas.getContext('2d');
             let w = canvas.width = window.innerWidth;
             let h = canvas.height = window.innerHeight;
@@ -709,16 +799,21 @@
                 h = canvas.height = window.innerHeight;
             });
 
-            let nodes = Array.from({ length: 22 }, () => ({
+            // Ambient background nodes array
+            let nodes = Array.from({ length: 15 }, () => ({
                 x: Math.random() * w, y: Math.random() * h,
-                r: Math.random() * 2 + 1,
-                vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35
+                r: Math.random() * 3 + 1,
+                vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3
             }));
 
-            function loop() {
+            function frameLoop() {
                 ctx.clearRect(0, 0, w, h);
-                const activeColorHex = currentAccent === 'purple' ? '#8b5cf6' : currentAccent === 'emerald' ? '#10b981' : currentAccent === 'amber' ? '#f59e0b' : '#f43f5e';
                 
+                // 1. Render Ambient Background Effects based on Active Theme Profile
+                let accentHex = '#6366f1';
+                if(activeTheme === 'expressive') accentHex = '#ffff00';
+                if(activeTheme === 'nostalgic') accentHex = '#00ff00';
+
                 nodes.forEach(n => {
                     n.x += n.vx; n.y += n.vy;
                     if(n.x < 0 || n.x > w) n.vx *= -1;
@@ -726,16 +821,34 @@
                     
                     ctx.beginPath();
                     ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-                    ctx.fillStyle = activeColorHex;
-                    ctx.globalAlpha = 0.22;
-                    ctx.shadowBlur = 6;
-                    ctx.shadowColor = activeColorHex;
+                    ctx.fillStyle = accentHex;
+                    ctx.globalAlpha = activeTheme === 'expressive' ? 0.15 : 0.25;
                     ctx.fill();
                 });
-                ctx.shadowBlur = 0;
-                requestAnimationFrame(loop);
+
+                // 2. Render Active Confetti System Explosion Engine Loops
+                particles.forEach((p, idx) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.1; // gravity acceleration line
+                    p.alpha -= 0.01;
+                    
+                    if(p.alpha <= 0) {
+                        particles.splice(idx, 1);
+                        return;
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fill();
+                });
+
+                ctx.globalAlpha = 1.0;
+                requestAnimationFrame(frameLoop);
             }
-            loop();
+            frameLoop();
         }
     </script>
 </body>
